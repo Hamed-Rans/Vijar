@@ -146,19 +146,25 @@ function renderDocs() {
         const card = document.createElement('div');
         card.className = 'doc-card';
         
-        const preview = getDocPreview(d);
-        let mediaHtml = '';
-        let textHtml = '';
+        // پیدا کردن عکس برای کاور
+        let mediaHtml = `<i class="fa-regular fa-file-lines"></i>`;
+        if (d.content && d.content.includes('<img')) {
+            const match = d.content.match(/<img[^>]+src="([^">]+)"/);
+            if (match && match[1]) {
+                mediaHtml = `<img src="${match[1]}" alt="preview">`;
+            }
+        }
 
-        if (preview.type === 'image') {
-            mediaHtml = `<img src="${preview.src}" alt="preview">`;
-            textHtml = 'دارای تصویر';
-        } else if (preview.type === 'text') {
-            mediaHtml = `<i class="fa-regular ${preview.icon}"></i>`;
-            textHtml = preview.text;
-        } else {
-            mediaHtml = `<i class="fa-regular ${preview.icon}"></i>`;
-            textHtml = preview.text;
+        // استخراج متن زنده از داخل ادیتور برای پیش‌نمایش
+        let previewHtml = 'جزوه خالی است...';
+        if (d.content) {
+            // حذف تگ‌های عکس برای جلوگیری از خرابی متن
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = d.content.replace(/<img[^>]*>/g, '');
+            let rawText = tempDiv.textContent || tempDiv.innerText || "";
+            rawText = rawText.trim().replace(/\s+/g, ' ');
+            previewHtml = rawText.length > 70 ? rawText.substring(0, 70) + '...' : rawText;
+            if(!previewHtml) previewHtml = 'بدون متن...';
         }
 
         card.innerHTML = `
@@ -167,7 +173,7 @@ function renderDocs() {
             </div>
             <div class="doc-card-body">
                 <h3>${escapeHtml(d.title || 'بدون عنوان')}</h3>
-                <p>${escapeHtml(textHtml)}</p>
+                <div class="live-preview">${escapeHtml(previewHtml)}</div>
             </div>
         `;
         card.onclick = () => openDoc(d.id);
