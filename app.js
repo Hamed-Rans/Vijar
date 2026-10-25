@@ -146,34 +146,30 @@ function renderDocs() {
         const card = document.createElement('div');
         card.className = 'doc-card';
         
-        // پیدا کردن عکس برای کاور
+        // 1. پیدا کردن عکس
         let mediaHtml = `<i class="fa-regular fa-file-lines"></i>`;
         if (d.content && d.content.includes('<img')) {
             const match = d.content.match(/<img[^>]+src="([^">]+)"/);
-            if (match && match[1]) {
-                mediaHtml = `<img src="${match[1]}" alt="preview">`;
-            }
+            if (match && match[1]) mediaHtml = `<img src="${match[1]}" alt="preview">`;
         }
 
-        // استخراج متن زنده از داخل ادیتور برای پیش‌نمایش
-        let previewHtml = 'جزوه خالی است...';
+        // 2. استخراج متن زنده
+        let previewText = 'جزوه خالی است...';
         if (d.content) {
-            // حذف تگ‌های عکس برای جلوگیری از خرابی متن
             let tempDiv = document.createElement('div');
             tempDiv.innerHTML = d.content.replace(/<img[^>]*>/g, '');
             let rawText = tempDiv.textContent || tempDiv.innerText || "";
-            rawText = rawText.trim().replace(/\s+/g, ' ');
-            previewHtml = rawText.length > 70 ? rawText.substring(0, 70) + '...' : rawText;
-            if(!previewHtml) previewHtml = 'بدون متن...';
+            rawText = rawText.replace(/\s+/g, ' ').trim();
+            if (rawText.length > 0) {
+                previewText = rawText.length > 70 ? rawText.substring(0, 70) + '...' : rawText;
+            }
         }
 
         card.innerHTML = `
-            <div class="doc-card-img">
-                ${mediaHtml}
-            </div>
+            <div class="doc-card-img">${mediaHtml}</div>
             <div class="doc-card-body">
                 <h3>${escapeHtml(d.title || 'بدون عنوان')}</h3>
-                <div class="live-preview">${escapeHtml(previewHtml)}</div>
+                <div class="live-preview">${escapeHtml(previewText)}</div>
             </div>
         `;
         card.onclick = () => openDoc(d.id);
@@ -253,10 +249,19 @@ function initEditor() {
         titleInput.focus(); titleInput.select();
     });
 
+       let saveTimeout;
     editor.addEventListener('input', () => {
         if (state.activeDoc) { 
             state.activeDoc.content = editor.innerHTML; 
             state.activeDoc.updatedAt = Date.now(); 
+            
+            // ذخیره خودکار بعد از ۱ ثانیه توقف تایپ
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(() => {
+                if (localStorage.getItem('vizhar_autosave') !== 'false') {
+                    saveState();
+                }
+            }, 1000);
         }
     });
     
@@ -618,10 +623,34 @@ function initSettings() {
         $('settingsModal').classList.remove('show'); showRoleView(); 
     };
     $('clearDataBtn').onclick = () => { 
-        if (confirm('تمام اطلاعات حذف شود؟')) { localStorage.clear(); location.reload(); } 
+        if (confirm('آیا مطمئن هستید؟ تمام اطلاعات حذف خواهد شد.')) { 
+            localStorage.clear(); location.reload(); 
+        } 
     };
-}
 
+    // مدیریت ذخیره خودکار
+    let autoSave = localStorage.getItem('vizhar_autosave') !== 'false';
+    if($('autoSaveToggle')) {
+        $('autoSaveToggle').checked = autoSave;
+        $('autoSaveToggle').onchange = (e) => {
+            autoSave = e.target.checked;
+            localStorage.setItem('vizhar_autosave', autoSave);
+            showToast(autoSave ? 'ذخیره خودکار فعال شد' : 'ذخیره خودکار غیرفعال شد');
+        };
+    }
+
+    // مدیریت اندازه فونت پیش‌فرض
+    let savedFs = localStorage.getItem(STORAGE_KEYS.defaultFontSize) || '17';
+    if($('defaultFontSizeSelect')) {
+        $('defaultFontSizeSelect').value = savedFs;
+        $('editor').style.fontSize = savedFs + 'px';
+        $('defaultFontSizeSelect').onchange = (e) => {
+            let fs = e.target.value;
+            localStorage.setItem(STORAGE_KEYS.defaultFontSize, fs);
+            $('editor').style.fontSize = fs + 'px';
+        };
+    }
+}
 function exportDoc(format) {
     const doc = state.activeDoc; if (!doc) return;
     const content = `<div dir="rtl" style="font-family:'Estedad',sans-serif; padding:30px;"><h1 style="color:#00A693;">${doc.title || 'بدون عنوان'}</h1>${doc.content || ''}</div>`;
