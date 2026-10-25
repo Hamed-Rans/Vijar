@@ -1,5 +1,5 @@
 /* ============================================================
-   ویژار - منطق اصلی (نسخه کامل و اصلاح شده)
+   ویژار - منطق اصلی (نسخه نهایی اصلاح شده)
    ============================================================ */
 const STORAGE_KEYS = {
     role: 'vizhar_role', docs: 'vizhar_docs', folders: 'vizhar_folders',
@@ -9,7 +9,7 @@ const STORAGE_KEYS = {
 let state = {
     role: null, folders: [], docs: [], activeFolder: 'all',
     activeDoc: null, selectionRange: null, selectedWord: '',
-    importMode: 'text' // برای تشخیص اینکه کاربر می‌خواهد متن آپلود کند یا عکس
+    importMode: 'text' 
 };
 
 const $ = (id) => document.getElementById(id);
@@ -22,7 +22,7 @@ function saveState() {
         localStorage.setItem(STORAGE_KEYS.docs, JSON.stringify(state.docs));
         localStorage.setItem(STORAGE_KEYS.folders, JSON.stringify(state.folders));
     } catch (e) {
-        console.error('خطا در ذخیره‌سازی (احتمالا حافظه پر شده است)', e);
+        console.error('خطا در ذخیره‌سازی (حافظه پر است)', e);
     }
 }
 
@@ -111,6 +111,26 @@ function renderFolders() {
     });
 }
 
+// استخراج هوشمند پیش‌نمایش از محتوای HTML
+function getDocPreview(doc) {
+    if (!doc.content || doc.content.trim() === '') {
+        return { type: 'empty', icon: 'fa-file-lines', text: 'جزوه خالی است' };
+    }
+    const parser = new DOMParser();
+    const htmlDoc = parser.parseFromString(doc.content, 'text/html');
+    
+    // اگر عکسی در متن باشد، به عنوان پیش‌نمایش استفاده شود
+    const img = htmlDoc.querySelector('img');
+    if (img) {
+        return { type: 'image', src: img.src };
+    }
+    
+    // در غیر این صورت متن استخراج شود
+    const text = (htmlDoc.body.textContent || "").trim();
+    const previewText = text.substring(0, 60) + (text.length > 60 ? '...' : '');
+    return { type: 'text', icon: 'fa-file-lines', text: previewText || 'بدون متن' };
+}
+
 function renderDocs() {
     const grid = $('documentsGrid'); grid.innerHTML = '';
     let docs = state.docs;
@@ -125,23 +145,29 @@ function renderDocs() {
     docs.forEach(d => {
         const card = document.createElement('div');
         card.className = 'doc-card';
-        // پیدا کردن اولین عکس داخل متن برای پیش‌نمایش، در غیر این صورت آیکون پیش‌فرض
-        let imgHtml = `<i class="fa-regular fa-file-lines"></i>`;
-        if (d.content && d.content.includes('<img')) {
-            const match = d.content.match(/<img[^>]+src="([^">]+)"/);
-            if (match && match[1]) {
-                imgHtml = `<img src="${match[1]}" alt="preview" style="object-fit:cover; width:100%; height:100%;">`;
-            }
-        }
         
-        const previewText = d.content ? d.content.replace(/<[^>]+>/g, '').substring(0, 40) + '...' : 'بدون متن';
+        const preview = getDocPreview(d);
+        let mediaHtml = '';
+        let textHtml = '';
+
+        if (preview.type === 'image') {
+            mediaHtml = `<img src="${preview.src}" alt="preview">`;
+            textHtml = 'دارای تصویر';
+        } else if (preview.type === 'text') {
+            mediaHtml = `<i class="fa-regular ${preview.icon}"></i>`;
+            textHtml = preview.text;
+        } else {
+            mediaHtml = `<i class="fa-regular ${preview.icon}"></i>`;
+            textHtml = preview.text;
+        }
+
         card.innerHTML = `
             <div class="doc-card-img">
-                ${imgHtml}
+                ${mediaHtml}
             </div>
             <div class="doc-card-body">
                 <h3>${escapeHtml(d.title || 'بدون عنوان')}</h3>
-                <p>${previewText}</p>
+                <p>${escapeHtml(textHtml)}</p>
             </div>
         `;
         card.onclick = () => openDoc(d.id);
@@ -151,7 +177,7 @@ function renderDocs() {
 
 function createDoc() {
     const doc = {
-        id: 'doc_' + Date.now(), title: '', content: '',
+        id: 'doc_' + Date.now(), title: '', content: '', board: null,
         folderId: state.activeFolder !== 'all' ? state.activeFolder : null,
         createdAt: Date.now(), updatedAt: Date.now(),
     };
@@ -171,6 +197,18 @@ function openDoc(id) {
     $('editor').innerHTML = state.activeDoc.content || '';
     $('textScratchpad').value = state.activeDoc.scratchpad || '';
     
+    // بازگرداندن نقاشی بوم
+    if (state.activeDoc.board) {
+        const canvas = $('scratchpadCanvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        };
+        img.src = state.activeDoc.board;
+    }
+
     showEditor(); 
     renderPinnedNotes();
 }
@@ -180,7 +218,6 @@ function initEditor() {
     const editor = $('editor');
     const titleInput = $('documentTitle');
 
-    // فرمت‌بندی
     $$('.tool-btn[data-command]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', () => {
@@ -188,7 +225,6 @@ function initEditor() {
         });
     });
 
-    // بلاک‌ها (تیترها)
     $$('.tool-btn[data-block]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', () => {
@@ -196,7 +232,6 @@ function initEditor() {
         });
     });
 
-    // قفل عنوان بعد از تایپ
     titleInput.addEventListener('blur', () => {
         if (titleInput.value.trim()) {
             titleInput.setAttribute('readonly', 'readonly');
@@ -207,7 +242,6 @@ function initEditor() {
         }
     });
     
-    // باز کردن قفل با کلیک راست
     titleInput.addEventListener('contextmenu', (e) => {
         e.preventDefault(); titleInput.removeAttribute('readonly');
         titleInput.focus(); titleInput.select();
@@ -267,7 +301,6 @@ function initSelectionTooltip() {
         tooltip.classList.add('hidden');
     });
 
-    // هاور روی متن‌های نکته‌دار (باز شدن بالای متن)
     editor.addEventListener('mouseover', (e) => {
         const el = e.target.closest('.hl-word');
         if (el && el.dataset.note) {
@@ -358,7 +391,6 @@ function initFontDropdowns() {
         $('editor').querySelectorAll('font[size="7"]').forEach(el => { el.removeAttribute('size'); el.style.fontSize = val + 'px'; });
     });
 
-    // پالت رنگ متن
     const colorBtn = $('textColorBtn'), colorPopup = $('colorPopup');
     colorBtn.onclick = (e) => { e.stopPropagation(); colorPopup.classList.toggle('show'); };
     colorPopup.querySelectorAll('.color-swatch').forEach(sw => {
@@ -366,7 +398,6 @@ function initFontDropdowns() {
     });
     $('nativeColorPicker').oninput = (e) => { $('editor').focus(); document.execCommand('foreColor', false, e.target.value); };
 
-    // بستن منوها
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-dropdown')) $$('.custom-dropdown').forEach(d => d.classList.remove('active'));
         if (!e.target.closest('.color-menu-wrapper')) $$('.custom-color-popup').forEach(p => p.classList.remove('show'));
@@ -433,7 +464,7 @@ function initImport() {
                 saveState();
             }
 
-            $('fileInput').value = ''; // ریست کردن اینپوت
+            $('fileInput').value = ''; 
             $('importModal').classList.remove('show');
             showToast('با موفقیت اضافه شد');
         };
@@ -456,7 +487,6 @@ function initCanvas() {
     let drawing = false, tool = 'pencil', currentColor = '#00A693', brushSize = 3;
     let points = [], startPos = null, snapshot = null;
 
-    // کالیبراسیون دقیق بوم
     function resizeCanvas() {
         const rect = container.getBoundingClientRect();
         const dpr = window.devicePixelRatio || 1;
@@ -467,7 +497,6 @@ function initCanvas() {
         ctx.scale(dpr, dpr);
         ctx.lineCap = 'round'; ctx.lineJoin = 'round';
         
-        // بازیابی نقاشی قبلی اگر وجود داشته باشد
         if (state.activeDoc && state.activeDoc.board) {
             const img = new Image();
             img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
@@ -538,7 +567,6 @@ function initCanvas() {
         if (state.activeDoc) state.activeDoc.board = canvas.toDataURL();
     });
 
-    // ابزارها
     $$('.board-tool[data-tool]').forEach(btn => {
         btn.onclick = () => {
             if (btn.classList.contains('active') && btn.dataset.tool === 'pencil') {
@@ -553,7 +581,6 @@ function initCanvas() {
     
     if($('brushSize')) $('brushSize').oninput = (e) => { brushSize = e.target.value; };
 
-    // رنگ بوم
     if($('boardColorBtn')) {
         $('boardColorBtn').onclick = (e) => { e.stopPropagation(); $('boardColorPopup').classList.toggle('show'); };
         $$('#boardColorPopup .color-swatch').forEach(sw => {
@@ -563,7 +590,6 @@ function initCanvas() {
     }
     $('clearBoardBtn').onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); };
 
-    // ارسال به جزوه
     $('exportBoardToDocBtn').onclick = () => {
         const img = document.createElement('img');
         img.src = canvas.toDataURL(); 
@@ -625,9 +651,8 @@ function init() {
     initCanvas(); 
     initModals(); 
     initSettings();
-    initImport(); // اجرای تابع آپلود مدیا
+    initImport(); 
 
-    // دکمه‌های ناوبری
     $('backToDashBtn').onclick = () => {
         if (state.activeDoc) {
             state.activeDoc.content = $('editor').innerHTML;
@@ -651,7 +676,6 @@ function init() {
     $('exportWordBtn').onclick = () => exportDoc('word');
     $('exportPdfBtn').onclick = () => exportDoc('pdf');
 
-    // شروع
     if (state.role) showDashboard(); else showRoleView();
 }
 
