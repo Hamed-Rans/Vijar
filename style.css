@@ -81,7 +81,9 @@ body, html {
     display: flex; align-items: center; gap: 15px;
 }
 .brand-name { 
-    font-size: 2.2rem; font-weight: 800;
+    font-family: 'Aref Ruqaa', serif !important; /* بازگرداندن فونت کالیگرافی هدر */
+    font-size: 2.4rem; /* کمی بزرگتر برای زیبایی بیشتر */
+    font-weight: 700;
     background: linear-gradient(45deg, var(--accent-main), #7A9CFF);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     margin: 0; line-height: 1; 
