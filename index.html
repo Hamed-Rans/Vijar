@@ -21,8 +21,8 @@
         <button id="importBtn" class="nav-btn hidden" title="افزودن فایل"><i class="fa-solid fa-file-circle-plus"></i></button>
         <button id="exportBtn" class="nav-btn hidden" title="دریافت جزوه"><i class="fa-solid fa-file-export"></i></button>
         <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house"></i></button>
-        <!-- آیکون تنظیمات شیک و جادویی -->
-        <button id="settingsBtn" class="nav-btn" title="تنظیمات"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+        <!-- آیکون تنظیمات را به این تغییر دهید -->
+        <button id="settingsBtn" class="nav-btn" title="تنظیمات"><i class="fa-solid fa-gear"></i></button>
     </div>
 </div>
 
@@ -337,18 +337,18 @@
         </div>
     </div>
 
-    <!-- تنظیمات -->
+        <!-- تنظیمات گسترده -->
     <div id="settingsModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-sliders" style="color:var(--accent-persian);"></i> تنظیمات</h3>
+                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gear" style="color:var(--accent-main);"></i> تنظیمات برنامه</h3>
                 <button class="settings-close-btn btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <div class="settings-row">
-                <div class="settings-row-label">
-                    <strong>تم ظاهری</strong>
-                    <small>حالت تاریک یا روشن</small>
+                <div>
+                    <strong style="font-size:0.95rem;">تم ظاهری</strong>
+                    <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">حالت تاریک یا روشن</p>
                 </div>
                 <div class="theme-toggle" id="themeToggle">
                     <button data-theme="dark" class="active"><i class="fa-solid fa-moon"></i></button>
@@ -356,9 +356,32 @@
                 </div>
             </div>
 
-            <div style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
-                <button id="resetRoleBtn" class="btn-ghost settings-btn"><i class="fa-solid fa-rotate-left"></i> انتخاب مجدد نقش</button>
-                <button id="clearDataBtn" class="btn-ghost settings-btn danger"><i class="fa-solid fa-trash-can"></i> حذف تمام اطلاعات</button>
+            <div class="settings-row">
+                <div>
+                    <strong style="font-size:0.95rem;">ذخیره خودکار</strong>
+                    <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">ذخیره تغییرات هنگام تایپ</p>
+                </div>
+                <label class="custom-checkbox" style="margin:0;">
+                    <input type="checkbox" id="autoSaveToggle" checked> <span class="checkmark"></span>
+                </label>
+            </div>
+
+            <div class="settings-row">
+                <div>
+                    <strong style="font-size:0.95rem;">اندازه فونت پیش‌فرض</strong>
+                    <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">متن داخل ادیتور</p>
+                </div>
+                <select id="defaultFontSizeSelect" class="custom-input" style="width:80px; margin:0; padding:6px;">
+                    <option value="14">۱۴</option>
+                    <option value="16" selected>۱۶</option>
+                    <option value="18">۱۸</option>
+                    <option value="20">۲۰</option>
+                </select>
+            </div>
+
+            <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
+                <button id="resetRoleBtn" class="settings-btn"><i class="fa-solid fa-rotate-left"></i> انتخاب مجدد نقش</button>
+                <button id="clearDataBtn" class="settings-btn danger"><i class="fa-solid fa-trash-can"></i> حذف تمام اطلاعات</button>
             </div>
         </div>
     </div>
