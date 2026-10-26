@@ -3,17 +3,19 @@ const STORAGE_KEYS = {
     theme: 'vizhar_theme', defaultFontSize: 'vizhar_default_fs', language: 'vizhar_lang' 
 };
 
+// تنظیم مسیر Worker برای کارکرد صحیح PDF.js
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 let state = {
     role: null, folders: [], docs: [], activeFolder: 'all', activeDoc: null,
     selectionRange: null, selectedWord: '', autoSave: true, blurEffect: true, baseFontSize: 16,
     targetDocIdToMove: null, targetFolderIdToEdit: null, currentFileToImport: null,
-    lang: 'fa', tempSettings: {}
+    lang: 'fa', tempSettings: {}, hasSettingsChanged: false
 };
 
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-/* ---------------- دیکشنری چندزبانه ---------------- */
 const i18n = {
     fa: {
         "btn-import": "افزودن", "btn-export": "خروجی",
@@ -57,16 +59,19 @@ function applyLanguage(lang) {
             el.textContent = i18n[lang][key];
         }
     });
+    if ($('#currentLangDisplay')) {
+        $('#currentLangDisplay').textContent = i18n[lang]["settings-lang"] === "Language" ? "English" : (lang === 'ar' ? 'العربية' : 'فارسی');
+    }
 }
 
-/* ---------------- ذخیره‌سازی ---------------- */
 function saveState() {
     try {
         localStorage.setItem(STORAGE_KEYS.role, state.role || '');
         localStorage.setItem(STORAGE_KEYS.docs, JSON.stringify(state.docs));
         localStorage.setItem(STORAGE_KEYS.folders, JSON.stringify(state.folders));
-    } catch (e) { console.error('خطا در حافظه', e); }
+    } catch (e) { console.error(e); }
 }
+
 function loadState() {
     state.role = localStorage.getItem(STORAGE_KEYS.role) || null;
     try {
@@ -79,37 +84,36 @@ function loadState() {
     } catch(e) { state.folders = []; state.docs = []; }
 }
 
-/* ---------------- تم (تابع جا افتاده اضافه شد) ---------------- */
 function applyTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem(STORAGE_KEYS.theme, theme);
     $$('#themeToggle button').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
 }
+
 function initTheme() {
     applyTheme(localStorage.getItem(STORAGE_KEYS.theme) || 'dark');
     $$('#themeToggle button').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme)));
 }
 
-/* ---------------- ناوبری ---------------- */
 function showRoleView() {
     $('role-view').classList.remove('hidden'); $('dashboard-view').classList.add('hidden'); $('editor-view').classList.add('hidden');
     $('backToDashBtn').classList.add('hidden'); $$('.action-nav').forEach(el => el.classList.add('hidden')); $('userRoleBadge').classList.add('hidden');
 }
+
 function showDashboard() {
     $('role-view').classList.add('hidden'); $('dashboard-view').classList.remove('hidden'); $('editor-view').classList.add('hidden');
     $('backToDashBtn').classList.add('hidden'); $$('.action-nav').forEach(el => el.classList.add('hidden'));
     $('userRoleBadge').classList.remove('hidden'); $('userRoleBadge').textContent = state.role === 'teacher' ? 'استاد' : 'دانشجو';
-    
     $('dashboard-view').style.opacity = '1';
     renderFolders(); renderDocs();
 }
+
 function showEditor() {
     $('role-view').classList.add('hidden'); $('dashboard-view').classList.add('hidden'); $('editor-view').classList.remove('hidden');
     $('backToDashBtn').classList.remove('hidden'); $$('.action-nav').forEach(el => el.classList.remove('hidden'));
     $('editor-view').style.opacity = '1';
 }
 
-/* ---------------- داشبورد ---------------- */
 function renderFolders() {
     const list = $('folderList'); list.innerHTML = '';
     const allLi = document.createElement('li'); allLi.className = 'folder-item';
@@ -150,9 +154,7 @@ function renderFolders() {
         li.querySelector('.folder-header').oncontextmenu = (e) => {
             e.preventDefault(); state.targetFolderIdToEdit = f.id;
             const menu = $('folderContextMenu');
-            menu.style.setProperty('--origin-x', e.clientX + 'px'); menu.style.setProperty('--origin-y', e.clientY + 'px');
-            menu.classList.remove('hidden'); menu.classList.remove('closing');
-            menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px'; menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
+            openMenuAt(e, menu);
         };
 
         li.querySelectorAll('.folder-doc-item').forEach(item => { item.onclick = () => openDoc(item.dataset.docId); });
@@ -192,10 +194,9 @@ function renderDocs() {
 
         const menuBtn = card.querySelector('.doc-menu-btn');
         const showDocMenu = (e) => {
-            state.targetDocIdToMove = d.id; const menu = $('docContextMenu');
-            menu.style.setProperty('--origin-x', e.clientX + 'px'); menu.style.setProperty('--origin-y', e.clientY + 'px');
-            menu.classList.remove('hidden'); menu.classList.remove('closing');
-            menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px'; menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
+            state.targetDocIdToMove = d.id; 
+            const menu = $('docContextMenu');
+            openMenuAt(e, menu);
         };
         menuBtn.onclick = (e) => { 
             e.stopPropagation(); const menu = $('docContextMenu');
@@ -238,7 +239,6 @@ function openDoc(id) {
     }, 200);
 }
 
-/* ---------------- ادیتور ---------------- */
 function initEditor() {
     const editor = $('editor');
     const titleInput = $('documentTitle');
@@ -288,9 +288,7 @@ function initEditor() {
 
     $('textScratchpad').addEventListener('contextmenu', (e) => {
         e.preventDefault(); const menu = $('scratchpadContextMenu');
-        menu.style.setProperty('--origin-x', e.clientX + 'px'); menu.style.setProperty('--origin-y', e.clientY + 'px');
-        menu.classList.remove('hidden'); menu.classList.remove('closing');
-        menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px'; menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
+        openMenuAt(e, menu);
     });
     $$('.scratch-cmd').forEach(li => { li.onclick = () => { $('textScratchpad').focus(); document.execCommand(li.dataset.cmd, false, null); $('scratchpadContextMenu').classList.add('hidden'); }; });
 
@@ -309,7 +307,6 @@ function updateToolbarState() {
     });
 }
 
-/* ---------------- تولتیپ و نکات ---------------- */
 function initSelectionTooltip() {
     const editor = $('editor');
     const tooltip = $('quickTooltip');
@@ -344,13 +341,16 @@ function initSelectionTooltip() {
             $('noteViewContent').textContent = el.dataset.note;
             const rect = el.getBoundingClientRect();
             
+            popup.className = 'note-view-popup ' + el.classList[1] + ' hidden';
+            
             popup.style.left = (rect.left + rect.width/2) + 'px'; 
             popup.style.top = (rect.top - 40) + 'px'; 
             popup.style.transform = 'translate(-50%, -100%)'; 
+            
+            if (state.blurEffect) editor.classList.add('blur-active');
+
             popup.classList.remove('hidden');
             requestAnimationFrame(() => popup.classList.add('show'));
-
-            if (state.blurEffect) editor.classList.add('blur-active');
         }
     });
     editor.addEventListener('mouseout', (e) => {
@@ -381,8 +381,16 @@ function initNoteModal() {
         span.dataset.note = note; span.dataset.word = state.selectedWord;
         if (pinned) span.dataset.pinned = '1';
 
-        try { state.selectionRange.surroundContents(span); }
-        catch (e) { const contents = state.selectionRange.extractContents(); span.appendChild(contents); state.selectionRange.insertNode(span); }
+        try { 
+            state.selectionRange.surroundContents(span); 
+            const space = document.createTextNode('\u200B');
+            span.after(space);
+        }
+        catch (e) { 
+            const contents = state.selectionRange.extractContents(); 
+            span.appendChild(contents); 
+            state.selectionRange.insertNode(span); 
+        }
 
         if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
         if (pinned) renderPinnedNotes();
@@ -403,21 +411,17 @@ function renderPinnedNotes() {
     });
 }
 
-/* ---------------- منوهای راست کلیک ---------------- */
+function openMenuAt(e, menuEl) {
+    menuEl.style.setProperty('--origin-x', e.clientX + 'px');
+    menuEl.style.setProperty('--origin-y', e.clientY + 'px');
+    menuEl.classList.remove('hidden'); menuEl.classList.remove('closing');
+    menuEl.style.left = Math.min(e.pageX, window.innerWidth - 180) + 'px'; 
+    menuEl.style.top = Math.min(e.pageY, window.innerHeight - 250) + 'px';
+}
+
 function initContextMenu() {
     const menu = $('customContextMenu');
-    
-    const openMenu = (e, menuEl) => {
-        e.preventDefault();
-        menuEl.style.setProperty('--origin-x', e.clientX + 'px');
-        menuEl.style.setProperty('--origin-y', e.clientY + 'px');
-        menuEl.classList.remove('hidden'); menuEl.classList.remove('closing');
-        menuEl.style.left = Math.min(e.pageX, window.innerWidth - 180) + 'px'; 
-        menuEl.style.top = Math.min(e.pageY, window.innerHeight - 250) + 'px';
-    };
-
-    $('editor').addEventListener('contextmenu', (e) => openMenu(e, menu));
-    $('textScratchpad').addEventListener('contextmenu', (e) => openMenu(e, $('scratchpadContextMenu')));
+    $('editor').addEventListener('contextmenu', (e) => { e.preventDefault(); openMenuAt(e, menu); });
 
     document.addEventListener('click', (e) => {
         const menus = [menu, $('docContextMenu'), $('folderContextMenu'), $('scratchpadContextMenu')];
@@ -480,7 +484,6 @@ function initContextMenu() {
     };
 }
 
-/* ---------------- فونت و آپلود ---------------- */
 function initFontDropdowns() {
     const fontDD = $('fontDropdown');
     fontDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); fontDD.classList.toggle('active'); };
@@ -501,9 +504,7 @@ function initFontDropdowns() {
 
     $('increaseFontSize').onclick = () => { state.baseFontSize = Math.min(state.baseFontSize + 2, 40); $('fontSizeDisplay').textContent = state.baseFontSize; $('editor').style.fontSize = state.baseFontSize + 'px'; localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); };
     $('decreaseFontSize').onclick = () => { state.baseFontSize = Math.max(state.baseFontSize - 2, 10); $('fontSizeDisplay').textContent = state.baseFontSize; $('editor').style.fontSize = state.baseFontSize + 'px'; localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); };
-}
 
-function initImport() {
     $('importBtn').onclick = () => { $('importActionOptions').classList.add('hidden'); $('importModal').classList.add('show'); };
     $$('.media-cat-item').forEach(cat => {
         cat.onclick = () => { $('fileInput').accept = cat.dataset.accept; $('fileInput').click(); };
@@ -525,7 +526,6 @@ function initImport() {
             else if (file.type.startsWith('audio/')) html += `<audio src="${event.target.result}" controls style="width:100%;"></audio>`;
             else html += `<a href="${event.target.result}" download="${file.name}" style="color:var(--accent-main); text-decoration:underline;">دریافت فایل: ${file.name}</a>`;
             html += `</div>`;
-            
             document.execCommand('insertHTML', false, html);
             if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
             $('importModal').classList.remove('show'); $('fileInput').value = '';
@@ -550,6 +550,7 @@ function initImport() {
         const file = state.currentFileToImport; if(!file) return;
         
         if(file.type === 'application/pdf') {
+            $('processLoadingOverlay').classList.remove('hidden');
             const reader = new FileReader();
             reader.onload = function() {
                 const typedarray = new Uint8Array(this.result);
@@ -563,10 +564,18 @@ function initImport() {
                         const paragraphs = fullText.split('\n').filter(p=>p.trim()).map(p => `<p>${escapeHtml(p)}</p>`).join('');
                         document.execCommand('insertHTML', false, paragraphs);
                         if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
+                        
+                        $('processLoadingOverlay').classList.add('hidden');
                         $('importModal').classList.remove('show'); $('fileInput').value = '';
-                        showToast('متن با موفقیت استخراج شد.');
+                        showToast('متن استخراج شد.');
+                    }).catch(err => {
+                        $('processLoadingOverlay').classList.add('hidden');
+                        showToast('خطا در استخراج متن PDF');
                     });
-                }).catch(err => showToast('خطا در خواندن PDF.'));
+                }).catch(err => {
+                    $('processLoadingOverlay').classList.add('hidden');
+                    showToast('خطا در خواندن فایل PDF');
+                });
             };
             reader.readAsArrayBuffer(file);
         } else if (file.type.startsWith('text/') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
@@ -584,7 +593,6 @@ function initImport() {
     };
 }
 
-/* ---------------- بوم (Canvas) ---------------- */
 let canvasState = { drawing: false, tool: 'pencil', color: '#4F75FF', size: 3, points: [], snapshot: null, startPos: null };
 
 function resizeCanvas() {
@@ -606,7 +614,6 @@ function initCanvas() {
     const canvas = $('scratchpadCanvas');
     const ctx = canvas.getContext('2d');
     const cursor = $('brushCursor');
-    
     setTimeout(resizeCanvas, 100);
     window.addEventListener('resize', resizeCanvas);
 
@@ -637,13 +644,11 @@ function initCanvas() {
         
         if (!canvasState.drawing) return;
         const pos = getPos(e);
-        
         if (['pencil', 'highlighter', 'eraser'].includes(canvasState.tool)) {
             canvasState.points.push(pos);
             if (canvasState.points.length > 2) {
                 const p1 = canvasState.points[canvasState.points.length - 3], p2 = canvasState.points[canvasState.points.length - 2], p3 = canvasState.points[canvasState.points.length - 1];
-                const m1 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
-                const m2 = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2 };
+                const m1 = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 }, m2 = { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2 };
                 ctx.beginPath(); ctx.moveTo(m1.x, m1.y); ctx.quadraticCurveTo(p2.x, p2.y, m2.x, m2.y); ctx.stroke();
             }
         } else if (canvasState.tool === 'line') {
@@ -701,21 +706,54 @@ function restoreCanvas() {
     img.src = state.activeDoc.board;
 }
 
-/* ---------------- تنظیمات و راه‌اندازی ---------------- */
 function initSettings() {
     $('autoSaveToggle').checked = state.autoSave;
     $('blurEffectToggle').checked = state.blurEffect;
-    $('languageSelect').value = state.lang;
+    $('#currentLangDisplay').textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
     applyLanguage(state.lang);
+
+    const settingsInputs = $$('#settingsModal input, #settingsModal select, #settingsModal .custom-dropdown');
+    const actionBar = $('settingsActionBar');
+    
+    const langDD = $('languageDropdown');
+    langDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); langDD.classList.toggle('active'); };
+    $$('#languageDropdown .dropdown-item').forEach(item => {
+        item.onclick = () => {
+            $('#currentLangDisplay').textContent = item.textContent;
+            langDD.dataset.selectedLang = item.dataset.langVal;
+            langDD.classList.remove('active');
+            actionBar.classList.add('show');
+        };
+    });
+
+    settingsInputs.forEach(input => {
+        input.addEventListener('change', () => {
+            actionBar.classList.add('show');
+        });
+    });
+
+    $('settingsBtn').onclick = () => {
+        actionBar.classList.remove('show'); 
+        $('settingsModal').classList.add('show');
+    };
+
+    $('cancelSettingsBtn').onclick = () => { 
+        $('autoSaveToggle').checked = state.autoSave;
+        $('blurEffectToggle').checked = state.blurEffect;
+        $('#currentLangDisplay').textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
+        langDD.dataset.selectedLang = state.lang;
+        $('settingsModal').classList.remove('show'); 
+    };
 
     $('confirmSettingsBtn').onclick = () => {
         state.autoSave = $('autoSaveToggle').checked;
         state.blurEffect = $('blurEffectToggle').checked;
+        const newLang = langDD.dataset.selectedLang || state.lang;
         
         localStorage.setItem('vizhar_autosave', state.autoSave);
         localStorage.setItem('vizhar_blur', state.blurEffect);
         
-        applyLanguage($('languageSelect').value);
+        applyLanguage(newLang);
 
         const isNotesChecked = $('toggleNotesPanel').checked;
         const isCanvasChecked = $('toggleCanvasPanel').checked;
@@ -734,7 +772,6 @@ function initSettings() {
         setTimeout(resizeCanvas, 300);
     };
 
-    $('cancelSettingsBtn').onclick = () => { $('settingsModal').classList.remove('show'); };
     $('resetRoleBtn').onclick = () => { state.role = null; localStorage.removeItem(STORAGE_KEYS.role); $('settingsModal').classList.remove('show'); showRoleView(); };
     $('clearDataBtn').onclick = () => { if (confirm('آیا مطمئن هستید؟ تمام اطلاعات حذف خواهد شد.')) { localStorage.clear(); location.reload(); } };
 }
@@ -744,6 +781,7 @@ function showToast(msg) {
     t.style.cssText = `position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:var(--accent-main); color:#fff; padding:10px 20px; border-radius:12px; z-index:99999; font-family:'YekanBakh'; box-shadow:var(--shadow-float);`;
     document.body.appendChild(t); setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 2000);
 }
+
 function escapeHtml(str) { return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
 function init() {
@@ -753,7 +791,6 @@ function init() {
     initFontDropdowns(); 
     initNoteModal(); 
     initCanvas(); 
-    initImport(); 
     initSettings();
 
     $$('.role-card').forEach(card => { card.addEventListener('click', () => { state.role = card.dataset.role; saveState(); showDashboard(); }); });
@@ -769,7 +806,6 @@ function init() {
     };
     
     $('createNewDocBtn').onclick = createDoc;
-    $('settingsBtn').onclick = () => $('settingsModal').classList.add('show');
     $('addFolderBtn').onclick = () => $('addFolderModal').classList.add('show');
     $('confirmAddFolderBtn').onclick = () => {
         const name = $('newFolderName').value.trim(); if (!name) return;
