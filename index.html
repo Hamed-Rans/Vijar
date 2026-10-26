@@ -9,7 +9,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-
+    
+    <!-- صفحه لودینگ -->
+    <div id="loading-screen">
+        <div class="loader-logo">ویژار</div>
+        <div class="loader-spinner"></div>
+    </div>
+    <!-- بقیه کدها... -->
+    
    <!-- هدر شناور -->
 <div class="floating-top-nav">
     <div class="nav-block brand-block glass-element">
@@ -356,13 +363,15 @@
                 </div>
             </div>
 
-            <div class="settings-row">
+                        <div class="settings-row">
                 <div>
                     <strong style="font-size:0.95rem;">ذخیره خودکار</strong>
                     <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">ذخیره تغییرات هنگام تایپ</p>
                 </div>
-                <label class="custom-checkbox" style="margin:0;">
-                    <input type="checkbox" id="autoSaveToggle" checked> <span class="checkmark"></span>
+                <!-- کلید تاگل جدید -->
+                <label class="switch">
+                    <input type="checkbox" id="autoSaveToggle" checked>
+                    <span class="slider"></span>
                 </label>
             </div>
 
