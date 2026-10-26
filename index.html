@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Lalezar&family=Gulzar&display=swap" rel="stylesheet">
-    <!-- اضافه کردن کتابخانه خواندن PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
@@ -89,7 +88,7 @@
             <!-- پنل چپ -->
             <aside class="side-panel left-panel" id="leftPanel">
                 <div class="panel-title glass-panel">
-                    <span class="header-title"><i class="fa-solid fa-thumbtack"></i> یادداشت‌های سنجاق‌شده</span>
+                    <span class="header-title"><i class="fa-solid fa-thumbtack"></i> یادداشت</span>
                 </div>
                 <div class="panel-content glass-panel" style="flex: 0.8; overflow-y: auto; padding: 10px;">
                     <div id="pinnedNotesArea" class="notes-container"></div>
@@ -105,7 +104,6 @@
                         <button class="board-tool" data-tool="highlighter" title="هایلایتر"><i class="fa-solid fa-highlighter"></i></button>
                         <button class="board-tool" data-tool="eraser" title="پاک‌کن"><i class="fa-solid fa-eraser"></i></button>
                         <div class="divider"></div>
-                        <!-- ابزارهای تکراری اصلاح شدند -->
                         <button class="board-tool" data-tool="line" title="خط"><i class="fa-solid fa-minus"></i></button>
                         <button class="board-tool" data-tool="rect" title="مربع"><i class="fa-regular fa-square"></i></button>
                         <button class="board-tool" data-tool="circle" title="دایره"><i class="fa-regular fa-circle"></i></button>
@@ -119,7 +117,9 @@
                 </div>
             </aside>
 
+            <!-- ادیتور مرکزی -->
             <main class="editor-main">
+                <!-- نوار ابزار بالا (اصلاح شده) -->
                 <div class="editor-top-toolbar glass-panel">
                     <div class="custom-dropdown" id="fontDropdown">
                         <div class="dropdown-selected">فونت <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
@@ -138,9 +138,10 @@
                         <button class="tool-btn" id="increaseFontSize"><i class="fa-solid fa-plus"></i></button>
                     </div>
                     <div class="divider"></div>
-                    <button class="tool-btn" data-block="h1" title="تیتر ۱">H1</button>
-                    <button class="tool-btn" data-block="h2" title="تیتر ۲">H2</button>
-                    <button class="tool-btn" data-block="h3" title="تیتر ۳">H3</button>
+                    <!-- ابزارهای جدید به جای H1,H2,H3 -->
+                    <button class="tool-btn" data-block="p" title="پاراگراف عادی"><i class="fa-solid fa-paragraph"></i></button>
+                    <button class="tool-btn" data-command="insertHorizontalRule" title="خط جداکننده"><i class="fa-solid fa-minus"></i></button>
+                    <button class="tool-btn" data-command="removeFormat" title="حذف استایل‌ها"><i class="fa-solid fa-eraser"></i></button>
                     <div class="divider"></div>
                     <button class="tool-btn align-tool" data-command="justifyRight" title="راست‌چین"><i class="fa-solid fa-align-right"></i></button>
                     <button class="tool-btn align-tool" data-command="justifyCenter" title="وسط‌چین"><i class="fa-solid fa-align-center"></i></button>
@@ -202,7 +203,7 @@
                     <span class="header-title"><i class="fa-solid fa-pen-clip"></i> چرک‌نویس</span>
                 </div>
                 <div class="panel-content glass-panel" style="flex: 1;">
-                    <div id="textScratchpad" class="scratchpad-text" contenteditable="true" placeholder="ایده‌ها و متن‌های موقت... (برای ابزارها کلیک راست کنید)"></div>
+                    <div id="textScratchpad" class="scratchpad-text" contenteditable="true" placeholder="ایده‌ها و متن‌های موقت..."></div>
                 </div>
             </aside>
         </div>
@@ -212,13 +213,11 @@
         <button id="quickAddNoteBtn"><i class="fa-solid fa-comment-medical"></i> افزودن یادداشت</button>
     </div>
 
-    <!-- پاپ‌آپ نکته (باید بالای کلمه باز شود) -->
-    <div id="noteViewPopup" class="note-view-popup glass-panel hidden">
+    <div id="noteViewPopup" class="note-view-popup hidden">
         <p id="noteViewContent"></p>
         <div class="note-arrow"></div>
     </div>
 
-    <!-- منوهای راست کلیک -->
     <div id="customContextMenu" class="context-menu glass-panel hidden">
         <ul>
             <li id="menuCopy"><i class="fa-regular fa-copy"></i> رونوشت</li>
@@ -240,7 +239,6 @@
         </ul>
     </div>
 
-    <!-- منوی راست کلیک دسته‌بندی -->
     <div id="folderContextMenu" class="context-menu glass-panel hidden">
         <ul>
             <li id="ctxPinFolder"><i class="fa-solid fa-thumbtack"></i> سنجاق به بالا</li>
@@ -258,7 +256,6 @@
         </ul>
     </div>
 
-    <!-- مودال‌ها -->
     <div id="noteModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
             <h3>یادداشت برای: <span id="selectedWordDisplay" class="highlight-preview"></span></h3>
@@ -293,7 +290,6 @@
         </div>
     </div>
 
-    <!-- مودال بارگذاری -->
     <div id="importModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -310,7 +306,6 @@
                 <div class="media-cat-item" data-accept=".txt,.md"><i class="fa-regular fa-file-lines"></i><span>متن</span></div>
             </div>
             
-            <!-- گزینه‌های PDF و فایل -->
             <div id="importActionOptions" class="hidden" style="margin-top:20px;">
                 <p style="font-size:0.9rem; margin-bottom:10px;">اقدام مورد نظر را انتخاب کنید:</p>
                 <div style="display:flex; flex-direction:column; gap:8px;">
@@ -323,7 +318,7 @@
         </div>
     </div>
 
-    <!-- پیکربندی (گسترده با دکمه تایید/انصراف) -->
+    <!-- تنظیمات -->
     <div id="settingsModal" class="modal">
         <div class="modal-content glass-panel border-top-accent" style="max-height: 85vh; overflow-y: auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
@@ -339,13 +334,17 @@
                 </div>
             </div>
 
+            <!-- منوی زبان سفارشی -->
             <div class="settings-row">
                 <div><strong data-lang="settings-lang">زبان برنامه</strong></div>
-                <select id="languageSelect" class="custom-input" style="width:120px; margin:0; padding:8px;">
-                    <option value="fa">فارسی</option>
-                    <option value="en">English</option>
-                    <option value="ar">العربية</option>
-                </select>
+                <div class="custom-dropdown" id="languageDropdown">
+                    <div class="dropdown-selected" id="currentLangDisplay">فارسی</div>
+                    <div class="dropdown-list">
+                        <div class="dropdown-item" data-lang-val="fa">فارسی</div>
+                        <div class="dropdown-item" data-lang-val="en">English</div>
+                        <div class="dropdown-item" data-lang-val="ar">العربية</div>
+                    </div>
+                </div>
             </div>
 
             <div class="settings-row">
@@ -388,15 +387,14 @@
                 </label>
             </div>
 
-            <!-- درباره ما -->
             <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border-glass); text-align: center;">
                 <p style="margin: 0; font-weight: bold; color: var(--accent-main);" data-lang="about-created">ساخته شده در استودیو داهپت</p>
                 <p style="margin: 4px 0; font-size: 0.85rem; color: var(--text-muted);">Dahpat Studio</p>
                 <p style="margin: 4px 0; font-size: 0.85rem; color: var(--text-muted);" data-lang="about-designer">طراح و ایده‌پرداز: Hamed Rans</p>
             </div>
 
-            <!-- دکمه‌های تایید و انصراف -->
-            <div style="margin-top:20px; display:flex; gap:10px;">
+            <!-- دکمه‌های تایید و انصراف (با کلاس برای انیمیشن) -->
+            <div id="settingsActionBar" class="settings-actions">
                 <button id="confirmSettingsBtn" class="btn-primary" style="flex:1; justify-content:center;" data-lang="btn-confirm">تایید تغییرات</button>
                 <button id="cancelSettingsBtn" class="btn-ghost" style="flex:1; justify-content:center;" data-lang="btn-cancel">انصراف</button>
             </div>
