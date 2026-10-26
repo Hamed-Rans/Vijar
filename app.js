@@ -1,16 +1,65 @@
 const STORAGE_KEYS = { 
     role: 'vizhar_role', docs: 'vizhar_docs', folders: 'vizhar_folders', 
-    theme: 'vizhar_theme', defaultFontSize: 'vizhar_default_fs' 
+    theme: 'vizhar_theme', defaultFontSize: 'vizhar_default_fs', language: 'vizhar_lang' 
 };
 
 let state = {
     role: null, folders: [], docs: [], activeFolder: 'all', activeDoc: null,
-    selectionRange: null, selectedWord: '', autoSave: true, baseFontSize: 16,
-    targetDocIdToMove: null, currentFileToImport: null
+    selectionRange: null, selectedWord: '', autoSave: true, blurEffect: true, baseFontSize: 16,
+    targetDocIdToMove: null, targetFolderIdToEdit: null, currentFileToImport: null,
+    lang: 'fa',
+    // تنظیمات موقت پنل‌ها
+    tempSettings: {}
 };
 
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
+
+/* ---------------- دیکشنری چندزبانه ---------------- */
+const i18n = {
+    fa: {
+        "btn-import": "افزودن", "btn-export": "خروجی",
+        "settings-title": "پیکربندی", "settings-theme": "پوسته ظاهری",
+        "settings-lang": "زبان برنامه", "settings-autosave": "ذخیره خودکار",
+        "settings-blur": "محو کردن هنگام هاور نکات", "settings-notes-panel": "پنل یادداشت‌ها",
+        "settings-canvas-panel": "پنل بوم نقاشی", "settings-scratch-panel": "پنل چرک‌نویس",
+        "about-created": "ساخته شده در استودیو داهپت", "about-designer": "طراح و ایده‌پرداز: Hamed Rans",
+        "btn-confirm": "تایید تغییرات", "btn-cancel": "انصراف",
+        "btn-reset-role": "انتخاب مجدد نقش", "btn-clear-data": "حذف تمام داده‌ها"
+    },
+    en: {
+        "btn-import": "Add", "btn-export": "Export",
+        "settings-title": "Settings", "settings-theme": "Appearance",
+        "settings-lang": "Language", "settings-autosave": "Auto Save",
+        "settings-blur": "Blur Background on Note Hover", "settings-notes-panel": "Notes Panel",
+        "settings-canvas-panel": "Canvas Panel", "settings-scratch-panel": "Scratchpad Panel",
+        "about-created": "Created by Dahpat Studio", "about-designer": "Designer & Ideator: Hamed Rans",
+        "btn-confirm": "Apply Changes", "btn-cancel": "Cancel",
+        "btn-reset-role": "Reset Role", "btn-clear-data": "Clear All Data"
+    },
+    ar: {
+        "btn-import": "إضافة", "btn-export": "تصدير",
+        "settings-title": "الإعدادات", "settings-theme": "المظهر",
+        "settings-lang": "اللغة", "settings-autosave": "حفظ تلقائي",
+        "settings-blur": "تمويه عند التمرير على الملاحظات", "settings-notes-panel": "لوحة الملاحظات",
+        "settings-canvas-panel": "لوحة الرسم", "settings-scratch-panel": "لوحة المسودة",
+        "about-created": "تم الإنشاء بواسطة استوديو داهبت", "about-designer": "المصمم والمبتكر: Hamed Rans",
+        "btn-confirm": "تطبيق التغييرات", "btn-cancel": "إلغاء",
+        "btn-reset-role": "إعادة اختيار الدور", "btn-clear-data": "حذف جميع البيانات"
+    }
+};
+
+function applyLanguage(lang) {
+    state.lang = lang;
+    localStorage.setItem(STORAGE_KEYS.language, lang);
+    document.documentElement.dir = (lang === 'ar' || lang === 'fa') ? 'rtl' : 'ltr';
+    $$('[data-lang]').forEach(el => {
+        const key = el.getAttribute('data-lang');
+        if (i18n[lang] && i18n[lang][key]) {
+            el.textContent = i18n[lang][key];
+        }
+    });
+}
 
 /* ---------------- ذخیره‌سازی ---------------- */
 function saveState() {
@@ -26,19 +75,10 @@ function loadState() {
         state.folders = JSON.parse(localStorage.getItem(STORAGE_KEYS.folders) || '[]');
         state.docs = JSON.parse(localStorage.getItem(STORAGE_KEYS.docs) || '[]');
         state.autoSave = localStorage.getItem('vizhar_autosave') !== 'false';
+        state.blurEffect = localStorage.getItem('vizhar_blur') !== 'false';
         state.baseFontSize = parseInt(localStorage.getItem(STORAGE_KEYS.defaultFontSize)) || 16;
+        state.lang = localStorage.getItem(STORAGE_KEYS.language) || 'fa';
     } catch(e) { state.folders = []; state.docs = []; }
-}
-
-/* ---------------- تم ---------------- */
-function applyTheme(theme) {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem(STORAGE_KEYS.theme, theme);
-    $$('#themeToggle button').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
-}
-function initTheme() {
-    applyTheme(localStorage.getItem(STORAGE_KEYS.theme) || 'dark');
-    $$('#themeToggle button').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme)));
 }
 
 /* ---------------- ناوبری ---------------- */
@@ -50,19 +90,22 @@ function showDashboard() {
     $('role-view').classList.add('hidden'); $('dashboard-view').classList.remove('hidden'); $('editor-view').classList.add('hidden');
     $('backToDashBtn').classList.add('hidden'); $$('.action-nav').forEach(el => el.classList.add('hidden'));
     $('userRoleBadge').classList.remove('hidden'); $('userRoleBadge').textContent = state.role === 'teacher' ? 'استاد' : 'دانشجو';
+    
+    $('dashboard-view').style.opacity = '1';
     renderFolders(); renderDocs();
 }
 function showEditor() {
     $('role-view').classList.add('hidden'); $('dashboard-view').classList.add('hidden'); $('editor-view').classList.remove('hidden');
     $('backToDashBtn').classList.remove('hidden'); $$('.action-nav').forEach(el => el.classList.remove('hidden'));
+    $('editor-view').style.opacity = '1';
 }
 
 /* ---------------- داشبورد ---------------- */
 function renderFolders() {
     const list = $('folderList'); list.innerHTML = '';
     const allLi = document.createElement('li'); allLi.className = 'folder-item';
-    allLi.innerHTML = `<div class="folder-header ${state.activeFolder === 'all' ? 'active' : ''}" data-id="all"><div class="folder-title-wrap"><i class="fa-solid fa-inbox"></i> همه جزوه‌ها</div></div>`;
-    allLi.querySelector('.folder-header').onclick = () => { state.activeFolder = 'all'; renderFolders(); renderDocs(); };
+    allLi.innerHTML = `<div class="folder-header ${state.activeFolder === 'all' ? 'active' : ''}" data-id="all"><div class="folder-title-wrap ${state.activeFolder === 'all' ? 'active' : ''}"><i class="fa-solid fa-inbox"></i> همه جزوه‌ها</div></div>`;
+    allLi.querySelector('.folder-title-wrap').onclick = () => { state.activeFolder = 'all'; renderFolders(); renderDocs(); };
     list.appendChild(allLi);
 
     state.folders.forEach(f => {
@@ -72,26 +115,40 @@ function renderFolders() {
         
         li.innerHTML = `
             <div class="folder-header ${isOpen ? 'active open' : ''}" data-id="${f.id}">
-                <div class="folder-title-wrap"><i class="fa-solid fa-folder"></i> ${escapeHtml(f.name)}</div>
-                <i class="fa-solid fa-chevron-left folder-arrow"></i>
+                <div class="folder-title-wrap ${isOpen ? 'active' : ''}"><i class="fa-solid fa-folder"></i> ${escapeHtml(f.name)}</div>
+                <button class="folder-arrow-btn"><i class="fa-solid fa-chevron-left"></i></button>
             </div>
             <ul class="folder-docs">
                 ${folderDocs.map(d => `<li class="folder-doc-item" data-doc-id="${d.id}"><i class="fa-regular fa-file-lines"></i> ${escapeHtml(d.title || 'بدون عنوان')}</li>`).join('')}
             </ul>
         `;
         
-        const header = li.querySelector('.folder-header');
-        header.onclick = (e) => {
-            if(e.target.closest('.folder-doc-item')) return;
-            if (state.activeFolder === f.id) {
-                state.activeFolder = 'all'; header.classList.remove('open', 'active');
-            } else {
-                state.activeFolder = f.id;
-                $$('.folder-header').forEach(h => h.classList.remove('open', 'active'));
-                header.classList.add('open', 'active');
-            }
+        // جدا کردن کلیک روی متن از کلیک روی فلش
+        li.querySelector('.folder-title-wrap').onclick = () => {
+            state.activeFolder = f.id; $$('.folder-header').forEach(h => h.classList.remove('open', 'active')); 
+            $$('.folder-title-wrap').forEach(h => h.classList.remove('active'));
+            li.querySelector('.folder-header').classList.add('active');
+            li.querySelector('.folder-title-wrap').classList.add('active');
             renderDocs();
         };
+
+        li.querySelector('.folder-arrow-btn').onclick = (e) => {
+            e.stopPropagation();
+            const header = li.querySelector('.folder-header');
+            if(header.classList.contains('open')) header.classList.remove('open');
+            else { $$('.folder-header').forEach(h => h.classList.remove('open')); header.classList.add('open'); }
+        };
+
+        // راست کلیک برای دسته بندی
+        li.querySelector('.folder-header').oncontextmenu = (e) => {
+            e.preventDefault(); state.targetFolderIdToEdit = f.id;
+            const menu = $('folderContextMenu');
+            menu.style.setProperty('--origin-x', e.clientX + 'px');
+            menu.style.setProperty('--origin-y', e.clientY + 'px');
+            menu.classList.remove('hidden'); menu.classList.remove('closing');
+            menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px'; menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
+        };
+
         li.querySelectorAll('.folder-doc-item').forEach(item => { item.onclick = () => openDoc(item.dataset.docId); });
         list.appendChild(li);
     });
@@ -108,16 +165,14 @@ function renderDocs() {
     docs.forEach(d => {
         const card = document.createElement('div'); card.className = 'doc-card'; card.dataset.id = d.id;
         
-        // استفاده از عکس ذخیره شده به عنوان کاور
+        // پیش‌نمایش عکس (با بکگراند سفید تا سیاه نشود)
         let mediaHtml = `<i class="fa-regular fa-file-lines"></i>`;
-        if (d.thumbnail) {
-            mediaHtml = `<img src="${d.thumbnail}" alt="thumbnail">`;
-        }
+        if (d.thumbnail) mediaHtml = `<img src="${d.thumbnail}" style="background:#fff;" alt="thumbnail">`;
 
         let previewText = 'متن خالی...';
         if (d.content) {
             let tempDiv = document.createElement('div'); tempDiv.innerHTML = d.content;
-            tempDiv.querySelectorAll('img, audio, video, iframe').forEach(el => el.remove());
+            tempDiv.querySelectorAll('img, audio, video, iframe, .media-attachment').forEach(el => el.remove());
             let rawText = tempDiv.textContent || tempDiv.innerText || "";
             rawText = rawText.replace(/\s+/g, ' ').trim();
             if (rawText.length > 0) previewText = rawText.length > 50 ? rawText.substring(0, 50) + '...' : rawText;
@@ -128,31 +183,19 @@ function renderDocs() {
             <div class="doc-card-img">${mediaHtml}</div>
             <div class="doc-card-body"><h3>${escapeHtml(d.title || 'بدون عنوان')}</h3><div class="live-preview">${escapeHtml(previewText)}</div></div>
         `;
-        
         card.onclick = (e) => { if(!e.target.closest('.doc-menu-btn')) openDoc(d.id); };
 
         const menuBtn = card.querySelector('.doc-menu-btn');
         const showDocMenu = (e) => {
-            state.targetDocIdToMove = d.id;
-            const menu = $('docContextMenu');
-            // انیمیشن باز شدن دقیقا از روی دکمه
-            const rect = menuBtn.getBoundingClientRect();
-            menu.style.left = (rect.left - 140) + 'px';
-            menu.style.top = (rect.bottom + 5) + 'px';
-            menu.classList.remove('hidden');
-            menu.classList.remove('closing');
+            state.targetDocIdToMove = d.id; const menu = $('docContextMenu');
+            menu.style.setProperty('--origin-x', e.clientX + 'px'); menu.style.setProperty('--origin-y', e.clientY + 'px');
+            menu.classList.remove('hidden'); menu.classList.remove('closing');
+            menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px'; menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
         };
-        
         menuBtn.onclick = (e) => { 
-            e.stopPropagation(); 
-            const menu = $('docContextMenu');
-            if (!menu.classList.contains('hidden')) {
-                // بستن با انیمیشن
-                menu.classList.add('closing');
-                setTimeout(() => menu.classList.add('hidden'), 300);
-            } else {
-                showDocMenu(e); 
-            }
+            e.stopPropagation(); const menu = $('docContextMenu');
+            if (!menu.classList.contains('hidden')) { menu.classList.add('closing'); setTimeout(() => menu.classList.add('hidden'), 300); } 
+            else { showDocMenu(e); }
         };
         card.oncontextmenu = (e) => { e.preventDefault(); showDocMenu(e); };
         grid.appendChild(card);
@@ -168,6 +211,7 @@ function openDoc(id) {
     state.activeDoc = state.docs.find(d => d.id === id);
     if (!state.activeDoc) return;
     
+    // انیمیشن جابه جایی بین صفحات
     $('dashboard-view').style.opacity = '0';
     setTimeout(() => {
         $('documentTitle').value = state.activeDoc.title || '';
@@ -179,16 +223,12 @@ function openDoc(id) {
         $('textScratchpad').innerHTML = state.activeDoc.scratchpad || '';
         $('fontSizeDisplay').textContent = state.baseFontSize;
         $('editor').style.fontSize = state.baseFontSize + 'px';
-        
-        // اعمال بافت کاغذ
         $('editor').className = `editor-box paper-${state.activeDoc.paperStyle || 'plain'}`;
         
         showEditor();
         $('editor-view').style.opacity = '0';
         setTimeout(() => $('editor-view').style.opacity = '1', 50);
-        $('dashboard-view').style.opacity = '1';
         
-        // رفع باگ بوم (تعیین سایز پس از نمایش)
         setTimeout(() => { resizeCanvas(); restoreCanvas(); }, 150);
         renderPinnedNotes();
     }, 200);
@@ -201,16 +241,11 @@ function initEditor() {
 
     $$('.tool-btn[data-command]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
-        btn.addEventListener('click', () => {
-            editor.focus(); document.execCommand(btn.dataset.command, false, null); updateToolbarState();
-        });
+        btn.addEventListener('click', () => { editor.focus(); document.execCommand(btn.dataset.command, false, null); updateToolbarState(); });
     });
-
     $$('.tool-btn[data-block]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
-        btn.addEventListener('click', () => {
-            editor.focus(); document.execCommand('formatBlock', false, btn.dataset.block);
-        });
+        btn.addEventListener('click', () => { editor.focus(); document.execCommand('formatBlock', false, btn.dataset.block); });
     });
 
     editor.addEventListener('keyup', updateToolbarState);
@@ -248,23 +283,14 @@ function initEditor() {
         };
     });
 
-    // منوی راست کلیک چرک‌نویس
+    // راست کلیک چرک‌نویس
     $('textScratchpad').addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        const menu = $('scratchpadContextMenu');
-        menu.classList.remove('hidden');
-        menu.classList.remove('closing');
-        menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px';
-        menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
+        e.preventDefault(); const menu = $('scratchpadContextMenu');
+        menu.style.setProperty('--origin-x', e.clientX + 'px'); menu.style.setProperty('--origin-y', e.clientY + 'px');
+        menu.classList.remove('hidden'); menu.classList.remove('closing');
+        menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px'; menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
     });
-
-    $$('.scratch-cmd').forEach(li => {
-        li.onclick = () => {
-            $('textScratchpad').focus();
-            document.execCommand(li.dataset.cmd, false, null);
-            $('scratchpadContextMenu').classList.add('hidden');
-        };
-    });
+    $$('.scratch-cmd').forEach(li => { li.onclick = () => { $('textScratchpad').focus(); document.execCommand(li.dataset.cmd, false, null); $('scratchpadContextMenu').classList.add('hidden'); }; });
 
     initSelectionTooltip();
     initContextMenu();
@@ -281,7 +307,7 @@ function updateToolbarState() {
     });
 }
 
-/* ---------------- تولتیپ و نکات ---------------- */
+/* ---------------- تولتیپ و نکات (رفع پوزیشن و افکت بلر) ---------------- */
 function initSelectionTooltip() {
     const editor = $('editor');
     const tooltip = $('quickTooltip');
@@ -316,16 +342,22 @@ function initSelectionTooltip() {
         if (el && el.dataset.note) {
             $('noteViewContent').textContent = el.dataset.note;
             const rect = el.getBoundingClientRect();
-            // قرار دادن دقیق بالای کلمه
-            popup.style.left = (rect.left + rect.width/2 - 100) + 'px'; 
-            popup.style.top = (rect.top - popup.offsetHeight - 15) + 'px';
+            
+            // پوزیشن دقیقا بالای کلمه
+            popup.style.left = (rect.left + rect.width/2) + 'px'; 
+            popup.style.top = (rect.top - 40) + 'px'; // 40px بالاتر
+            popup.style.transform = 'translate(-50%, -100%)'; // مرکزیت افقی
             popup.classList.remove('hidden');
             requestAnimationFrame(() => popup.classList.add('show'));
+
+            // افکت بلر (اگر در تنظیمات فعال باشد)
+            if (state.blurEffect) editor.classList.add('blur-active');
         }
     });
     editor.addEventListener('mouseout', (e) => {
         if (e.target.closest('.hl-word')) {
             popup.classList.remove('show');
+            editor.classList.remove('blur-active');
             setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 300);
         }
     });
@@ -347,8 +379,7 @@ function initNoteModal() {
 
         const span = document.createElement('span');
         span.className = `hl-word hl-${color}`;
-        span.dataset.note = note;
-        span.dataset.word = state.selectedWord;
+        span.dataset.note = note; span.dataset.word = state.selectedWord;
         if (pinned) span.dataset.pinned = '1';
 
         try { state.selectionRange.surroundContents(span); }
@@ -367,8 +398,7 @@ function renderPinnedNotes() {
     const temp = document.createElement('div');
     temp.innerHTML = state.activeDoc.content || '';
     temp.querySelectorAll('.hl-word[data-pinned="1"]').forEach(el => {
-        const card = document.createElement('div');
-        card.className = 'note-card';
+        const card = document.createElement('div'); card.className = 'note-card';
         card.innerHTML = `<strong>${el.dataset.word || 'یادداشت'}:</strong> ${escapeHtml(el.dataset.note)}`;
         area.appendChild(card);
     });
@@ -376,27 +406,39 @@ function renderPinnedNotes() {
 
 /* ---------------- منوهای راست کلیک ---------------- */
 function initContextMenu() {
-    // منوی ادیتور
     const menu = $('customContextMenu');
-    $('editor').addEventListener('contextmenu', (e) => {
-        e.preventDefault(); menu.classList.remove('hidden'); menu.classList.remove('closing');
-        menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px'; menu.style.top = Math.min(e.pageY, window.innerHeight - 200) + 'px';
-    });
     
+    const openMenu = (e, menuEl) => {
+        e.preventDefault();
+        menuEl.style.setProperty('--origin-x', e.clientX + 'px');
+        menuEl.style.setProperty('--origin-y', e.clientY + 'px');
+        menuEl.classList.remove('hidden'); menuEl.classList.remove('closing');
+        // محدود کردن موقعیت به صفحه
+        menuEl.style.left = Math.min(e.pageX, window.innerWidth - 180) + 'px'; 
+        menuEl.style.top = Math.min(e.pageY, window.innerHeight - 250) + 'px';
+    };
+
+    $('editor').addEventListener('contextmenu', (e) => openMenu(e, menu));
+    $('textScratchpad').addEventListener('contextmenu', (e) => openMenu(e, $('scratchpadContextMenu')));
+
     document.addEventListener('click', (e) => {
-        if (!menu.contains(e.target)) { menu.classList.add('closing'); setTimeout(()=>menu.classList.add('hidden'), 300); }
-        const docMenu = $('docContextMenu');
-        if (!docMenu.contains(e.target) && !e.target.closest('.doc-menu-btn')) { docMenu.classList.add('closing'); setTimeout(()=>docMenu.classList.add('hidden'), 300); }
-        const scratchMenu = $('scratchpadContextMenu');
-        if (!scratchMenu.contains(e.target)) scratchMenu.classList.add('hidden');
+        const menus = [menu, $('docContextMenu'), $('folderContextMenu'), $('scratchpadContextMenu')];
+        menus.forEach(m => {
+            if (!m.contains(e.target) && !e.target.closest('.doc-menu-btn') && !e.target.closest('.folder-header')) {
+                m.classList.add('closing');
+                setTimeout(()=>m.classList.add('hidden'), 300);
+            }
+        });
     });
     
     $('menuCopy').onclick = () => { document.execCommand('copy'); menu.classList.add('hidden'); };
     $('menuCut').onclick = () => { document.execCommand('cut'); menu.classList.add('hidden'); };
     $('menuPaste').onclick = async () => { try { const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); } catch(e) { showToast('دسترسی ندارید'); } menu.classList.add('hidden'); };
+    $('menuBold').onclick = () => { document.execCommand('bold'); menu.classList.add('hidden'); };
+    $('menuItalic').onclick = () => { document.execCommand('italic'); menu.classList.add('hidden'); };
     $('menuDelete').onclick = () => { document.execCommand('delete'); menu.classList.add('hidden'); };
 
-    // منوی کارت
+    // منوی کارت جزوه
     $('ctxEditTitle').onclick = () => {
         const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
         if(doc) {
@@ -420,9 +462,29 @@ function initContextMenu() {
         if(folderId !== null) { doc.folderId = folderId === 'null' ? null : folderId; saveState(); renderDocs(); renderFolders(); }
         $('docContextMenu').classList.add('hidden');
     };
+
+    // منوی دسته بندی
+    $('ctxPinFolder').onclick = () => {
+        const idx = state.folders.findIndex(f => f.id === state.targetFolderIdToEdit);
+        if(idx > 0) { const temp = state.folders[idx]; state.folders[idx] = state.folders[idx-1]; state.folders[idx-1] = temp; saveState(); renderFolders(); }
+        $('folderContextMenu').classList.add('hidden');
+    };
+    $('ctxEditFolder').onclick = () => {
+        const folder = state.folders.find(f => f.id === state.targetFolderIdToEdit);
+        if(folder) { const newName = prompt('نام جدید:', folder.name); if(newName) { folder.name = newName; saveState(); renderFolders(); } }
+        $('folderContextMenu').classList.add('hidden');
+    };
+    $('ctxDeleteFolder').onclick = () => {
+        if(confirm('حذف شود؟ (جزوه‌ها به همه منتقل می‌شوند)')) {
+            state.folders = state.folders.filter(f => f.id !== state.targetFolderIdToEdit);
+            state.docs.forEach(d => { if(d.folderId === state.targetFolderIdToEdit) d.folderId = null; });
+            saveState(); renderFolders(); renderDocs();
+        }
+        $('folderContextMenu').classList.add('hidden');
+    };
 }
 
-/* ---------------- فونت و رنگ متن ---------------- */
+/* ---------------- فونت و آپلود ---------------- */
 function initFontDropdowns() {
     const fontDD = $('fontDropdown');
     fontDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); fontDD.classList.toggle('active'); };
@@ -441,20 +503,10 @@ function initFontDropdowns() {
         if (!e.target.closest('.color-menu-wrapper')) $$('.custom-color-popup').forEach(p => p.classList.remove('show'));
     });
 
-    // تغییر سایز فونت
-    $('increaseFontSize').onclick = () => {
-        state.baseFontSize = Math.min(state.baseFontSize + 2, 40);
-        $('fontSizeDisplay').textContent = state.baseFontSize; $('editor').style.fontSize = state.baseFontSize + 'px';
-        localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize);
-    };
-    $('decreaseFontSize').onclick = () => {
-        state.baseFontSize = Math.max(state.baseFontSize - 2, 10);
-        $('fontSizeDisplay').textContent = state.baseFontSize; $('editor').style.fontSize = state.baseFontSize + 'px';
-        localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize);
-    };
+    $('increaseFontSize').onclick = () => { state.baseFontSize = Math.min(state.baseFontSize + 2, 40); $('fontSizeDisplay').textContent = state.baseFontSize; $('editor').style.fontSize = state.baseFontSize + 'px'; localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); };
+    $('decreaseFontSize').onclick = () => { state.baseFontSize = Math.max(state.baseFontSize - 2, 10); $('fontSizeDisplay').textContent = state.baseFontSize; $('editor').style.fontSize = state.baseFontSize + 'px'; localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); };
 }
 
-/* ---------------- آپلود ---------------- */
 function initImport() {
     $('importBtn').onclick = () => { $('importActionOptions').classList.add('hidden'); $('importModal').classList.add('show'); };
     $$('.media-cat-item').forEach(cat => {
@@ -463,24 +515,79 @@ function initImport() {
     $('fileInput').onchange = (e) => {
         const file = e.target.files[0]; if (!file) return; state.currentFileToImport = file;
         $('importActionOptions').classList.remove('hidden');
+        if (file.type === 'application/pdf') $('actionOpenPdf').classList.remove('hidden');
+        else $('actionOpenPdf').classList.add('hidden');
     };
 
+    // ضمیمه کردن به عنوان فایل دانلودی
     $('actionEmbedFile').onclick = () => {
         const file = state.currentFileToImport; if(!file) return;
         const reader = new FileReader();
         reader.onload = (event) => {
-            let html = '';
-            if (file.type.startsWith('image/')) html = `<img src="${event.target.result}" style="max-width:100%; border-radius:12px; margin:10px 0;">`;
-            else if (file.type.startsWith('video/')) html = `<video src="${event.target.result}" controls style="max-width:100%; border-radius:12px; margin:10px 0;"></video>`;
-            else if (file.type.startsWith('audio/')) html = `<audio src="${event.target.result}" controls style="width:100%; margin:10px 0;"></audio>`;
-            else if (file.type === 'application/pdf') html = `<embed src="${event.target.result}" type="application/pdf" width="100%" height="500px" style="border-radius:12px; margin:10px 0;">`;
-            else html = `<a href="${event.target.result}" download="${file.name}" style="color:var(--accent-main); text-decoration:underline;">دریافت فایل: ${file.name}</a>`;
+            let html = `<div class="media-attachment"><button class="delete-media-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>`;
+            if (file.type.startsWith('image/')) html += `<img src="${event.target.result}" style="max-width:100%; border-radius:12px;">`;
+            else if (file.type.startsWith('video/')) html += `<video src="${event.target.result}" controls style="max-width:100%; border-radius:12px;"></video>`;
+            else if (file.type.startsWith('audio/')) html += `<audio src="${event.target.result}" controls style="width:100%;"></audio>`;
+            else html += `<a href="${event.target.result}" download="${file.name}" style="color:var(--accent-main); text-decoration:underline;">دریافت فایل: ${file.name}</a>`;
+            html += `</div>`;
             
             document.execCommand('insertHTML', false, html);
             if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
             $('importModal').classList.remove('show'); $('fileInput').value = '';
         };
         reader.readAsDataURL(file);
+    };
+
+    // باز کردن PDF در حالت خواننده
+    $('actionOpenPdf').onclick = () => {
+        const file = state.currentFileToImport; if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            let html = `<div class="media-attachment"><button class="delete-media-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
+                        <embed src="${event.target.result}" type="application/pdf" width="100%" height="500px" style="border-radius:12px;"></div>`;
+            document.execCommand('insertHTML', false, html);
+            if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
+            $('importModal').classList.remove('show'); $('fileInput').value = '';
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // استخراج متن (پشتیبانی از PDF)
+    $('actionExtractText').onclick = () => {
+        const file = state.currentFileToImport; if(!file) return;
+        
+        if(file.type === 'application/pdf') {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const typedarray = new Uint8Array(this.result);
+                pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                    let textPromises = [];
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        textPromises.push(pdf.getPage(i).then(page => page.getTextContent().then(text => text.items.map(s => s.str).join(' '))));
+                    }
+                    Promise.all(textPromises).then(pagesText => {
+                        const fullText = pagesText.join('\n');
+                        const paragraphs = fullText.split('\n').filter(p=>p.trim()).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+                        document.execCommand('insertHTML', false, paragraphs);
+                        if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
+                        $('importModal').classList.remove('show'); $('fileInput').value = '';
+                        showToast('متن با موفقیت استخراج شد.');
+                    });
+                }).catch(err => showToast('خطا در خواندن PDF.'));
+            };
+            reader.readAsArrayBuffer(file);
+        } else if (file.type.startsWith('text/') || file.name.endsWith('.txt') || file.name.endsWith('.md')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const paragraphs = event.target.result.split('\n').filter(p=>p.trim()).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+                document.execCommand('insertHTML', false, paragraphs);
+                if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
+                $('importModal').classList.remove('show'); $('fileInput').value = '';
+            };
+            reader.readAsText(file);
+        } else {
+            showToast('استخراج متن فقط برای فایل‌های متنی و PDF پشتیبانی می‌شود.');
+        }
     };
 }
 
@@ -492,20 +599,13 @@ function resizeCanvas() {
     if(!canvas || !canvas.parentElement) return;
     const container = canvas.parentElement;
     const rect = container.getBoundingClientRect();
-    
-    // جلوگیری از صفر شدن سایز
     if(rect.width === 0 || rect.height === 0) return; 
 
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = rect.width * dpr; 
-    canvas.height = rect.height * dpr;
-    canvas.style.width = rect.width + 'px'; 
-    canvas.style.height = rect.height + 'px';
-    
+    canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+    canvas.style.width = rect.width + 'px'; canvas.style.height = rect.height + 'px';
     const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr); 
-    ctx.lineCap = 'round'; 
-    ctx.lineJoin = 'round';
+    ctx.scale(dpr, dpr); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
     restoreCanvas();
 }
 
@@ -529,16 +629,23 @@ function initCanvas() {
         else { ctx.strokeStyle = canvasState.color; ctx.globalAlpha = 1; ctx.lineWidth = canvasState.size; ctx.globalCompositeOperation = 'source-over'; }
     }
 
-    canvas.addEventListener('pointerenter', () => cursor.style.display = 'block');
+    canvas.addEventListener('pointerenter', () => { 
+        cursor.style.display = 'block'; 
+        // تغییر نشانگر بر اساس ابزار
+        if (canvasState.tool === 'eraser') { cursor.style.backgroundColor = 'rgba(255,255,255,0.5)'; cursor.style.border = '2px solid white'; }
+        else if (canvasState.tool === 'highlighter') { cursor.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; cursor.style.border = '1px solid yellow'; }
+        else { cursor.style.backgroundColor = 'transparent'; cursor.style.border = '1.5px solid var(--accent-main)'; }
+    });
     canvas.addEventListener('pointerleave', () => { cursor.style.display = 'none'; canvasState.drawing = false; });
     
     canvas.addEventListener('pointermove', (e) => {
-        const size = canvasState.tool === 'eraser' || canvasState.tool === 'highlighter' ? (canvasState.tool==='eraser'?20:15) : canvasState.size;
+        const size = canvasState.tool === 'eraser' || canvasState.tool === 'highlighter' ? 20 : canvasState.size;
         cursor.style.width = size + 'px'; cursor.style.height = size + 'px';
         cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
-        if (!canvasState.drawing) return;
         
+        if (!canvasState.drawing) return;
         const pos = getPos(e);
+        
         if (['pencil', 'highlighter', 'eraser'].includes(canvasState.tool)) {
             canvasState.points.push(pos);
             if (canvasState.points.length > 2) {
@@ -564,7 +671,7 @@ function initCanvas() {
         canvasState.drawing = true; const pos = getPos(e); canvasState.points = [pos]; canvasState.startPos = pos;
         canvasState.snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height); setupBrush();
         if (['pencil', 'highlighter', 'eraser'].includes(canvasState.tool)) {
-            ctx.beginPath(); ctx.arc(pos.x, pos.y, (canvasState.tool === 'eraser' || canvasState.tool === 'highlighter' ? (canvasState.tool==='eraser'?10:7) : canvasState.size/2), 0, Math.PI * 2);
+            ctx.beginPath(); ctx.arc(pos.x, pos.y, (canvasState.tool === 'eraser' || canvasState.tool === 'highlighter' ? 10 : canvasState.size/2), 0, Math.PI * 2);
             ctx.fillStyle = ctx.strokeStyle; ctx.fill();
         }
     });
@@ -574,9 +681,16 @@ function initCanvas() {
         if (state.activeDoc) state.activeDoc.board = canvas.toDataURL();
     });
 
+    // دکمه های ابزار (ابزار تکراری حذف شد)
     $$('.board-tool[data-tool]').forEach(btn => {
-        btn.onclick = () => { $$('.board-tool[data-tool]').forEach(b => b.classList.remove('active')); btn.classList.add('active'); canvasState.tool = btn.dataset.tool; };
+        btn.onclick = () => { 
+            $$('.board-tool[data-tool]').forEach(b => b.classList.remove('active')); 
+            btn.classList.add('active'); 
+            canvasState.tool = btn.dataset.tool; 
+            canvas.dispatchEvent(new Event('pointerenter')); // بروزرسانی نشانگر
+        };
     });
+    
     $('boardColorBtn').onclick = (e) => { e.stopPropagation(); $('boardColorPopup').classList.toggle('show'); };
     $$('#boardColorPopup .color-swatch').forEach(sw => { sw.onclick = () => { canvasState.color = sw.dataset.color; $('boardColorPopup').classList.remove('show'); }; });
     $('clearBoardBtn').onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); };
@@ -596,17 +710,47 @@ function restoreCanvas() {
     img.src = state.activeDoc.board;
 }
 
-/* ---------------- تنظیمات ---------------- */
+/* ---------------- تنظیمات و راه‌اندازی ---------------- */
 function initSettings() {
+    // پر کردن مقادیر اولیه
+    $('autoSaveToggle').checked = state.autoSave;
+    $('blurEffectToggle').checked = state.blurEffect;
+    $('languageSelect').value = state.lang;
+    applyLanguage(state.lang);
+
+    // دکمه تایید تنظیمات
+    $('confirmSettingsBtn').onclick = () => {
+        state.autoSave = $('autoSaveToggle').checked;
+        state.blurEffect = $('blurEffectToggle').checked;
+        
+        localStorage.setItem('vizhar_autosave', state.autoSave);
+        localStorage.setItem('vizhar_blur', state.blurEffect);
+        
+        applyLanguage($('languageSelect').value);
+
+        // اعمال نمایش پنل‌ها
+        const isNotesChecked = $('toggleNotesPanel').checked;
+        const isCanvasChecked = $('toggleCanvasPanel').checked;
+        const isScratchChecked = $('toggleScratchPanel').checked;
+        
+        // در اینجا فقط بخش‌های داخلی پنل چپ را کنترل میکنیم
+        $('pinnedNotesArea').parentElement.style.display = isNotesChecked ? 'flex' : 'none';
+        $('pinnedNotesArea').parentElement.previousElementSibling.style.display = isNotesChecked ? 'flex' : 'none'; // تیتر
+        
+        $('canvasContainer').parentElement.style.display = isCanvasChecked ? 'flex' : 'none';
+        $('canvasContainer').parentElement.previousElementSibling.style.display = isCanvasChecked ? 'flex' : 'none'; // تیتر
+        
+        $('rightPanel').style.display = isScratchChecked ? 'flex' : 'none';
+
+        $('settingsModal').classList.remove('show');
+        showToast('تنظیمات ذخیره شد');
+        setTimeout(resizeCanvas, 300); // بروزرسانی سایز بوم
+    };
+
+    $('cancelSettingsBtn').onclick = () => { $('settingsModal').classList.remove('show'); };
+
     $('resetRoleBtn').onclick = () => { state.role = null; localStorage.removeItem(STORAGE_KEYS.role); $('settingsModal').classList.remove('show'); showRoleView(); };
     $('clearDataBtn').onclick = () => { if (confirm('آیا مطمئن هستید؟ تمام اطلاعات حذف خواهد شد.')) { localStorage.clear(); location.reload(); } };
-    
-    $('autoSaveToggle').checked = state.autoSave;
-    $('autoSaveToggle').onchange = (e) => { state.autoSave = e.target.checked; localStorage.setItem('vizhar_autosave', state.autoSave); };
-
-    // مخفی کردن پنل‌ها
-    $('toggleLeftPanel').onchange = (e) => { $('leftPanel').style.display = e.target.checked ? 'flex' : 'none'; };
-    $('toggleRightPanel').onchange = (e) => { $('rightPanel').style.display = e.target.checked ? 'flex' : 'none'; };
 }
 
 function showToast(msg) {
@@ -616,7 +760,6 @@ function showToast(msg) {
 }
 function escapeHtml(str) { return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
-/* ---------------- راه‌اندازی ---------------- */
 function init() {
     loadState(); initTheme(); initEditor(); initFontDropdowns(); initNoteModal(); initCanvas(); initImport(); initSettings();
 
@@ -625,8 +768,8 @@ function init() {
     $('backToDashBtn').onclick = () => {
         if (state.activeDoc) {
             state.activeDoc.content = $('editor').innerHTML; state.activeDoc.title = $('documentTitle').value.trim();
-            // گرفتن اسکرین‌شات زنده برای پیش‌نمایش
-            html2canvas($('editor'), { scale: 0.5, backgroundColor: null }).then(canvas => {
+            // تولید عکس بدون بکگراند سیاه
+            html2canvas($('editor'), { scale: 0.5, backgroundColor: getComputedStyle(document.body).getPropertyValue('--surface-solid').trim() }).then(canvas => {
                 state.activeDoc.thumbnail = canvas.toDataURL('image/jpeg');
                 saveState(); showDashboard();
             }).catch(() => { saveState(); showDashboard(); });
