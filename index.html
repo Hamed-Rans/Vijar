@@ -7,10 +7,11 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Lalezar&family=Gulzar&display=swap" rel="stylesheet">
+    <!-- اضافه کردن کتابخانه خواندن PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
-    <!-- صفحه لودینگ -->
     <div id="loading-screen">
         <div class="loader-geometric">
             <div class="shape shape1"></div>
@@ -20,7 +21,6 @@
         <div class="loader-text">ویژار</div>
     </div>
 
-    <!-- هدر شناور -->
     <div class="floating-top-nav">
         <div class="nav-block brand-block glass-element">
             <i class="fa-solid fa-feather-pointed logo-icon"></i>
@@ -29,15 +29,14 @@
         </div>
         <div class="nav-block actions-block">
             <button id="focusModeBtn" class="nav-btn action-nav hidden" title="حالت تمرکز"><i class="fa-solid fa-expand"></i></button>
-            <button id="importBtn" class="nav-btn-text action-nav hidden" title="افزودن رسانه"><i class="fa-solid fa-cloud-arrow-up"></i> <span>افزودن</span></button>
-            <button id="exportBtn" class="nav-btn-text action-nav hidden" title="دریافت خروجی"><i class="fa-solid fa-download"></i> <span>خروجی</span></button>
+            <button id="importBtn" class="nav-btn-text action-nav hidden" title="افزودن رسانه"><i class="fa-solid fa-cloud-arrow-up"></i> <span data-lang="btn-import">افزودن</span></button>
+            <button id="exportBtn" class="nav-btn-text action-nav hidden" title="دریافت خروجی"><i class="fa-solid fa-download"></i> <span data-lang="btn-export">خروجی</span></button>
             
             <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house"></i></button>
             <button id="settingsBtn" class="nav-btn" title="پیکربندی"><i class="fa-solid fa-gear"></i></button>
         </div>
     </div>
 
-    <!-- صفحه انتخاب نقش -->
     <section id="role-view" class="view-section active">
         <div class="role-container">
             <div class="role-header">
@@ -57,7 +56,6 @@
         </div>
     </section>
 
-    <!-- داشبورد -->
     <section id="dashboard-view" class="view-section hidden">
         <div class="dashboard-layout">
             <aside class="dashboard-sidebar">
@@ -86,15 +84,14 @@
         </div>
     </section>
 
-    <!-- ویرایشگر -->
     <section id="editor-view" class="view-section hidden">
         <div class="workspace-layout" id="workspaceLayout">
-            <!-- پنل چپ (نکات و بوم) -->
+            <!-- پنل چپ -->
             <aside class="side-panel left-panel" id="leftPanel">
                 <div class="panel-title glass-panel">
                     <span class="header-title"><i class="fa-solid fa-thumbtack"></i> یادداشت‌های سنجاق‌شده</span>
                 </div>
-                <div class="panel-content glass-panel" style="flex: 0.6; overflow-y: auto; padding: 10px;">
+                <div class="panel-content glass-panel" style="flex: 0.8; overflow-y: auto; padding: 10px;">
                     <div id="pinnedNotesArea" class="notes-container"></div>
                 </div>
 
@@ -108,6 +105,7 @@
                         <button class="board-tool" data-tool="highlighter" title="هایلایتر"><i class="fa-solid fa-highlighter"></i></button>
                         <button class="board-tool" data-tool="eraser" title="پاک‌کن"><i class="fa-solid fa-eraser"></i></button>
                         <div class="divider"></div>
+                        <!-- ابزارهای تکراری اصلاح شدند -->
                         <button class="board-tool" data-tool="line" title="خط"><i class="fa-solid fa-minus"></i></button>
                         <button class="board-tool" data-tool="rect" title="مربع"><i class="fa-regular fa-square"></i></button>
                         <button class="board-tool" data-tool="circle" title="دایره"><i class="fa-regular fa-circle"></i></button>
@@ -121,16 +119,14 @@
                 </div>
             </aside>
 
-            <!-- ادیتور مرکزی -->
             <main class="editor-main">
-                <!-- نوار ابزار بالا (پرشده با ابزارها) -->
                 <div class="editor-top-toolbar glass-panel">
                     <div class="custom-dropdown" id="fontDropdown">
                         <div class="dropdown-selected">فونت <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
                         <div class="dropdown-list">
                             <div class="dropdown-item" data-value="YekanBakh">یکان‌بخ</div>
                             <div class="dropdown-item" data-value="Lalezar" style="font-family:'Lalezar'">لاله‌زار</div>
-                            <div class="dropdown-item" data-value="Gulzar" style="font-family:'Gulzar'">گلزار (دست‌نویس)</div>
+                            <div class="dropdown-item" data-value="Gulzar" style="font-family:'Gulzar'">گلزار</div>
                             <div class="dropdown-item" data-value="Vazirmatn">وزیرمتن</div>
                         </div>
                     </div>
@@ -141,19 +137,15 @@
                         <button class="tool-btn" id="decreaseFontSize"><i class="fa-solid fa-minus"></i></button>
                         <button class="tool-btn" id="increaseFontSize"><i class="fa-solid fa-plus"></i></button>
                     </div>
-                    
                     <div class="divider"></div>
                     <button class="tool-btn" data-block="h1" title="تیتر ۱">H1</button>
                     <button class="tool-btn" data-block="h2" title="تیتر ۲">H2</button>
                     <button class="tool-btn" data-block="h3" title="تیتر ۳">H3</button>
                     <div class="divider"></div>
-                    
                     <button class="tool-btn align-tool" data-command="justifyRight" title="راست‌چین"><i class="fa-solid fa-align-right"></i></button>
                     <button class="tool-btn align-tool" data-command="justifyCenter" title="وسط‌چین"><i class="fa-solid fa-align-center"></i></button>
                     <button class="tool-btn align-tool" data-command="justifyLeft" title="چپ‌چین"><i class="fa-solid fa-align-left"></i></button>
                     <div class="divider"></div>
-                    
-                    <!-- تغییر بافت پس‌زمینه (خط‌دار و شطرنجی) -->
                     <div class="custom-dropdown" id="paperStyleDropdown">
                         <div class="dropdown-selected">بافت کاغذ <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
                         <div class="dropdown-list">
@@ -163,7 +155,6 @@
                         </div>
                     </div>
                     <div class="divider"></div>
-                    
                     <div class="color-menu-wrapper">
                         <button class="tool-btn" id="textColorBtn" title="رنگ متن"><i class="fa-solid fa-palette"></i></button>
                         <div class="custom-color-popup glass-panel hidden" id="colorPopup">
@@ -182,7 +173,6 @@
                     <input type="text" id="documentTitle" class="doc-title-input glass-panel" placeholder="عنوان جزوه...">
                 </div>
 
-                <!-- محتوای ادیتور -->
                 <div class="editor-content-wrapper glass-panel">
                     <div id="editor" contenteditable="true" class="editor-box paper-plain" placeholder="اینجا بنویسید..."></div>
                     <div id="dragOverlay" class="drag-overlay hidden">
@@ -191,7 +181,6 @@
                     </div>
                 </div>
 
-                <!-- نوار ابزار پایین (بزرگتر و شیشه‌ای‌تر) -->
                 <div class="floating-doc-toolbar glass-element">
                     <button class="tool-btn toggle-tool" data-command="bold"><i class="fa-solid fa-bold"></i></button>
                     <button class="tool-btn toggle-tool" data-command="italic"><i class="fa-solid fa-italic"></i></button>
@@ -208,7 +197,6 @@
                 </div>
             </main>
 
-            <!-- پنل راست (چرک‌نویس) -->
             <aside class="side-panel right-panel" id="rightPanel">
                 <div class="panel-title glass-panel">
                     <span class="header-title"><i class="fa-solid fa-pen-clip"></i> چرک‌نویس</span>
@@ -220,15 +208,14 @@
         </div>
     </section>
 
-    <!-- تولتیپ انتخاب متن -->
     <div id="quickTooltip" class="quick-tooltip hidden glass-panel">
         <button id="quickAddNoteBtn"><i class="fa-solid fa-comment-medical"></i> افزودن یادداشت</button>
     </div>
 
-    <!-- پاپ‌آپ نمایش نکته -->
+    <!-- پاپ‌آپ نکته (باید بالای کلمه باز شود) -->
     <div id="noteViewPopup" class="note-view-popup glass-panel hidden">
-        <div class="note-arrow"></div>
         <p id="noteViewContent"></p>
+        <div class="note-arrow"></div>
     </div>
 
     <!-- منوهای راست کلیک -->
@@ -238,7 +225,10 @@
             <li id="menuCut"><i class="fa-solid fa-scissors"></i> برش</li>
             <li id="menuPaste"><i class="fa-solid fa-paste"></i> چسباندن</li>
             <hr>
-            <li id="menuDelete"><i class="fa-solid fa-trash-can"></i> حذف</li>
+            <li id="menuBold"><i class="fa-solid fa-bold"></i> درشت‌نویسی</li>
+            <li id="menuItalic"><i class="fa-solid fa-italic"></i> مورب</li>
+            <hr>
+            <li id="menuDelete"><i class="fa-solid fa-trash-can" style="color:var(--danger)"></i> <span style="color:var(--danger)">حذف</span></li>
         </ul>
     </div>
 
@@ -250,7 +240,15 @@
         </ul>
     </div>
 
-    <!-- منوی راست کلیک چرک‌نویس -->
+    <!-- منوی راست کلیک دسته‌بندی -->
+    <div id="folderContextMenu" class="context-menu glass-panel hidden">
+        <ul>
+            <li id="ctxPinFolder"><i class="fa-solid fa-thumbtack"></i> سنجاق به بالا</li>
+            <li id="ctxEditFolder"><i class="fa-solid fa-pen"></i> تغییر نام</li>
+            <li id="ctxDeleteFolder"><i class="fa-solid fa-trash-can" style="color:var(--danger)"></i> <span style="color:var(--danger)">حذف</span></li>
+        </ul>
+    </div>
+
     <div id="scratchpadContextMenu" class="context-menu glass-panel hidden">
         <ul>
             <li class="scratch-cmd" data-cmd="bold"><i class="fa-solid fa-bold"></i> درشت‌نویسی</li>
@@ -312,29 +310,29 @@
                 <div class="media-cat-item" data-accept=".txt,.md"><i class="fa-regular fa-file-lines"></i><span>متن</span></div>
             </div>
             
+            <!-- گزینه‌های PDF و فایل -->
             <div id="importActionOptions" class="hidden" style="margin-top:20px;">
                 <p style="font-size:0.9rem; margin-bottom:10px;">اقدام مورد نظر را انتخاب کنید:</p>
                 <div style="display:flex; flex-direction:column; gap:8px;">
-                    <button id="actionEmbedFile" class="btn-ghost" style="justify-content:flex-start;"><i class="fa-solid fa-paperclip"></i> پیوست مستقیم فایل</button>
-                    <button id="actionExtractText" class="btn-ghost" style="justify-content:flex-start;"><i class="fa-solid fa-file-lines"></i> استخراج متن (فقط متنی)</button>
+                    <button id="actionExtractText" class="btn-ghost" style="justify-content:flex-start;"><i class="fa-solid fa-file-lines"></i> استخراج متن (فقط متنی و PDF)</button>
+                    <button id="actionEmbedFile" class="btn-ghost" style="justify-content:flex-start;"><i class="fa-solid fa-paperclip"></i> پیوست به عنوان فایل دانلودی</button>
+                    <button id="actionOpenPdf" class="btn-ghost hidden" style="justify-content:flex-start;"><i class="fa-solid fa-book-open"></i> باز کردن به عنوان پی‌دی‌اف‌خوان</button>
                 </div>
             </div>
             <input type="file" id="fileInput" style="display:none;">
         </div>
     </div>
 
-    <!-- پیکربندی -->
+    <!-- پیکربندی (گسترده با دکمه تایید/انصراف) -->
     <div id="settingsModal" class="modal">
         <div class="modal-content glass-panel border-top-accent" style="max-height: 85vh; overflow-y: auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gear" style="color:var(--accent-main);"></i> پیکربندی</h3>
+                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gear" style="color:var(--accent-main);"></i> <span data-lang="settings-title">پیکربندی</span></h3>
                 <button class="settings-close-btn btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
             <div class="settings-row">
-                <div>
-                    <strong>پوسته ظاهری</strong>
-                </div>
+                <div><strong data-lang="settings-theme">پوسته ظاهری</strong></div>
                 <div class="theme-toggle" id="themeToggle">
                     <button data-theme="dark" class="active"><i class="fa-solid fa-moon"></i></button>
                     <button data-theme="light"><i class="fa-solid fa-sun"></i></button>
@@ -342,45 +340,70 @@
             </div>
 
             <div class="settings-row">
-                <div>
-                    <strong>ذخیره خودکار</strong>
-                </div>
+                <div><strong data-lang="settings-lang">زبان برنامه</strong></div>
+                <select id="languageSelect" class="custom-input" style="width:120px; margin:0; padding:8px;">
+                    <option value="fa">فارسی</option>
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                </select>
+            </div>
+
+            <div class="settings-row">
+                <div><strong data-lang="settings-autosave">ذخیره خودکار</strong></div>
                 <label class="switch">
                     <input type="checkbox" id="autoSaveToggle" checked>
                     <span class="slider"></span>
                 </label>
             </div>
+
+            <div class="settings-row">
+                <div><strong data-lang="settings-blur">محو کردن هنگام هاور نکات</strong></div>
+                <label class="switch">
+                    <input type="checkbox" id="blurEffectToggle" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
             
             <div class="settings-row">
-                <div>
-                    <strong>پنل یادداشت‌ها و بوم</strong>
-                </div>
+                <div><strong data-lang="settings-notes-panel">پنل یادداشت‌ها</strong></div>
                 <label class="switch">
-                    <input type="checkbox" id="toggleLeftPanel" checked>
+                    <input type="checkbox" id="toggleNotesPanel" checked>
                     <span class="slider"></span>
                 </label>
             </div>
 
             <div class="settings-row">
-                <div>
-                    <strong>پنل چرک‌نویس</strong>
-                </div>
+                <div><strong data-lang="settings-canvas-panel">پنل بوم نقاشی</strong></div>
                 <label class="switch">
-                    <input type="checkbox" id="toggleRightPanel" checked>
+                    <input type="checkbox" id="toggleCanvasPanel" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="settings-row">
+                <div><strong data-lang="settings-scratch-panel">پنل چرک‌نویس</strong></div>
+                <label class="switch">
+                    <input type="checkbox" id="toggleScratchPanel" checked>
                     <span class="slider"></span>
                 </label>
             </div>
 
             <!-- درباره ما -->
             <div style="margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border-glass); text-align: center;">
-                <p style="margin: 0; font-weight: bold; color: var(--accent-main);">ساخته شده در استودیو داهپت</p>
+                <p style="margin: 0; font-weight: bold; color: var(--accent-main);" data-lang="about-created">ساخته شده در استودیو داهپت</p>
                 <p style="margin: 4px 0; font-size: 0.85rem; color: var(--text-muted);">Dahpat Studio</p>
-                <p style="margin: 4px 0; font-size: 0.85rem; color: var(--text-muted);">طراح و ایده‌پرداز: حامد رنس</p>
+                <p style="margin: 4px 0; font-size: 0.85rem; color: var(--text-muted);" data-lang="about-designer">طراح و ایده‌پرداز: Hamed Rans</p>
             </div>
 
+            <!-- دکمه‌های تایید و انصراف -->
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button id="confirmSettingsBtn" class="btn-primary" style="flex:1; justify-content:center;" data-lang="btn-confirm">تایید تغییرات</button>
+                <button id="cancelSettingsBtn" class="btn-ghost" style="flex:1; justify-content:center;" data-lang="btn-cancel">انصراف</button>
+            </div>
+            
             <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
-                <button id="resetRoleBtn" class="settings-btn"><i class="fa-solid fa-rotate-left"></i> انتخاب مجدد نقش</button>
-                <button id="clearDataBtn" class="settings-btn danger"><i class="fa-solid fa-trash-can"></i> حذف تمام داده‌ها</button>
+                <button id="resetRoleBtn" class="settings-btn"><i class="fa-solid fa-rotate-left"></i> <span data-lang="btn-reset-role">انتخاب مجدد نقش</span></button>
+                <button id="clearDataBtn" class="settings-btn danger"><i class="fa-solid fa-trash-can"></i> <span data-lang="btn-clear-data">حذف تمام داده‌ها</span></button>
             </div>
         </div>
     </div>
