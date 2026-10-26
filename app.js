@@ -715,3 +715,10 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+// بستن صفحه لودینگ بعد از بارگذاری کامل
+window.addEventListener('load', () => {
+    const loader = document.getElementById('loading-screen');
+    if (loader) {
+        loader.classList.add('hidden-loader');
+    }
+});
