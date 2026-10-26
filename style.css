@@ -11,6 +11,16 @@
     src: url('https://cdn.jsdelivr.net/gh/mostafaebrahimi/yekan-bakh@1.0.0/YekanBakh-Bold.woff2') format('woff2');
     font-weight: 700; font-display: swap;
 }
+@font-face {
+    font-family: 'YekanBakh';
+    src: url('https://cdn.jsdelivr.net/gh/mostafaebrahimi/yekan-bakh@1.0.0/YekanBakh-Regular.woff2') format('woff2');
+    font-weight: 400; font-display: swap;
+}
+@font-face {
+    font-family: 'YekanBakh';
+    src: url('https://cdn.jsdelivr.net/gh/mostafaebrahimi/yekan-bakh@1.0.0/YekanBakh-Bold.woff2') format('woff2');
+    font-weight: 700; font-display: swap;
+}
 
 :root {
     --bg-base: #0D1117; 
