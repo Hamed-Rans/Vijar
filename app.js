@@ -7,9 +7,7 @@ let state = {
     role: null, folders: [], docs: [], activeFolder: 'all', activeDoc: null,
     selectionRange: null, selectedWord: '', autoSave: true, blurEffect: true, baseFontSize: 16,
     targetDocIdToMove: null, targetFolderIdToEdit: null, currentFileToImport: null,
-    lang: 'fa',
-    // تنظیمات موقت پنل‌ها
-    tempSettings: {}
+    lang: 'fa', tempSettings: {}
 };
 
 const $ = (id) => document.getElementById(id);
@@ -81,6 +79,17 @@ function loadState() {
     } catch(e) { state.folders = []; state.docs = []; }
 }
 
+/* ---------------- تم (تابع جا افتاده اضافه شد) ---------------- */
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem(STORAGE_KEYS.theme, theme);
+    $$('#themeToggle button').forEach(b => b.classList.toggle('active', b.dataset.theme === theme));
+}
+function initTheme() {
+    applyTheme(localStorage.getItem(STORAGE_KEYS.theme) || 'dark');
+    $$('#themeToggle button').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme)));
+}
+
 /* ---------------- ناوبری ---------------- */
 function showRoleView() {
     $('role-view').classList.remove('hidden'); $('dashboard-view').classList.add('hidden'); $('editor-view').classList.add('hidden');
@@ -123,7 +132,6 @@ function renderFolders() {
             </ul>
         `;
         
-        // جدا کردن کلیک روی متن از کلیک روی فلش
         li.querySelector('.folder-title-wrap').onclick = () => {
             state.activeFolder = f.id; $$('.folder-header').forEach(h => h.classList.remove('open', 'active')); 
             $$('.folder-title-wrap').forEach(h => h.classList.remove('active'));
@@ -139,12 +147,10 @@ function renderFolders() {
             else { $$('.folder-header').forEach(h => h.classList.remove('open')); header.classList.add('open'); }
         };
 
-        // راست کلیک برای دسته بندی
         li.querySelector('.folder-header').oncontextmenu = (e) => {
             e.preventDefault(); state.targetFolderIdToEdit = f.id;
             const menu = $('folderContextMenu');
-            menu.style.setProperty('--origin-x', e.clientX + 'px');
-            menu.style.setProperty('--origin-y', e.clientY + 'px');
+            menu.style.setProperty('--origin-x', e.clientX + 'px'); menu.style.setProperty('--origin-y', e.clientY + 'px');
             menu.classList.remove('hidden'); menu.classList.remove('closing');
             menu.style.left = Math.min(e.pageX, window.innerWidth - 160) + 'px'; menu.style.top = Math.min(e.pageY, window.innerHeight - 150) + 'px';
         };
@@ -165,7 +171,6 @@ function renderDocs() {
     docs.forEach(d => {
         const card = document.createElement('div'); card.className = 'doc-card'; card.dataset.id = d.id;
         
-        // پیش‌نمایش عکس (با بکگراند سفید تا سیاه نشود)
         let mediaHtml = `<i class="fa-regular fa-file-lines"></i>`;
         if (d.thumbnail) mediaHtml = `<img src="${d.thumbnail}" style="background:#fff;" alt="thumbnail">`;
 
@@ -211,7 +216,6 @@ function openDoc(id) {
     state.activeDoc = state.docs.find(d => d.id === id);
     if (!state.activeDoc) return;
     
-    // انیمیشن جابه جایی بین صفحات
     $('dashboard-view').style.opacity = '0';
     setTimeout(() => {
         $('documentTitle').value = state.activeDoc.title || '';
@@ -272,7 +276,6 @@ function initEditor() {
         if (state.activeDoc) { state.activeDoc.scratchpad = $('textScratchpad').innerHTML; if(state.autoSave) saveState(); }
     });
 
-    // بافت کاغذ
     $('paperStyleDropdown').querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); $('paperStyleDropdown').classList.toggle('active'); };
     $$('#paperStyleDropdown .dropdown-item').forEach(item => {
         item.onclick = () => {
@@ -283,7 +286,6 @@ function initEditor() {
         };
     });
 
-    // راست کلیک چرک‌نویس
     $('textScratchpad').addEventListener('contextmenu', (e) => {
         e.preventDefault(); const menu = $('scratchpadContextMenu');
         menu.style.setProperty('--origin-x', e.clientX + 'px'); menu.style.setProperty('--origin-y', e.clientY + 'px');
@@ -307,7 +309,7 @@ function updateToolbarState() {
     });
 }
 
-/* ---------------- تولتیپ و نکات (رفع پوزیشن و افکت بلر) ---------------- */
+/* ---------------- تولتیپ و نکات ---------------- */
 function initSelectionTooltip() {
     const editor = $('editor');
     const tooltip = $('quickTooltip');
@@ -336,21 +338,18 @@ function initSelectionTooltip() {
         tooltip.classList.add('hidden');
     });
 
-    // هاور روی نکات
     editor.addEventListener('mouseover', (e) => {
         const el = e.target.closest('.hl-word');
         if (el && el.dataset.note) {
             $('noteViewContent').textContent = el.dataset.note;
             const rect = el.getBoundingClientRect();
             
-            // پوزیشن دقیقا بالای کلمه
             popup.style.left = (rect.left + rect.width/2) + 'px'; 
-            popup.style.top = (rect.top - 40) + 'px'; // 40px بالاتر
-            popup.style.transform = 'translate(-50%, -100%)'; // مرکزیت افقی
+            popup.style.top = (rect.top - 40) + 'px'; 
+            popup.style.transform = 'translate(-50%, -100%)'; 
             popup.classList.remove('hidden');
             requestAnimationFrame(() => popup.classList.add('show'));
 
-            // افکت بلر (اگر در تنظیمات فعال باشد)
             if (state.blurEffect) editor.classList.add('blur-active');
         }
     });
@@ -413,7 +412,6 @@ function initContextMenu() {
         menuEl.style.setProperty('--origin-x', e.clientX + 'px');
         menuEl.style.setProperty('--origin-y', e.clientY + 'px');
         menuEl.classList.remove('hidden'); menuEl.classList.remove('closing');
-        // محدود کردن موقعیت به صفحه
         menuEl.style.left = Math.min(e.pageX, window.innerWidth - 180) + 'px'; 
         menuEl.style.top = Math.min(e.pageY, window.innerHeight - 250) + 'px';
     };
@@ -438,7 +436,6 @@ function initContextMenu() {
     $('menuItalic').onclick = () => { document.execCommand('italic'); menu.classList.add('hidden'); };
     $('menuDelete').onclick = () => { document.execCommand('delete'); menu.classList.add('hidden'); };
 
-    // منوی کارت جزوه
     $('ctxEditTitle').onclick = () => {
         const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
         if(doc) {
@@ -463,7 +460,6 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
 
-    // منوی دسته بندی
     $('ctxPinFolder').onclick = () => {
         const idx = state.folders.findIndex(f => f.id === state.targetFolderIdToEdit);
         if(idx > 0) { const temp = state.folders[idx]; state.folders[idx] = state.folders[idx-1]; state.folders[idx-1] = temp; saveState(); renderFolders(); }
@@ -519,7 +515,6 @@ function initImport() {
         else $('actionOpenPdf').classList.add('hidden');
     };
 
-    // ضمیمه کردن به عنوان فایل دانلودی
     $('actionEmbedFile').onclick = () => {
         const file = state.currentFileToImport; if(!file) return;
         const reader = new FileReader();
@@ -538,7 +533,6 @@ function initImport() {
         reader.readAsDataURL(file);
     };
 
-    // باز کردن PDF در حالت خواننده
     $('actionOpenPdf').onclick = () => {
         const file = state.currentFileToImport; if(!file) return;
         const reader = new FileReader();
@@ -552,7 +546,6 @@ function initImport() {
         reader.readAsDataURL(file);
     };
 
-    // استخراج متن (پشتیبانی از PDF)
     $('actionExtractText').onclick = () => {
         const file = state.currentFileToImport; if(!file) return;
         
@@ -631,7 +624,6 @@ function initCanvas() {
 
     canvas.addEventListener('pointerenter', () => { 
         cursor.style.display = 'block'; 
-        // تغییر نشانگر بر اساس ابزار
         if (canvasState.tool === 'eraser') { cursor.style.backgroundColor = 'rgba(255,255,255,0.5)'; cursor.style.border = '2px solid white'; }
         else if (canvasState.tool === 'highlighter') { cursor.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; cursor.style.border = '1px solid yellow'; }
         else { cursor.style.backgroundColor = 'transparent'; cursor.style.border = '1.5px solid var(--accent-main)'; }
@@ -681,13 +673,12 @@ function initCanvas() {
         if (state.activeDoc) state.activeDoc.board = canvas.toDataURL();
     });
 
-    // دکمه های ابزار (ابزار تکراری حذف شد)
     $$('.board-tool[data-tool]').forEach(btn => {
         btn.onclick = () => { 
             $$('.board-tool[data-tool]').forEach(b => b.classList.remove('active')); 
             btn.classList.add('active'); 
             canvasState.tool = btn.dataset.tool; 
-            canvas.dispatchEvent(new Event('pointerenter')); // بروزرسانی نشانگر
+            canvas.dispatchEvent(new Event('pointerenter')); 
         };
     });
     
@@ -712,13 +703,11 @@ function restoreCanvas() {
 
 /* ---------------- تنظیمات و راه‌اندازی ---------------- */
 function initSettings() {
-    // پر کردن مقادیر اولیه
     $('autoSaveToggle').checked = state.autoSave;
     $('blurEffectToggle').checked = state.blurEffect;
     $('languageSelect').value = state.lang;
     applyLanguage(state.lang);
 
-    // دکمه تایید تنظیمات
     $('confirmSettingsBtn').onclick = () => {
         state.autoSave = $('autoSaveToggle').checked;
         state.blurEffect = $('blurEffectToggle').checked;
@@ -728,27 +717,24 @@ function initSettings() {
         
         applyLanguage($('languageSelect').value);
 
-        // اعمال نمایش پنل‌ها
         const isNotesChecked = $('toggleNotesPanel').checked;
         const isCanvasChecked = $('toggleCanvasPanel').checked;
         const isScratchChecked = $('toggleScratchPanel').checked;
         
-        // در اینجا فقط بخش‌های داخلی پنل چپ را کنترل میکنیم
         $('pinnedNotesArea').parentElement.style.display = isNotesChecked ? 'flex' : 'none';
-        $('pinnedNotesArea').parentElement.previousElementSibling.style.display = isNotesChecked ? 'flex' : 'none'; // تیتر
+        $('pinnedNotesArea').parentElement.previousElementSibling.style.display = isNotesChecked ? 'flex' : 'none';
         
         $('canvasContainer').parentElement.style.display = isCanvasChecked ? 'flex' : 'none';
-        $('canvasContainer').parentElement.previousElementSibling.style.display = isCanvasChecked ? 'flex' : 'none'; // تیتر
+        $('canvasContainer').parentElement.previousElementSibling.style.display = isCanvasChecked ? 'flex' : 'none';
         
         $('rightPanel').style.display = isScratchChecked ? 'flex' : 'none';
 
         $('settingsModal').classList.remove('show');
         showToast('تنظیمات ذخیره شد');
-        setTimeout(resizeCanvas, 300); // بروزرسانی سایز بوم
+        setTimeout(resizeCanvas, 300);
     };
 
     $('cancelSettingsBtn').onclick = () => { $('settingsModal').classList.remove('show'); };
-
     $('resetRoleBtn').onclick = () => { state.role = null; localStorage.removeItem(STORAGE_KEYS.role); $('settingsModal').classList.remove('show'); showRoleView(); };
     $('clearDataBtn').onclick = () => { if (confirm('آیا مطمئن هستید؟ تمام اطلاعات حذف خواهد شد.')) { localStorage.clear(); location.reload(); } };
 }
@@ -761,14 +747,20 @@ function showToast(msg) {
 function escapeHtml(str) { return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
 function init() {
-    loadState(); initTheme(); initEditor(); initFontDropdowns(); initNoteModal(); initCanvas(); initImport(); initSettings();
+    loadState(); 
+    initTheme(); 
+    initEditor(); 
+    initFontDropdowns(); 
+    initNoteModal(); 
+    initCanvas(); 
+    initImport(); 
+    initSettings();
 
     $$('.role-card').forEach(card => { card.addEventListener('click', () => { state.role = card.dataset.role; saveState(); showDashboard(); }); });
 
     $('backToDashBtn').onclick = () => {
         if (state.activeDoc) {
             state.activeDoc.content = $('editor').innerHTML; state.activeDoc.title = $('documentTitle').value.trim();
-            // تولید عکس بدون بکگراند سیاه
             html2canvas($('editor'), { scale: 0.5, backgroundColor: getComputedStyle(document.body).getPropertyValue('--surface-solid').trim() }).then(canvas => {
                 state.activeDoc.thumbnail = canvas.toDataURL('image/jpeg');
                 saveState(); showDashboard();
