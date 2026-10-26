@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ز <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -10,10 +10,15 @@
 </head>
 <body>
     
-    <!-- صفحه لودینگ -->
+   <body>
+    <!-- صفحه لودینگ اختصاصی -->
     <div id="loading-screen">
-        <div class="loader-logo">ویژار</div>
-        <div class="loader-spinner"></div>
+        <div class="loader-geometric">
+            <div class="shape shape1"></div>
+            <div class="shape shape2"></div>
+            <div class="shape shape3"></div>
+        </div>
+        <div class="loader-text">ویژار</div>
     </div>
     <!-- بقیه کدها... -->
     
@@ -25,8 +30,9 @@
         <span id="userRoleBadge" class="custom-badge hidden">دانشجو</span>
     </div>
     <div class="nav-block actions-block">
-        <button id="importBtn" class="nav-btn hidden" title="افزودن فایل"><i class="fa-solid fa-file-circle-plus"></i></button>
-        <button id="exportBtn" class="nav-btn hidden" title="دریافت جزوه"><i class="fa-solid fa-file-export"></i></button>
+       <button id="focusModeBtn" class="nav-btn hidden" title="حالت تمرکز"><i class="fa-solid fa-expand"></i></button>
+        <button id="importBtn" class="nav-btn-text hidden" title="افزودن فایل"><i class="fa-solid fa-file-circle-plus"></i> <span>افزودن فایل</span></button>
+        <button id="exportBtn" class="nav-btn-text hidden" title="دریافت خروجی"><i class="fa-solid fa-file-export"></i> <span>دریافت خروجی</span></button>
         <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house"></i></button>
         <!-- آیکون تنظیمات را به این تغییر دهید -->
         <button id="settingsBtn" class="nav-btn" title="تنظیمات"><i class="fa-solid fa-gear"></i></button>
@@ -162,6 +168,10 @@
                 <!-- محتوای ادیتور -->
                 <div class="editor-content-wrapper glass-panel">
                     <div id="editor" contenteditable="true" class="editor-box" placeholder="اینجا بنویسید..."></div>
+                    <div id="editor" contenteditable="true" class="editor-box" placeholder="تایپ کنید..."></div>
+                    <div id="dragOverlay" class="drag-overlay hidden">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p>فایل را اینجا رها کنید</p>
                 </div>
 
                 <!-- نوار ابزار پایین -->
