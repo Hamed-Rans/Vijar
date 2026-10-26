@@ -18,15 +18,12 @@
     --surface-glass: rgba(22, 27, 34, 0.6);
     --border-glass: rgba(255, 255, 255, 0.08);
     --glass-blur: blur(16px);
-    
     --shadow-emboss: 8px 8px 16px rgba(0,0,0,0.6), -4px -4px 12px rgba(255,255,255,0.03);
     --shadow-inset: inset 4px 4px 8px rgba(0,0,0,0.5), inset -2px -2px 6px rgba(255,255,255,0.02);
     --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.6);
-    
     --accent-main: #4F75FF; 
     --accent-hover: #3A5BCC;
     --accent-soft: rgba(79, 117, 255, 0.15);
-    
     --text-main: #F8FAFC;
     --text-muted: #94A3B8;
     --danger: #EF4444;
@@ -103,16 +100,21 @@ body, html {
 #settingsBtn:hover i { animation: spinGear 0.8s ease; }
 @keyframes spinGear { 0% { transform: rotate(0); } 100% { transform: rotate(180deg); } }
 
-/* نقش */
-.view-section { height: 100vh; padding-top: 100px; overflow-y: auto; }
+/* نقش (رفع باگ هاور) */
+.view-section { height: 100vh; padding-top: 100px; overflow-y: auto; transition: opacity 0.4s ease; }
 .role-container { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .role-header { text-align: center; margin-bottom: 40px; }
 .role-header h2 { font-size: 2.2rem; margin: 0 0 10px; font-weight: 800; }
 .role-header h2 span { color: var(--accent-main); }
 .role-cards { display: flex; gap: 30px; }
-.role-card { width: 260px; height: 260px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 30px; }
+.role-card { 
+    width: 260px; height: 260px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+    cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; border-radius: 30px; 
+    /* رفع باگ ایجاد مربع ناگهانی */
+    outline: none; border: 2px solid transparent;
+}
 .role-card:hover { transform: translateY(-10px) scale(1.02); border-color: var(--accent-main); box-shadow: var(--shadow-float); }
-.role-icon { font-size: 4rem; color: var(--accent-main); margin-bottom: 20px; transition: 0.4s ease; }
+.role-icon { font-size: 4rem; color: var(--accent-main); margin-bottom: 20px; transition: transform 0.4s ease; }
 .role-card:hover .role-icon { transform: scale(1.15); }
 .role-card h3 { font-size: 1.2rem; margin: 0; font-weight: 700; }
 
@@ -124,19 +126,20 @@ body, html {
 .sidebar-title h3, .docs-title h2 { margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; color: var(--accent-main); }
 .sidebar-content, .docs-content { padding: 20px; flex: 1; border-radius: 20px; overflow-y: auto; }
 
-/* درخت دسته‌بندی و انیمیشن */
+/* درخت دسته‌بندی (دکمه فلش جدا شد) */
 .folder-list { list-style: none; padding: 0; margin: 0; }
 .folder-item { margin-bottom: 8px; }
-.folder-header { padding: 12px 15px; border-radius: 16px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); transition: all 0.3s; background: rgba(0,0,0,0.1); border: 1px solid transparent; }
+.folder-header { display: flex; align-items: center; justify-content: space-between; border-radius: 16px; background: rgba(0,0,0,0.1); border: 1px solid transparent; transition: all 0.3s; }
 .folder-header:hover { background: rgba(255,255,255,0.05); border-color: var(--border-glass); }
-.folder-header.active { background: var(--accent-soft); color: var(--accent-main); border-color: var(--accent-main); }
-.folder-title-wrap { display: flex; align-items: center; gap: 10px; }
-.folder-arrow { transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 0.8rem; }
-.folder-header.open .folder-arrow { transform: rotate(-90deg); }
+.folder-header.active { background: var(--accent-soft); border-color: var(--accent-main); }
+.folder-title-wrap { flex: 1; padding: 12px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+.folder-title-wrap.active { color: var(--accent-main); }
+.folder-arrow-btn { padding: 12px 15px; cursor: pointer; background: transparent; border: none; color: var(--text-muted); transition: transform 0.3s; }
+.folder-header.open .folder-arrow-btn { transform: rotate(-90deg); color: var(--accent-main); }
+
 .folder-docs { list-style: none; padding: 0 15px 0 0; margin: 0; max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s ease; }
 .folder-header.open + .folder-docs { max-height: 500px; opacity: 1; margin-top: 5px; padding-bottom: 5px; }
-.folder-doc-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; transform: translateY(-10px); opacity: 0; transition: all 0.3s ease; }
-.folder-header.open + .folder-docs .folder-doc-item { transform: translateY(0); opacity: 1; }
+.folder-doc-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
 .folder-doc-item:hover { background: rgba(255,255,255,0.05); color: var(--accent-main); }
 
 .btn-icon-small { background: var(--surface-solid) !important; border: 1px solid var(--border-glass) !important; color: var(--accent-main) !important; width: 34px; height: 34px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: var(--shadow-emboss); }
@@ -144,22 +147,21 @@ body, html {
 .btn-primary { background: var(--accent-main); color: #fff; border: none; padding: 10px 22px; border-radius: 50px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 15px rgba(79, 117, 255, 0.3); }
 .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(79, 117, 255, 0.5); }
 
-/* کارت جزوه و انیمیشن */
+/* کارت جزوه */
 .documents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
-.doc-card { background: var(--surface-solid); border: 1px solid var(--border-glass); border-radius: 20px; overflow: hidden; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; flex-direction: column; box-shadow: var(--shadow-emboss); position: relative; animation: cardEnter 0.5s ease forwards; }
+.doc-card { background: var(--surface-solid); border: 1px solid var(--border-glass); border-radius: 20px; overflow: hidden; cursor: pointer; transition: all 0.4s; display: flex; flex-direction: column; box-shadow: var(--shadow-emboss); position: relative; animation: cardEnter 0.5s ease forwards; }
 @keyframes cardEnter { from { transform: translateY(20px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
 .doc-card:hover { transform: translateY(-5px); border-color: var(--accent-main); }
-.doc-card-img { height: 140px; background: rgba(0,0,0,0.1); display: flex; justify-content: center; align-items: center; font-size: 3rem; color: var(--text-muted); overflow: hidden; border-bottom: 1px solid var(--border-glass); }
+.doc-card-img { height: 140px; background: #FFFFFF; display: flex; justify-content: center; align-items: center; font-size: 3rem; color: var(--text-muted); overflow: hidden; border-bottom: 1px solid var(--border-glass); }
 .doc-card-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .doc-card-body { padding: 15px; display: flex; flex-direction: column; gap: 6px; }
 .doc-card-body h3 { margin: 0; font-size: 1rem; font-weight: 700; }
 .live-preview { font-size: .8rem; color: var(--text-muted); line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .doc-menu-btn { position: absolute; top: 10px; left: 10px; width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.5); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s; backdrop-filter: blur(4px); }
-.doc-card:hover .doc-menu-btn { opacity: 1; }
 .doc-menu-btn:hover { background: var(--accent-main); }
 
-/* ویرایشگر */
-.workspace-layout { display: flex; gap: 20px; max-width: 1700px; margin: 0 auto; padding: 0 40px; height: calc(100vh - 120px); transition: all 0.5s ease; }
+/* ویرایشگر (رفع بهم ریختگی چینش) */
+.workspace-layout { display: flex; gap: 20px; max-width: 1800px; margin: 0 auto; padding: 0 30px; height: calc(100vh - 120px); align-items: stretch; }
 .side-panel { width: 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; transition: all 0.5s ease; }
 .focus-mode .side-panel { display: none; }
 .focus-mode .workspace-layout { max-width: 1000px; padding: 0 20px; }
@@ -174,7 +176,7 @@ body, html {
 .note-card strong { color: var(--accent-main); }
 
 /* نوار ابزار بالا */
-.editor-main { flex: 1; display: flex; flex-direction: column; gap: 15px; position: relative; height: 100%; }
+.editor-main { flex: 1; display: flex; flex-direction: column; gap: 15px; height: 100%; min-width: 0; }
 .editor-top-toolbar { display: flex; align-items: center; gap: 5px; padding: 8px 15px; border-radius: 20px; flex-shrink: 0; z-index: 10; overflow-x: auto; }
 .editor-top-toolbar::-webkit-scrollbar { height: 4px; }
 .editor-top-toolbar .divider { height: 20px; width: 1px; background: var(--border-glass); margin: 0 5px; }
@@ -188,14 +190,18 @@ body, html {
 .doc-title-input:focus { border-color: var(--accent-main); }
 .doc-title-input[readonly] { background: transparent; border-color: transparent; box-shadow: none; cursor: default; }
 .editor-content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; position: relative; background: var(--surface-solid); box-shadow: var(--shadow-inset); }
-.editor-box { flex: 1; padding: 30px; outline: none; line-height: 32px; font-size: 17px; overflow-y: auto; padding-bottom: 100px; }
+.editor-box { flex: 1; padding: 30px; outline: none; line-height: 32px; font-size: 17px; overflow-y: auto; padding-bottom: 100px; transition: filter 0.3s ease; }
+
+/* افکت بلر برای ادیتور وقتی روی نکته هاور می شود */
+.editor-box.blur-active { filter: blur(3px); }
+.editor-box.blur-active .hl-word:hover { filter: none; }
 
 /* بافت کاغذ */
 .paper-plain { background-color: transparent; }
 .paper-lined { background-image: repeating-linear-gradient(transparent, transparent 31px, var(--border-glass) 31px, var(--border-glass) 32px); background-attachment: local; }
 .paper-grid { background-image: linear-gradient(var(--border-glass) 1px, transparent 1px), linear-gradient(90deg, var(--border-glass) 1px, transparent 1px); background-size: 32px 32px; background-attachment: local; }
 
-/* نوار ابزار پایین (شیشه‌ای واقعی و بزرگتر) */
+/* نوار ابزار پایین */
 .floating-doc-toolbar { 
     position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); 
     display: flex; align-items: center; gap: 8px; padding: 12px 24px; 
@@ -211,8 +217,8 @@ body, html {
 
 /* بوم */
 .canvas-container { position: relative; flex: 1; min-height: 200px; overflow: hidden; border-radius: 0 0 20px 20px; }
-canvas { display: block; width: 100%; height: 100%; cursor: none; }
-.brush-cursor { position: fixed; pointer-events: none; z-index: 9999; border: 1.5px solid var(--accent-main); border-radius: 50%; transform: translate(-50%, -50%); display: none; mix-blend-mode: difference; }
+canvas { display: block; width: 100%; height: 100%; }
+.brush-cursor { position: fixed; pointer-events: none; z-index: 9999; border: 1.5px solid var(--accent-main); border-radius: 50%; transform: translate(-50%, -50%); display: none; }
 .scratchpad-tools { display: flex; gap: 5px; padding: 10px; justify-content: center; flex-wrap: wrap; border-bottom: 1px solid var(--border-glass); background: rgba(0,0,0,0.1); }
 .board-tool { width: 32px; height: 32px; border-radius: 10px; background: transparent; border: 1px solid transparent; color: var(--text-muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
 .board-tool.active, .board-tool:hover { background: var(--accent-soft); color: var(--accent-main); border-color: var(--accent-main); }
@@ -221,7 +227,7 @@ canvas { display: block; width: 100%; height: 100%; cursor: none; }
 .btn-standard { background: var(--surface-solid); border: 1px solid var(--border-glass); color: var(--text-main); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
 .btn-standard:hover { border-color: var(--accent-main); color: var(--accent-main); }
 
-/* پاپ‌آپ نکات (جمع و جور و بالای متن) */
+/* پاپ‌آپ نکات (باز شدن بالای متن و جمع و جور) */
 .note-view-popup { 
     position: absolute; padding: 8px 12px; max-width: 200px; 
     z-index: 500; border: 1px solid var(--accent-main); 
@@ -230,42 +236,42 @@ canvas { display: block; width: 100%; height: 100%; cursor: none; }
     transform: translateY(10px); opacity: 0; visibility: hidden; transition: all 0.3s;
 }
 .note-view-popup.show { opacity: 1; visibility: visible; transform: translateY(0); }
-.note-arrow { position: absolute; bottom: -5px; right: 15px; width: 10px; height: 10px; background: var(--surface-solid); transform: rotate(45deg); border-bottom: 1px solid var(--accent-main); border-right: 1px solid var(--accent-main); }
+.note-arrow { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: var(--surface-solid); border-bottom: 1px solid var(--accent-main); border-right: 1px solid var(--accent-main); }
 
 /* هایلایت */
 .hl-yellow { background: rgba(234, 179, 8, 0.2); border-bottom: 2px solid #EAB308; }
 .hl-blue { background: rgba(59, 130, 246, 0.2); border-bottom: 2px solid #3B82F6; }
 .hl-green { background: rgba(16, 185, 129, 0.2); border-bottom: 2px solid #10B981; }
 .hl-red { background: rgba(239, 68, 68, 0.2); border-bottom: 2px solid #EF4444; }
-.hl-word { cursor: pointer; border-radius: 4px; padding: 0 3px; transition: 0.2s; }
+.hl-word { cursor: pointer; border-radius: 4px; padding: 0 3px; transition: 0.2s; position: relative; z-index: 10; }
 .hl-word:hover { filter: brightness(1.3); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 
 /* تولتیپ */
 .quick-tooltip { position: absolute; z-index: 500; padding: 6px 10px; border: 1px solid var(--accent-main); transform: translateX(-50%); transition: 0.2s; background: var(--surface-solid); border-radius: 8px; box-shadow: var(--shadow-float); }
 .quick-tooltip button { background: transparent; border: none; color: var(--accent-main); cursor: pointer; font-size: .85rem; display: flex; gap: 5px; align-items: center; }
 
-/* منوهای راست کلیک و انیمیشن خاص */
+/* منوهای راست کلیک (انیمیشن از نقطه کلیک) */
 .context-menu { 
     position: fixed; border-radius: 14px; padding: 6px 0; min-width: 160px; 
     z-index: 2000; background: var(--surface-solid); border: 1px solid var(--border-glass); 
     box-shadow: var(--shadow-float); 
-    /* انیمیشن باز شدن از یک نقطه */
-    transform-origin: top right;
+    transform-origin: var(--origin-x, top) var(--origin-y, right); /* انیمیشن از مکان کلیک */
     animation: menuOpen 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+    overflow: hidden;
 }
-@keyframes menuOpen { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes menuOpen { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .context-menu.closing { animation: menuClose 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
-@keyframes menuClose { from { transform: scale(1); opacity: 1; } to { transform: scale(0.5); opacity: 0; } }
+@keyframes menuClose { from { transform: scale(1); opacity: 1; } to { transform: scale(0); opacity: 0; } }
 
 .context-menu ul { list-style: none; padding: 0; margin: 0; }
 .context-menu li { 
     padding: 10px 18px; cursor: pointer; display: flex; align-items: center; gap: 12px; 
     font-size: 0.9rem; color: var(--text-main); 
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* انیمیشن نرم برای هاور */
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    border-radius: 8px; margin: 2px 6px; /* جلوگیری از بیرون زدن بکگراند */
 }
-/* افکت بلر شدن بقیه وقتی یکی هاور میشه */
-.context-menu:hover li:not(:hover) { filter: blur(1.5px); opacity: 0.5; transform: scale(0.95) translateX(-5px); }
-.context-menu li:hover { background: var(--accent-soft); color: var(--accent-main); border-radius: 8px; transform: scale(1.05) translateX(5px); }
+.context-menu:hover li:not(:hover) { filter: blur(1.5px); opacity: 0.5; transform: scale(0.95); }
+.context-menu li:hover { background: var(--accent-soft); color: var(--accent-main); transform: scale(1.02); }
 .context-menu hr { border: none; border-top: 1px solid var(--border-glass); margin: 6px 0; }
 
 /* مودال‌ها */
@@ -313,3 +319,7 @@ input:checked + .slider:before { transform: translateX(26px); }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-glass); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent-main); }
+
+/* دکمه حذف ضمیمه */
+.media-attachment { position: relative; display: inline-block; margin: 10px 0; max-width: 100%; }
+.media-attachment .delete-media-btn { position: absolute; top: 5px; right: 5px; background: var(--danger); color: white; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; }
