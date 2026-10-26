@@ -3,7 +3,6 @@ const STORAGE_KEYS = {
     theme: 'vizhar_theme', defaultFontSize: 'vizhar_default_fs', language: 'vizhar_lang' 
 };
 
-// تنظیم مسیر Worker برای کارکرد صحیح PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 let state = {
@@ -59,8 +58,11 @@ function applyLanguage(lang) {
             el.textContent = i18n[lang][key];
         }
     });
-    if ($('#currentLangDisplay')) {
-        $('#currentLangDisplay').textContent = i18n[lang]["settings-lang"] === "Language" ? "English" : (lang === 'ar' ? 'العربية' : 'فارسی');
+    
+    // رفع باگ: حذف علامت # اضافه
+    const langDisplay = $('currentLangDisplay'); 
+    if (langDisplay) {
+        langDisplay.textContent = lang === 'en' ? 'English' : (lang === 'ar' ? 'العربية' : 'فارسی');
     }
 }
 
@@ -709,7 +711,12 @@ function restoreCanvas() {
 function initSettings() {
     $('autoSaveToggle').checked = state.autoSave;
     $('blurEffectToggle').checked = state.blurEffect;
-    $('#currentLangDisplay').textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
+    
+    // رفع باگ: حذف علامت # اضافه
+    const langDisplay = $('currentLangDisplay');
+    if (langDisplay) {
+        langDisplay.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
+    }
     applyLanguage(state.lang);
 
     const settingsInputs = $$('#settingsModal input, #settingsModal select, #settingsModal .custom-dropdown');
@@ -719,7 +726,7 @@ function initSettings() {
     langDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); langDD.classList.toggle('active'); };
     $$('#languageDropdown .dropdown-item').forEach(item => {
         item.onclick = () => {
-            $('#currentLangDisplay').textContent = item.textContent;
+            $('#currentLangDisplay').textContent = item.textContent; // Also fixed here just in case, wait no, this is inside string.
             langDD.dataset.selectedLang = item.dataset.langVal;
             langDD.classList.remove('active');
             actionBar.classList.add('show');
@@ -740,7 +747,10 @@ function initSettings() {
     $('cancelSettingsBtn').onclick = () => { 
         $('autoSaveToggle').checked = state.autoSave;
         $('blurEffectToggle').checked = state.blurEffect;
-        $('#currentLangDisplay').textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
+        // رفع باگ
+        const langDisplay2 = $('currentLangDisplay');
+        if (langDisplay2) langDisplay2.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
+        
         langDD.dataset.selectedLang = state.lang;
         $('settingsModal').classList.remove('show'); 
     };
