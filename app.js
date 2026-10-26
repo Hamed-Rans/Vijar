@@ -153,13 +153,13 @@ function renderDocs() {
             if (match && match[1]) mediaHtml = `<img src="${match[1]}" alt="preview">`;
         }
 
-        // 2. استخراج متن زنده
+        // 2. استخراج متن زنده (با اطمینان از خالی نبودن)
         let previewText = 'جزوه خالی است...';
         if (d.content) {
             let tempDiv = document.createElement('div');
-            tempDiv.innerHTML = d.content.replace(/<img[^>]*>/g, '');
+            tempDiv.innerHTML = d.content.replace(/<img[^>]*>/g, ''); 
             let rawText = tempDiv.textContent || tempDiv.innerText || "";
-            rawText = rawText.replace(/\s+/g, ' ').trim();
+            rawText = rawText.replace(/\s+/g, ' ').trim(); 
             if (rawText.length > 0) {
                 previewText = rawText.length > 70 ? rawText.substring(0, 70) + '...' : rawText;
             }
@@ -176,7 +176,6 @@ function renderDocs() {
         grid.appendChild(card);
     });
 }
-
 function createDoc() {
     const doc = {
         id: 'doc_' + Date.now(), title: '', content: '', board: null,
@@ -688,6 +687,49 @@ function init() {
     initSettings();
     initImport(); 
 
+       // Drag and Drop
+    const editorBox = $('editor');
+    const dragOverlay = $('dragOverlay');
+    
+    editorBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dragOverlay.classList.remove('hidden');
+    });
+    
+    editorBox.addEventListener('dragleave', (e) => {
+        if (!editorBox.contains(e.relatedTarget)) {
+            dragOverlay.classList.add('hidden');
+        }
+    });
+    
+    editorBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragOverlay.classList.add('hidden');
+        
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            if (file.type.startsWith('image/')) {
+                const imgHtml = `<img src="${event.target.result}" style="max-width:100%; border-radius:12px; margin:10px 0;">`;
+                document.execCommand('insertHTML', false, imgHtml);
+            } else if (file.type.startsWith('text/') || file.name.endsWith('.txt')) {
+                const text = event.target.result;
+                const paragraphs = text.split('\n').filter(p=>p.trim()).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+                document.execCommand('insertHTML', false, paragraphs);
+            }
+            if (state.activeDoc) {
+                state.activeDoc.content = editorBox.innerHTML;
+                saveState();
+            }
+            showToast('فایل با موفقیت اضافه شد');
+        };
+        
+        if (file.type.startsWith('image/')) reader.readAsDataURL(file);
+        else reader.readAsText(file);
+    });
+   
     $('backToDashBtn').onclick = () => {
         if (state.activeDoc) {
             state.activeDoc.content = $('editor').innerHTML;
@@ -698,6 +740,16 @@ function init() {
     };
     
     $('createNewDocBtn').onclick = createDoc;
+       // فعال‌سازی حالت تمرکز
+    $('focusModeBtn').onclick = () => {
+        document.body.classList.toggle('focus-mode');
+        const icon = $('focusModeBtn').querySelector('i');
+        if (document.body.classList.contains('focus-mode')) {
+            icon.className = 'fa-solid fa-compress';
+        } else {
+            icon.className = 'fa-solid fa-expand';
+        }
+    };
     $('settingsBtn').onclick = () => $('settingsModal').classList.add('show');
     $('addFolderBtn').onclick = () => $('addFolderModal').classList.add('show');
     
