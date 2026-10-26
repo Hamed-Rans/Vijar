@@ -14,7 +14,6 @@
 }
 
 :root {
-    /* مشکی مایل به طوسی عمیق */
     --bg-base: #0D1117; 
     --surface-solid: #161B22;
     --surface-glass: rgba(22, 27, 34, 0.85);
@@ -22,7 +21,6 @@
     --glass-blur: blur(20px);
     --shadow-float: 0 10px 30px rgba(0, 0, 0, 0.6);
     
-    /* آبی نیلی (Indigo) */
     --accent-main: #4F75FF; 
     --accent-hover: #3A5BCC;
     --accent-soft: rgba(79, 117, 255, 0.15);
@@ -49,8 +47,6 @@
    پایه و رفع مشکل آیکون‌ها
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; }
-
-/* اعمال فونت فقط به عناصر متنی، بدون تخریب فونت آیکون‌ها */
 body, html, div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, select {
     font-family: 'YekanBakh', 'Vazirmatn', Tahoma, sans-serif; 
 }
@@ -61,7 +57,6 @@ body, html {
     transition: background 0.4s ease, color 0.4s ease;
 }
 
-/* شیشه‌ای‌سازی */
 .glass-panel, .glass-element, .floating-doc-toolbar {
     background: var(--surface-glass);
     backdrop-filter: var(--glass-blur);
@@ -71,6 +66,40 @@ body, html {
     border-radius: 20px;
 }
 .hidden { display: none !important; }
+
+/* ============================================================
+   صفحه لودینگ (انیمیشن اختصاصی)
+   ============================================================ */
+#loading-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: var(--bg-base); z-index: 99999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#loading-screen.hidden-loader { opacity: 0; visibility: hidden; }
+
+.loader-geometric { position: relative; width: 80px; height: 80px; margin-bottom: 20px; }
+.loader-geometric .shape {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    border: 2px solid var(--accent-main); border-radius: 20px;
+    animation: spinShapes 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+.loader-geometric .shape1 { transform: rotate(0deg); animation-delay: 0s; }
+.loader-geometric .shape2 { transform: rotate(45deg); animation-delay: 0.3s; border-color: var(--accent-soft); }
+.loader-geometric .shape3 { transform: rotate(90deg); animation-delay: 0.6s; }
+
+@keyframes spinShapes {
+    0% { transform: rotate(0deg) scale(1); opacity: 1; }
+    50% { transform: rotate(180deg) scale(0.8); opacity: 0.5; }
+    100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+
+.loader-text { 
+    font-family: 'Aref Ruqaa', serif !important;
+    font-size: 2.5rem; color: var(--accent-main); letter-spacing: 2px;
+    animation: pulseText 2s infinite alternate; 
+}
+@keyframes pulseText { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
 /* ============================================================
    هدر (کشیده شده تا وسط صفحه)
@@ -87,14 +116,13 @@ body, html {
 }
 .nav-block { pointer-events: auto; display: flex; align-items: center; gap: 15px; }
 
-/* کشیدن بلوک برند از سمت چپ تا وسط */
 .brand-block {
     padding: 12px 35px; border-radius: 50px;
     display: flex; align-items: center; justify-content: flex-start; gap: 15px;
-    width: 45%; max-width: 600px; /* کشیده تا وسط */
+    width: 45%; max-width: 600px;
 }
 .brand-name { 
-    font-family: 'Aref Ruqaa', serif !important; /* استثنا برای هدر */
+    font-family: 'Aref Ruqaa', serif !important;
     font-size: 2.4rem; font-weight: 700;
     background: linear-gradient(45deg, var(--accent-main), #7A9CFF);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
@@ -109,16 +137,17 @@ body, html {
 }
 
 .actions-block { gap: 12px; }
-.nav-btn {
-    pointer-events: auto; cursor: pointer;
-    width: 50px; height: 50px; border-radius: 16px !important;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.3rem; color: var(--text-main);
+.nav-btn, .nav-btn-text {
+    pointer-events: auto; cursor: pointer; height: 50px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 1.1rem; color: var(--text-main); font-weight: 600;
     background: var(--surface-glass) !important;
     border: 1px solid var(--border-glass) !important;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease; border-radius: 16px !important;
 }
-.nav-btn:hover {
+.nav-btn { width: 50px; }
+.nav-btn-text { padding: 0 20px; }
+.nav-btn:hover, .nav-btn-text:hover {
     background: var(--accent-main) !important; color: #fff !important;
     transform: translateY(-2px); border-color: var(--accent-main) !important;
 }
@@ -126,31 +155,46 @@ body, html {
 #settingsBtn:hover i { transform: rotate(90deg); }
 
 /* ============================================================
-   صفحه لودینگ
+   حالت تمرکز (Focus Mode)
    ============================================================ */
-#loading-screen {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: var(--bg-base); z-index: 99999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-}
-#loading-screen.hidden-loader { opacity: 0; visibility: hidden; }
-.loader-logo {
-    font-family: 'Aref Ruqaa', serif !important;
-    font-size: 3rem; color: var(--accent-main); margin-bottom: 20px;
-    animation: pulseLogo 1.5s infinite alternate;
-}
-.loader-spinner {
-    width: 40px; height: 40px; border: 4px solid var(--accent-soft);
-    border-top: 4px solid var(--accent-main); border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-@keyframes pulseLogo { 0% { opacity: 0.7; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
+.focus-mode .side-panel { display: none !important; }
+.focus-mode .workspace-layout { max-width: 1000px; padding: 0 20px; }
 
 /* ============================================================
-   صفحه انتخاب نقش و داشبورد (بدون تغییر ظاهری)
+   Drag & Drop Overlay
    ============================================================ */
+.drag-overlay {
+    position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px;
+    background: rgba(79, 117, 255, 0.1); border: 2px dashed var(--accent-main);
+    border-radius: 20px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 50;
+    backdrop-filter: blur(5px); pointer-events: none;
+}
+.drag-overlay i { font-size: 3rem; color: var(--accent-main); margin-bottom: 10px; animation: bounce 1s infinite alternate; }
+.drag-overlay p { font-size: 1.2rem; font-weight: bold; color: var(--accent-main); margin: 0; }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+/* ============================================================
+   مودال‌ها با انیمیشن فوق نرم (بدون لگ)
+   ============================================================ */
+.modal { 
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); 
+    z-index: 3000; display: flex; justify-content: center; align-items: center; 
+    opacity: 0; visibility: hidden; 
+    transition: opacity 0.4s ease, visibility 0.4s ease; 
+}
+.modal.show { opacity: 1; visibility: visible; }
+.modal-content { 
+    width: 460px; max-width: 90vw; padding: 25px; position: relative; 
+    border-top: 4px solid var(--accent-main); background: var(--surface-solid); border-radius: 24px; 
+    transform: translateY(30px) scale(0.96); opacity: 0;
+    will-change: transform, opacity;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease; 
+}
+.modal.show .modal-content { transform: translateY(0) scale(1); opacity: 1; }
+
+/* بقیه استایل‌ها (داشبورد، ادیتور، بوم، تنظیمات) */
 .view-section { height: 100vh; padding-top: 110px; overflow-y: auto; }
 .role-container { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 .role-header { text-align: center; margin-bottom: 50px; }
@@ -159,12 +203,7 @@ body, html {
 .role-header p { color: var(--text-muted); font-size: 1.1rem; margin: 0; }
 
 .role-cards { display: flex; gap: 30px; }
-.role-card {
-    width: 280px; height: 280px; padding: 30px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-radius: 28px;
-}
+.role-card { width: 280px; height: 280px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 28px; }
 .role-card:hover { transform: translateY(-8px); border-color: var(--accent-main); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
 .role-icon { font-size: 4rem; color: var(--accent-main); margin-bottom: 20px; transition: 0.4s ease; }
 .role-card:hover .role-icon { transform: scale(1.1); }
@@ -197,57 +236,65 @@ body, html {
 .empty-state { text-align: center; padding: 50px 20px; border: 1px dashed var(--accent-main); border-radius: 24px; }
 .empty-icon { font-size: 3rem; color: var(--accent-main); margin-bottom: 15px; }
 
-/* ============================================================
-   ویرایشگر (بدون تغییر)
-   ============================================================ */
 .workspace-layout { display: flex; gap: 20px; max-width: 1700px; margin: 0 auto; padding: 0 40px; height: calc(100vh - 140px); }
 .side-panel { width: 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; }
 .panel-title { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-radius: 20px; color: var(--accent-main); font-weight: 700; height: 60px; flex-shrink: 0; }
 .panel-content { border-radius: 20px; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
 .scratchpad-text { flex: 1; border: none; background: transparent; color: var(--text-main); padding: 15px; outline: none; resize: none; line-height: 1.8; }
 .editor-main { flex: 1; display: flex; flex-direction: column; gap: 15px; position: relative; height: 100%; }
-.editor-top-toolbar { display: flex; align-items: center; gap: 5px; padding: 8px 15px; border-radius: 20px; flex-shrink: 0; }
+.editor-top-toolbar { display: flex; align-items: center; gap: 5px; padding: 8px 15px; border-radius: 20px; flex-shrink: 0; z-index: 10; }
 .editor-top-toolbar .divider { height: 20px; width: 1px; background: var(--border-glass); margin: 0 5px; }
 .tool-btn { background: transparent; border: none; width: 34px; height: 34px; border-radius: 10px; color: var(--text-muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
 .tool-btn:hover, .tool-btn.active-tool { background: var(--accent-soft); color: var(--accent-main); }
 .doc-title-input { width: 100%; padding: 16px 25px; font-size: 1.5rem; font-weight: 800; border: 1px solid var(--border-glass); background: var(--surface-glass); color: var(--text-main); outline: none; border-radius: 20px; transition: 0.3s; }
 .doc-title-input:focus { border-color: var(--accent-main); box-shadow: 0 0 15px var(--accent-soft); }
 .doc-title-input[readonly] { background: transparent; border-color: transparent; cursor: default; }
-.editor-content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; }
+.editor-content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; position: relative; }
 .editor-box { flex: 1; padding: 30px; outline: none; line-height: 2; font-size: 17px; overflow-y: auto; padding-bottom: 100px; }
 .floating-doc-toolbar { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 5px; padding: 8px 15px; border-radius: 30px; z-index: 100; }
 .primary-glow { background: var(--accent-main) !important; color: white !important; box-shadow: 0 4px 15px var(--accent-soft); }
 .primary-glow:hover { background: var(--accent-hover) !important; }
 
-/* ============================================================
-   انیمیشن جدید مودال‌ها (فنری و نرم)
-   ============================================================ */
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 3000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
-.modal.show { opacity: 1; visibility: visible; }
-.modal-content { 
-    width: 460px; max-width: 90vw; padding: 25px; position: relative; 
-    border-top: 4px solid var(--accent-main); background: var(--surface-solid); border-radius: 24px; 
-    transform: translateY(40px) scale(0.9); opacity: 0;
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s ease; 
-}
-.modal.show .modal-content { transform: translateY(0) scale(1); opacity: 1; }
+/* رفع باگ منوهای کشویی */
+.custom-dropdown { position: relative; }
+.dropdown-selected { padding: 6px 12px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.1); border: 1px solid transparent; transition: 0.2s; }
+.dropdown-selected:hover { border-color: var(--border-glass); }
+.dropdown-list { position: absolute; top: 120%; right: 0; background: var(--surface-solid); border: 1px solid var(--border-glass); border-radius: 12px; width: 120px; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: 0.3s; z-index: 300; overflow: hidden; box-shadow: var(--shadow-float); }
+.custom-dropdown.active .dropdown-list { opacity: 1; visibility: visible; transform: translateY(0); }
+.dropdown-item { padding: 10px 15px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; border-bottom: 1px solid var(--border-glass); }
+.dropdown-item:hover { background: var(--accent-soft); color: var(--accent-main); }
+.color-menu-wrapper { position: relative; }
+.custom-color-popup { position: absolute; top: 120%; left: 50%; transform: translateX(-50%) translateY(-10px); padding: 15px; border-radius: 16px; width: 200px; display: flex; flex-direction: column; gap: 15px; z-index: 300; opacity: 0; visibility: hidden; transition: all 0.3s ease; border: 1px solid var(--accent-main); background: var(--surface-solid); }
+.custom-color-popup.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.preset-colors { display: flex; justify-content: space-between; gap: 8px; }
+.color-swatch { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+.color-swatch:hover { transform: scale(1.2); border-color: var(--text-main); }
+.custom-color-picker { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; border-top: 1px solid var(--border-glass); padding-top: 10px; }
+.custom-color-btn { background: none; border: none; color: var(--accent-main); font-size: 1.2rem; cursor: pointer; transition: 0.2s; }
 
-/* ============================================================
-   تنظیمات و کلید ذخیره خودکار
-   ============================================================ */
+/* رفع باگ ابزارهای بوم */
+.canvas-container { position: relative; flex: 1; overflow: hidden; border-radius: 0 0 20px 20px; }
+canvas { display: block; width: 100%; height: 100%; cursor: none; }
+.brush-cursor { position: fixed; pointer-events: none; z-index: 9999; border: 1.5px solid var(--accent-main); border-radius: 50%; transform: translate(-50%, -50%); display: none; mix-blend-mode: difference; }
+.scratchpad-tools { display: flex; gap: 5px; padding: 10px; justify-content: center; flex-wrap: wrap; border-bottom: 1px solid var(--border-glass); }
+.board-tool { width: 32px; height: 32px; border-radius: 8px; background: transparent; border: 1px solid transparent; color: var(--text-muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+.board-tool.active, .board-tool:hover { background: var(--accent-soft); color: var(--accent-main); border-color: var(--accent-main); }
+.shape-tools { display: flex; background: rgba(0,0,0,0.15); border-radius: 8px; padding: 2px; }
+.tool-wrapper { position: relative; }
+.tool-settings { position: absolute; top: 120%; left: 50%; transform: translateX(-50%); padding: 10px; width: 120px; z-index: 100; opacity: 0; visibility: hidden; transition: 0.3s; background: var(--surface-solid); border: 1px solid var(--accent-main); border-radius: 12px; }
+.tool-settings.show { opacity: 1; visibility: visible; }
+
+/* تنظیمات */
 .settings-close-btn { width: 36px; height: 36px; border-radius: 50% !important; border: 1px solid var(--border-glass); background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.4s ease; }
 .settings-close-btn:hover { color: #fff; border-color: var(--danger); background: var(--danger); transform: rotate(90deg); }
 .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--border-glass); }
 .settings-row:last-child { border-bottom: none; }
-
-/* کلید تاگل مدرن (iOS Style) */
 .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .4s; border-radius: 34px; }
 .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
 input:checked + .slider { background-color: var(--accent-main); }
 input:checked + .slider:before { transform: translateX(26px); }
-
 .theme-toggle { display: flex; gap: 5px; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 10px; }
 .theme-toggle button { border: none; background: transparent; color: var(--text-muted); width: 32px; height: 32px; border-radius: 8px; cursor: pointer; transition: 0.2s; }
 .theme-toggle button.active { background: var(--accent-main); color: #fff; }
@@ -255,7 +302,6 @@ input:checked + .slider:before { transform: translateX(26px); }
 .settings-btn:hover { background: rgba(255,255,255,0.05); }
 .settings-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.1); }
 
-/* بقیه استایل‌های مودال‌ها، فرم‌ها، بوم و... */
 .custom-input, .custom-textarea { width: 100%; background: rgba(0,0,0,0.1); border: 1px solid var(--border-glass); color: var(--text-main); padding: 12px; border-radius: 12px; outline: none; margin: 15px 0; resize: none; transition: 0.3s; }
 .custom-input:focus, .custom-textarea:focus { border-color: var(--accent-main); background: rgba(0,0,0,0.2); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
