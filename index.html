@@ -1,4 +1,4 @@
-ز <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -6,12 +6,11 @@
     <title>ویژار | دستیار هوشمند جزوه‌نویسی</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Lalezar&family=Gulzar&display=swap" rel="stylesheet">
 </head>
 <body>
-    
-   <body>
-    <!-- صفحه لودینگ اختصاصی -->
+
+    <!-- صفحه لودینگ -->
     <div id="loading-screen">
         <div class="loader-geometric">
             <div class="shape shape1"></div>
@@ -20,26 +19,26 @@
         </div>
         <div class="loader-text">ویژار</div>
     </div>
-    <!-- بقیه کدها... -->
-    
-   <!-- هدر شناور -->
-<div class="floating-top-nav">
-    <div class="nav-block brand-block glass-element">
-        <i class="fa-solid fa-feather-pointed logo-icon"></i>
-        <h1 class="brand-name">ویژار</h1>
-        <span id="userRoleBadge" class="custom-badge hidden">دانشجو</span>
-    </div>
-    <div class="nav-block actions-block">
-       <button id="focusModeBtn" class="nav-btn hidden" title="حالت تمرکز"><i class="fa-solid fa-expand"></i></button>
-        <button id="importBtn" class="nav-btn-text hidden" title="افزودن فایل"><i class="fa-solid fa-file-circle-plus"></i> <span>افزودن فایل</span></button>
-        <button id="exportBtn" class="nav-btn-text hidden" title="دریافت خروجی"><i class="fa-solid fa-file-export"></i> <span>دریافت خروجی</span></button>
-        <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house"></i></button>
-        <!-- آیکون تنظیمات را به این تغییر دهید -->
-        <button id="settingsBtn" class="nav-btn" title="تنظیمات"><i class="fa-solid fa-gear"></i></button>
-    </div>
-</div>
 
-    <!-- انتخاب نقش (وسط‌چین و بزرگ‌تر) -->
+    <!-- هدر شناور -->
+    <div class="floating-top-nav">
+        <div class="nav-block brand-block glass-element">
+            <i class="fa-solid fa-feather-pointed logo-icon"></i>
+            <h1 class="brand-name">ویژار</h1>
+            <span id="userRoleBadge" class="custom-badge hidden">دانشجو</span>
+        </div>
+        <div class="nav-block actions-block">
+            <!-- دکمه‌های ویرایشگر (در صفحه اصلی مخفی هستند) -->
+            <button id="focusModeBtn" class="nav-btn action-nav hidden" title="حالت تمرکز"><i class="fa-solid fa-expand"></i></button>
+            <button id="importBtn" class="nav-btn-text action-nav hidden" title="افزودن فایل"><i class="fa-solid fa-cloud-arrow-up"></i> <span>افزودن</span></button>
+            <button id="exportBtn" class="nav-btn-text action-nav hidden" title="دریافت خروجی"><i class="fa-solid fa-download"></i> <span>خروجی</span></button>
+            
+            <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house"></i></button>
+            <button id="settingsBtn" class="nav-btn" title="تنظیمات"><i class="fa-solid fa-gear"></i></button>
+        </div>
+    </div>
+
+    <!-- صفحه انتخاب نقش -->
     <section id="role-view" class="view-section active">
         <div class="role-container">
             <div class="role-header">
@@ -62,24 +61,24 @@
     <!-- داشبورد -->
     <section id="dashboard-view" class="view-section hidden">
         <div class="dashboard-layout">
-            <!-- ستون راست (دسته‌بندی) -->
+            <!-- ستون دسته‌بندی‌ها (با قابلیت باز و بسته شدن) -->
             <aside class="dashboard-sidebar">
                 <div class="sidebar-title glass-panel">
                     <h3><i class="fa-solid fa-folder-tree"></i> دسته‌بندی‌ها</h3>
-                    <button id="addFolderBtn" class="btn-icon-small"><i class="fa-solid fa-circle-plus"></i></button>
+                    <button id="addFolderBtn" class="btn-icon-small"><i class="fa-solid fa-plus"></i></button>
                 </div>
                 <div class="sidebar-content glass-panel">
                     <ul id="folderList" class="folder-list"></ul>
                 </div>
             </aside>
 
-            <!-- ستون وسط (جزوه‌ها) -->
+            <!-- ستون جزوه‌ها -->
             <main class="documents-area">
                 <div class="docs-title glass-panel">
                     <h2>جزوه‌های من</h2>
                     <button id="createNewDocBtn" class="btn-primary"><i class="fa-solid fa-plus"></i> ایجاد جزوه</button>
                 </div>
-                <div class="docs-content glass-panel">
+                <div class="docs-content glass-panel" id="docsContentArea">
                     <div id="emptyState" class="empty-state hidden">
                         <i class="fa-regular fa-folder-open empty-icon"></i>
                         <p>هیچ جزوه‌ای در اینجا یافت نشد.</p>
@@ -94,67 +93,115 @@
     <section id="editor-view" class="view-section hidden">
         <div class="workspace-layout">
 
-            <!-- چرک‌نویس -->
+            <!-- پنل راست (چرک‌نویس + بوم) -->
             <aside class="side-panel right-panel">
                 <div class="panel-title glass-panel">
-                    <span class="header-title"><i class="fa-solid fa-keyboard"></i> چرک‌نویس</span>
+                    <span class="header-title"><i class="fa-solid fa-pen-clip"></i> چرک‌نویس</span>
+                    <!-- منوی ابزار چرک‌نویس -->
+                    <div class="scratchpad-actions">
+                        <button class="btn-icon-small scratch-tool" data-cmd="bold" title="بولد"><i class="fa-solid fa-bold"></i></button>
+                        <button class="btn-icon-small scratch-tool" data-cmd="italic" title="مورب"><i class="fa-solid fa-italic"></i></button>
+                        <button class="btn-icon-small scratch-tool" data-cmd="list" title="لیست"><i class="fa-solid fa-list-ul"></i></button>
+                    </div>
                 </div>
                 <div class="panel-content glass-panel" style="flex: 1;">
-                    <textarea id="textScratchpad" class="scratchpad-text" placeholder="ایده‌ها و متن‌های موقت..."></textarea>
+                    <!-- چرک‌نویس به یک div تبدیل شد تا بتواند فرمت‌دهی بگیرد -->
+                    <div id="textScratchpad" class="scratchpad-text" contenteditable="true" placeholder="ایده‌ها و متن‌های موقت..."></div>
+                </div>
+
+                <!-- بوم -->
+                <div class="panel-title glass-panel" style="margin-top: 15px;">
+                    <span class="header-title"><i class="fa-solid fa-paintbrush"></i> بوم</span>
+                    <button id="exportBoardToDocBtn" class="btn-text-small btn-pill"><i class="fa-solid fa-arrow-up-from-bracket"></i> ارسال به متن</button>
+                </div>
+                <div class="panel-content glass-panel">
+                    <div class="scratchpad-tools">
+                        <button class="board-tool active" data-tool="pencil" title="قلم"><i class="fa-solid fa-pencil"></i></button>
+                        <button class="board-tool" data-tool="highlighter" title="هایلایتر"><i class="fa-solid fa-highlighter"></i></button>
+                        <button class="board-tool" data-tool="eraser" title="پاک‌کن"><i class="fa-solid fa-eraser"></i></button>
+                        <div class="divider"></div>
+                        <div class="shape-tools">
+                            <button class="board-tool" data-tool="line" title="خط"><i class="fa-solid fa-minus"></i></button>
+                            <button class="board-tool" data-tool="rect" title="مربع"><i class="fa-regular fa-square"></i></button>
+                            <button class="board-tool" data-tool="circle" title="دایره"><i class="fa-regular fa-circle"></i></button>
+                        </div>
+                        <div class="color-menu-wrapper board-color-wrapper">
+                            <button class="board-tool" id="boardColorBtn" title="رنگ"><i class="fa-solid fa-fill-drip"></i></button>
+                            <div class="custom-color-popup glass-panel hidden" id="boardColorPopup">
+                                <div class="preset-colors">
+                                    <div class="color-swatch" data-color="#F8FAFC" style="background:#F8FAFC;"></div>
+                                    <div class="color-swatch" data-color="#EF4444" style="background:#EF4444;"></div>
+                                    <div class="color-swatch" data-color="#3B82F6" style="background:#3B82F6;"></div>
+                                    <div class="color-swatch" data-color="#10B981" style="background:#10B981;"></div>
+                                    <div class="color-swatch" data-color="#4F75FF" style="background:#4F75FF;"></div>
+                                </div>
+                                <div class="custom-color-picker">
+                                    <label>دلخواه</label>
+                                    <button class="custom-color-btn" onclick="document.getElementById('boardColor').click()"><i class="fa-solid fa-eye-dropper"></i></button>
+                                    <input type="color" id="boardColor" value="#4F75FF" style="display:none;">
+                                </div>
+                            </div>
+                        </div>
+                        <button id="clearBoardBtn" class="board-tool" title="پاک کردن"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                    <div class="canvas-container">
+                        <canvas id="scratchpadCanvas"></canvas>
+                        <div id="brushCursor" class="brush-cursor"></div>
+                    </div>
                 </div>
             </aside>
 
-            <!-- ادیتور اصلی -->
+            <!-- ادیتور مرکزی -->
             <main class="editor-main">
                 <!-- نوار ابزار بالا -->
                 <div class="editor-top-toolbar glass-panel">
                     <div class="custom-dropdown" id="fontDropdown">
                         <div class="dropdown-selected">فونت <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
                         <div class="dropdown-list">
-                            <div class="dropdown-item" data-value="Estedad">استعداد</div>
+                            <div class="dropdown-item" data-value="YekanBakh">یکان‌بخ</div>
+                            <div class="dropdown-item" data-value="Lalezar" style="font-family:'Lalezar'">لاله‌زار</div>
+                            <div class="dropdown-item" data-value="Gulzar" style="font-family:'Gulzar'">گلزار (دست‌نویس)</div>
                             <div class="dropdown-item" data-value="Vazirmatn">وزیرمتن</div>
-                            <div class="dropdown-item" data-value="Liana">لیانا</div>
-                            <div class="dropdown-item" data-value="Kahroba">کهربا</div>
                         </div>
                     </div>
                     <div class="custom-dropdown" id="sizeDropdown">
-                        <div class="dropdown-selected">۱۶ <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
-                        <div class="dropdown-list">
-                            <div class="dropdown-item" data-value="12">۱۲</div>
-                            <div class="dropdown-item" data-value="14">۱۴</div>
-                            <div class="dropdown-item" data-value="16">۱۶</div>
-                            <div class="dropdown-item" data-value="18">۱۸</div>
-                            <div class="dropdown-item" data-value="20">۲۰</div>
-                            <div class="dropdown-item" data-value="24">۲۴</div>
-                            <div class="dropdown-item" data-value="28">۲۸</div>
-                        </div>
+                        <div class="dropdown-selected" id="fontSizeDisplay">۱۶</div>
                     </div>
+                    <div class="font-size-controls">
+                        <button class="tool-btn" id="decreaseFontSize"><i class="fa-solid fa-minus"></i></button>
+                        <button class="tool-btn" id="increaseFontSize"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    
                     <div class="divider"></div>
                     <button class="tool-btn" data-block="h1" title="تیتر ۱">H1</button>
                     <button class="tool-btn" data-block="h2" title="تیتر ۲">H2</button>
                     <button class="tool-btn" data-block="h3" title="تیتر ۳">H3</button>
-                    <button class="tool-btn" data-block="p" title="پاراگراف"><i class="fa-solid fa-paragraph"></i></button>
-                    <div class="divider"></div>
-                    <button class="tool-btn" data-command="justifyRight"><i class="fa-solid fa-align-right"></i></button>
-                    <button class="tool-btn" data-command="justifyCenter"><i class="fa-solid fa-align-center"></i></button>
-                    <button class="tool-btn" data-command="justifyLeft"><i class="fa-solid fa-align-left"></i></button>
                     <div class="divider"></div>
                     
-                    <!-- پالت رنگ سفارشی -->
+                    <!-- دکمه‌های چینش با قابلیت فعال شدن -->
+                    <button class="tool-btn align-tool" data-command="justifyRight" title="راست‌چین"><i class="fa-solid fa-align-right"></i></button>
+                    <button class="tool-btn align-tool" data-command="justifyCenter" title="وسط‌چین"><i class="fa-solid fa-align-center"></i></button>
+                    <button class="tool-btn align-tool" data-command="justifyLeft" title="چپ‌چین"><i class="fa-solid fa-align-left"></i></button>
+                    <div class="divider"></div>
+                    
+                    <!-- رنگ متن -->
                     <div class="color-menu-wrapper">
                         <button class="tool-btn" id="textColorBtn" title="رنگ متن"><i class="fa-solid fa-palette"></i></button>
                         <div class="custom-color-popup glass-panel hidden" id="colorPopup">
-                            <div class="preset-colors">
-                                <div class="color-swatch" data-index="0" style="background:#F8FAFC;"></div>
-                                <div class="color-swatch" data-index="1" style="background:#EF4444;"></div>
-                                <div class="color-swatch" data-index="2" style="background:#3B82F6;"></div>
-                                <div class="color-swatch" data-index="3" style="background:#10B981;"></div>
-                                <div class="color-swatch" data-index="4" style="background:#D4AF37;"></div>
+                            <div class="color-category">
+                                <span class="category-label">رنگ‌های اصلی</span>
+                                <div class="preset-colors">
+                                    <div class="color-swatch" data-color="#F8FAFC" style="background:#F8FAFC;"></div>
+                                    <div class="color-swatch" data-color="#4F75FF" style="background:#4F75FF;"></div>
+                                    <div class="color-swatch" data-color="#EF4444" style="background:#EF4444;"></div>
+                                    <div class="color-swatch" data-color="#10B981" style="background:#10B981;"></div>
+                                    <div class="color-swatch" data-color="#F59E0B" style="background:#F59E0B;"></div>
+                                </div>
                             </div>
                             <div class="custom-color-picker">
                                 <label>رنگ دلخواه</label>
                                 <button class="custom-color-btn" onclick="document.getElementById('nativeColorPicker').click()"><i class="fa-solid fa-eye-dropper"></i></button>
-                                <input type="color" id="nativeColorPicker" value="#00A693" style="display:none;">
+                                <input type="color" id="nativeColorPicker" value="#4F75FF" style="display:none;">
                             </div>
                         </div>
                     </div>
@@ -168,10 +215,10 @@
                 <!-- محتوای ادیتور -->
                 <div class="editor-content-wrapper glass-panel">
                     <div id="editor" contenteditable="true" class="editor-box" placeholder="اینجا بنویسید..."></div>
-                    <div id="editor" contenteditable="true" class="editor-box" placeholder="تایپ کنید..."></div>
                     <div id="dragOverlay" class="drag-overlay hidden">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <p>فایل را اینجا رها کنید</p>
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <p>فایل را اینجا رها کنید</p>
+                    </div>
                 </div>
 
                 <!-- نوار ابزار پایین -->
@@ -190,65 +237,6 @@
                     <button id="saveDocBtn" class="tool-btn primary-glow" title="ذخیره"><i class="fa-solid fa-floppy-disk"></i></button>
                 </div>
             </main>
-
-            <!-- نکات و بوم -->
-            <aside class="side-panel left-panel">
-                <!-- نکات -->
-                <div class="panel-title glass-panel">
-                    <span class="header-title"><i class="fa-solid fa-thumbtack"></i> نکات پین‌شده</span>
-                </div>
-                <div class="panel-content glass-panel" style="flex: 1; overflow-y: auto;">
-                    <div id="pinnedNotesArea" class="notes-container"></div>
-                </div>
-
-                <!-- بوم -->
-                <div class="panel-title glass-panel" style="margin-top: 15px;">
-                    <span class="header-title"><i class="fa-solid fa-paintbrush"></i> بوم</span>
-                    <button id="exportBoardToDocBtn" class="btn-text-small"><i class="fa-solid fa-arrow-up-from-bracket"></i> ارسال به جزوه</button>
-                </div>
-                <div class="panel-content glass-panel">
-                    <div class="scratchpad-tools">
-                        <div class="tool-wrapper">
-                            <button class="board-tool active" data-tool="pencil" title="قلم"><i class="fa-solid fa-pencil"></i></button>
-                            <div class="tool-settings glass-panel hidden" id="pencilSettings">
-                                <label>اندازه</label>
-                                <input type="range" id="brushSize" min="1" max="20" value="3">
-                            </div>
-                        </div>
-                        <button class="board-tool" data-tool="highlighter" title="هایلایتر"><i class="fa-solid fa-highlighter"></i></button>
-                        <div class="shape-tools">
-                            <button class="board-tool" data-tool="line" title="خط"><i class="fa-solid fa-minus"></i></button>
-                            <button class="board-tool" data-tool="rect" title="مربع"><i class="fa-regular fa-square"></i></button>
-                            <button class="board-tool" data-tool="circle" title="دایره"><i class="fa-regular fa-circle"></i></button>
-                        </div>
-                        <button class="board-tool" data-tool="eraser" title="پاک‌کن"><i class="fa-solid fa-eraser"></i></button>
-                        
-                        <div class="color-menu-wrapper board-color-wrapper">
-                            <button class="board-tool" id="boardColorBtn" title="رنگ"><i class="fa-solid fa-fill-drip"></i></button>
-                            <div class="custom-color-popup glass-panel hidden" id="boardColorPopup">
-                                <div class="preset-colors">
-                                    <div class="color-swatch" data-color="#F8FAFC" style="background:#F8FAFC;"></div>
-                                    <div class="color-swatch" data-color="#EF4444" style="background:#EF4444;"></div>
-                                    <div class="color-swatch" data-color="#3B82F6" style="background:#3B82F6;"></div>
-                                    <div class="color-swatch" data-color="#10B981" style="background:#10B981;"></div>
-                                    <div class="color-swatch" data-color="#D4AF37" style="background:#D4AF37;"></div>
-                                </div>
-                                <div class="custom-color-picker">
-                                    <label>دلخواه</label>
-                                    <button class="custom-color-btn" onclick="document.getElementById('boardColor').click()"><i class="fa-solid fa-eye-dropper"></i></button>
-                                    <input type="color" id="boardColor" value="#00A693" style="display:none;">
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button id="clearBoardBtn" class="board-tool" title="پاک کردن"><i class="fa-solid fa-trash-can"></i></button>
-                    </div>
-                    <div class="canvas-container">
-                        <canvas id="scratchpadCanvas"></canvas>
-                        <div id="brushCursor" class="brush-cursor"></div>
-                    </div>
-                </div>
-            </aside>
         </div>
     </section>
 
@@ -257,13 +245,13 @@
         <button id="quickAddNoteBtn"><i class="fa-solid fa-comment-medical"></i> افزودن توضیح</button>
     </div>
 
-    <!-- پاپ‌آپ نمایش نکته -->
+    <!-- پاپ‌آپ نمایش نکته (با فلش) -->
     <div id="noteViewPopup" class="note-view-popup glass-panel hidden">
-        <div class="note-indicator"></div>
+        <div class="note-arrow"></div>
         <p id="noteViewContent"></p>
     </div>
 
-    <!-- راست‌کلیک -->
+    <!-- منوی راست‌کلیک عمومی (برای ادیتور) -->
     <div id="customContextMenu" class="context-menu glass-panel hidden">
         <ul>
             <li id="menuCopy"><i class="fa-regular fa-copy"></i> کپی</li>
@@ -275,6 +263,15 @@
         </ul>
     </div>
 
+    <!-- منوی راست‌کلیک کارت جزوه -->
+    <div id="docContextMenu" class="context-menu glass-panel hidden">
+        <ul>
+            <li id="ctxEditTitle"><i class="fa-solid fa-pen"></i> ویرایش عنوان</li>
+            <li id="ctxMoveToFolder"><i class="fa-solid fa-folder-open"></i> انتقال به دسته‌بندی</li>
+            <li id="ctxDeleteDoc"><i class="fa-solid fa-trash-can" style="color:var(--danger)"></i> <span style="color:var(--danger)">حذف جزوه</span></li>
+        </ul>
+    </div>
+
     <!-- مودال‌ها -->
     <div id="noteModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
@@ -283,11 +280,18 @@
             <div class="label-selector">
                 <span>رنگ برچسب:</span>
                 <div class="color-options" id="labelColorOptions">
-                    <div class="color-dot active" data-color="yellow" style="background: #EAB308;"></div>
-                    <div class="color-dot" data-color="blue" style="background: #3B82F6;"></div>
-                    <div class="color-dot" data-color="green" style="background: #10B981;"></div>
-                    <div class="color-dot" data-color="red" style="background: #EF4444;"></div>
-                    <div class="color-dot" data-color="neon" style="background: #39FF14;"></div>
+                    <!-- دسته‌بندی رنگ‌ها -->
+                    <div class="color-group">
+                        <span class="group-title">اصلی</span>
+                        <div class="color-dot active" data-color="yellow" style="background: #EAB308;"></div>
+                        <div class="color-dot" data-color="blue" style="background: #3B82F6;"></div>
+                        <div class="color-dot" data-color="green" style="background: #10B981;"></div>
+                    </div>
+                    <div class="color-group">
+                        <span class="group-title">تاکیدی</span>
+                        <div class="color-dot" data-color="red" style="background: #EF4444;"></div>
+                        <div class="color-dot" data-color="neon" style="background: #39FF14;"></div>
+                    </div>
                 </div>
             </div>
             <label class="custom-checkbox">
@@ -311,54 +315,41 @@
         </div>
     </div>
 
-    <!-- ایمپورت -->
+    <!-- مودال آپلود پیشرفته -->
     <div id="importModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <h3 style="margin:0;"><i class="fa-solid fa-file-circle-plus" style="color:var(--accent-persian);"></i> افزودن فایل</h3>
+                <h3 style="margin:0;"><i class="fa-solid fa-cloud-arrow-up" style="color:var(--accent-main);"></i> افزودن به جزوه</h3>
                 <button class="settings-close-btn btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <p style="color:var(--text-muted); font-size:.85rem; margin:0 0 10px;">نوع افزودن را انتخاب کنید</p>
+            <p style="color:var(--text-muted); font-size:.85rem; margin:0 0 15px;">نوع فایل خود را انتخاب کنید</p>
+            
+            <div class="media-categories">
+                <div class="media-cat-item" data-accept="image/*"><i class="fa-regular fa-image"></i><span>تصویر</span></div>
+                <div class="media-cat-item" data-accept=".pdf"><i class="fa-regular fa-file-pdf"></i><span>PDF</span></div>
+                <div class="media-cat-item" data-accept="audio/*"><i class="fa-solid fa-microphone-lines"></i><span>صوت</span></div>
+                <div class="media-cat-item" data-accept="video/*"><i class="fa-solid fa-video"></i><span>ویدیو</span></div>
+                <div class="media-cat-item" data-accept=".txt,.md"><i class="fa-regular fa-file-lines"></i><span>متن</span></div>
+                <div class="media-cat-item" data-accept="*"><i class="fa-solid fa-paperclip"></i><span>سایر</span></div>
+            </div>
+            
+            <!-- گزینه‌های اکشن (بعد از انتخاب فایل نشان داده می‌شود) -->
+            <div id="importActionOptions" class="hidden" style="margin-top:20px;">
+                <p style="font-size:0.9rem; margin-bottom:10px;">با این فایل چه کار کنم؟</p>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <button id="actionEmbedFile" class="btn-ghost" style="justify-content:flex-start;"><i class="fa-solid fa-paperclip"></i> ضمیمه کردن مستقیم</button>
+                    <button id="actionExtractText" class="btn-ghost" style="justify-content:flex-start;"><i class="fa-solid fa-file-lines"></i> استخراج متن (در صورت پشتیبانی)</button>
+                </div>
+            </div>
             <input type="file" id="fileInput" style="display:none;">
-            <div class="media-cards">
-                <div class="media-card" id="importAsTextBtn">
-                    <i class="fa-solid fa-file-lines"></i>
-                    <span>استخراج متن</span>
-                </div>
-                <div class="media-card" id="importAsMediaBtn">
-                    <i class="fa-solid fa-image"></i>
-                    <span>پیوست تصویر</span>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- اکسپورت -->
-    <div id="exportModal" class="modal">
-        <div class="modal-content glass-panel border-top-accent">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <h3 style="margin:0;"><i class="fa-solid fa-file-export" style="color:var(--accent-persian);"></i> دریافت جزوه</h3>
-                <button class="settings-close-btn btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <p style="color:var(--text-muted); font-size:.85rem; margin:0 0 10px;">فرمت خروجی را انتخاب کنید</p>
-            <div class="media-cards">
-                <div class="media-card" id="exportWordBtn">
-                    <i class="fa-solid fa-file-word"></i>
-                    <span>Word</span>
-                </div>
-                <div class="media-card" id="exportPdfBtn">
-                    <i class="fa-solid fa-file-pdf"></i>
-                    <span>PDF</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-        <!-- تنظیمات گسترده -->
+    <!-- تنظیمات -->
     <div id="settingsModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gear" style="color:var(--accent-main);"></i> تنظیمات برنامه</h3>
+                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gear" style="color:var(--accent-main);"></i> تنظیمات</h3>
                 <button class="settings-close-btn btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
@@ -373,29 +364,15 @@
                 </div>
             </div>
 
-                        <div class="settings-row">
+            <div class="settings-row">
                 <div>
                     <strong style="font-size:0.95rem;">ذخیره خودکار</strong>
                     <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">ذخیره تغییرات هنگام تایپ</p>
                 </div>
-                <!-- کلید تاگل جدید -->
                 <label class="switch">
                     <input type="checkbox" id="autoSaveToggle" checked>
                     <span class="slider"></span>
                 </label>
-            </div>
-
-            <div class="settings-row">
-                <div>
-                    <strong style="font-size:0.95rem;">اندازه فونت پیش‌فرض</strong>
-                    <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">متن داخل ادیتور</p>
-                </div>
-                <select id="defaultFontSizeSelect" class="custom-input" style="width:80px; margin:0; padding:6px;">
-                    <option value="14">۱۴</option>
-                    <option value="16" selected>۱۶</option>
-                    <option value="18">۱۸</option>
-                    <option value="20">۲۰</option>
-                </select>
             </div>
 
             <div style="margin-top:20px; display:flex; flex-direction:column; gap:8px;">
@@ -405,6 +382,7 @@
         </div>
     </div>
 
+    <!-- اسکریپت‌ها -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.3/purify.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
