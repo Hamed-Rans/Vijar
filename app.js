@@ -236,7 +236,6 @@ function openDoc(id) {
     }, 200);
 }
 
-/* ---------------- ادیتور ---------------- */
 function updateWordCount() {
     const text = $('editor').innerText || '';
     const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
@@ -247,7 +246,6 @@ function initEditor() {
     const editor = $('editor');
     const titleInput = $('documentTitle');
 
-    // رفع باگ اعمال فونت روی کل متن (فوکوس روی ادیتور)
     $$('.tool-btn[data-command]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', () => { 
@@ -267,7 +265,6 @@ function initEditor() {
     editor.addEventListener('keyup', updateToolbarState);
     editor.addEventListener('mouseup', updateToolbarState);
     
-    // شمارش کلمات
     editor.addEventListener('input', () => {
         updateWordCount();
         if (state.activeDoc) { 
@@ -299,13 +296,11 @@ function initEditor() {
         };
     });
 
-    // منوی راست کلیک چرک نویس
     $('textScratchpad').addEventListener('contextmenu', (e) => {
         e.preventDefault(); openMenuAt(e, $('scratchpadContextMenu'));
     });
     $$('.scratch-cmd').forEach(li => { li.onclick = () => { $('textScratchpad').focus(); document.execCommand(li.dataset.cmd, false, null); $('scratchpadContextMenu').classList.add('hidden'); }; });
 
-    // دکمه باز کردن ابزارهای بیشتر
     $('expandToolbarBtn').onclick = () => {
         const tb = $('topToolbar');
         tb.classList.toggle('expanded');
@@ -328,14 +323,12 @@ function updateToolbarState() {
     });
 }
 
-/* ---------------- تولتیپ و نکات ---------------- */
 function initSelectionTooltip() {
     const editor = $('editor');
     const tooltip = $('quickTooltip');
     const popup = $('noteViewPopup');
     const blurOverlay = $('blurOverlay');
 
-    // نمایش تولتیپ با تاخیر (وقتی موس رها شد)
     document.addEventListener('mouseup', () => {
         setTimeout(() => {
             const sel = window.getSelection();
@@ -441,28 +434,24 @@ function renderPinnedNotes() {
     
     temp.querySelectorAll('.hl-word[data-pinned="1"]').forEach(el => {
         const card = document.createElement('div'); 
-        card.className = `note-card ${el.classList[1]}`; // اعمال رنگ برچسب
+        card.className = `note-card ${el.classList[1]}`;
         
-        // دکمه ویرایش
         const editBtn = document.createElement('button');
         editBtn.className = 'edit-note-btn';
         editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
         editBtn.onclick = () => {
-            // پیدا کردن المان اصلی در ادیتور و باز کردن مودال برای ویرایش
             const editorEl = $('editor').querySelector(`.hl-word[data-note="${escapeHtml(el.dataset.note)}"]`);
             if(editorEl) {
                 $('selectedWordDisplay').textContent = editorEl.dataset.word;
                 $('noteInput').value = editorEl.dataset.note;
                 $('pinNoteCheck').checked = editorEl.dataset.pinned === '1';
                 
-                // انتخاب رنگ
                 const currentColor = editorEl.classList[1].replace('hl-', '');
                 $$('#labelColorOptions .color-dot').forEach(d => {
                     d.classList.toggle('active', d.dataset.color === currentColor);
                 });
 
                 $('noteModal').classList.add('show');
-                // حذف المان قبلی برای اینکه با ثبت مجدد جایگزین شود
                 state.selectionRange = document.createRange();
                 state.selectionRange.selectNode(editorEl);
             }
@@ -474,7 +463,6 @@ function renderPinnedNotes() {
     });
 }
 
-/* ---------------- منوهای راست کلیک ---------------- */
 function openMenuAt(e, menuEl) {
     menuEl.classList.remove('hidden'); 
     menuEl.classList.remove('closing');
@@ -551,7 +539,6 @@ function initContextMenu() {
     };
 }
 
-/* ---------------- فونت و آپلود ---------------- */
 function initFontDropdowns() {
     const fontDD = $('fontDropdown');
     fontDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); fontDD.classList.toggle('active'); };
@@ -575,7 +562,6 @@ function initFontDropdowns() {
         if (!e.target.closest('.color-menu-wrapper')) $$('.custom-color-popup').forEach(p => p.classList.remove('show'));
     });
 
-    // کنترل سایز فونت با انتخاب متن
     $('increaseFontSize').onclick = () => { 
         $('editor').focus();
         const sel = window.getSelection();
@@ -603,7 +589,6 @@ function initFontDropdowns() {
         localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
     };
 
-    // آپلود دو مرحله ای
     $('importBtn').onclick = () => { 
         $('importStep1').classList.remove('hidden'); 
         $('importStep2').classList.add('hidden'); 
@@ -624,7 +609,6 @@ function initFontDropdowns() {
     $('fileInput').onchange = (e) => {
         const file = e.target.files[0]; if (!file) return; 
         state.currentFileToImport = file;
-        // رفتن به مرحله 2
         $('importStep1').classList.add('hidden'); 
         $('importStep2').classList.remove('hidden');
         if (file.type === 'application/pdf') $('actionOpenPdf').classList.remove('hidden');
@@ -713,7 +697,6 @@ function initFontDropdowns() {
     };
 }
 
-/* ---------------- بوم ---------------- */
 let canvasState = { drawing: false, tool: 'pencil', color: '#4F75FF', size: 3, points: [], snapshot: null, startPos: null };
 
 function resizeCanvas() {
@@ -752,7 +735,6 @@ function initCanvas() {
 
     canvas.addEventListener('pointerenter', () => { 
         cursor.style.display = 'block'; 
-        // تغییر نشانگر
         if (canvasState.tool === 'eraser') cursor.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23EF4444'%3E%3Cpath d='M16 3l5 5-11 11H5v-5L16 3zm-2.5 7.5l-7 7H7v1.5h1.5l7-7-2-2z'/%3E%3C/svg%3E\")";
         else if (canvasState.tool === 'highlighter') cursor.classList.add('cursor-highlighter');
         else { cursor.classList.remove('cursor-highlighter'); cursor.style.backgroundImage = ""; }
@@ -826,7 +808,6 @@ function restoreCanvas() {
     img.src = state.activeDoc.board;
 }
 
-/* ---------------- تنظیمات ---------------- */
 function initSettings() {
     $('autoSaveToggle').checked = state.autoSave;
     $('blurEffectToggle').checked = state.blurEffect;
@@ -924,7 +905,6 @@ function init() {
         state.folders.push({ id: 'f_' + Date.now(), name }); saveState(); $('newFolderName').value = ''; $('addFolderModal').classList.remove('show'); renderFolders();
     };
 
-    // تمام صفحه شدن
     $('focusModeBtn').onclick = () => { 
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => { showToast('مرورگر اجازه نداد.'); });
@@ -937,7 +917,6 @@ function init() {
         }
     };
 
-    // کلاپس کردن پنل ها
     $('toggleLeftPanelBtn').onclick = () => {
         $('leftPanel').classList.toggle('collapsed-left');
         $('toggleLeftPanelBtn').querySelector('i').classList.toggle('fa-rotate-180');
