@@ -1,17 +1,6 @@
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 @import url('https://fonts.googleapis.com/css2?family=Lalezar&family=Gulzar&display=swap');
 
-@font-face {
-    font-family: 'YekanBakh';
-    src: url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Regular.woff2') format('woff2');
-    font-weight: 400; font-display: swap;
-}
-@font-face {
-    font-family: 'YekanBakh';
-    src: url('https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh-Bold.woff2') format('woff2');
-    font-weight: 700; font-display: swap;
-}
-
 :root {
     --bg-base: #0D1117; 
     --surface-solid: #161B22;
@@ -45,17 +34,13 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-body, html, div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, select { font-family: 'YekanBakh', 'Vazirmatn', Tahoma, sans-serif; }
+body, html, div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, select { font-family: 'Vazirmatn', Tahoma, sans-serif !important; }
+i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important; }
 body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-color: var(--bg-base); color: var(--text-main); transition: background 0.4s ease, color 0.4s ease; }
 
 /* Toast Notification */
 .toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 99999; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
-.toast-message { 
-    background: var(--surface-glass); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-glass); 
-    color: var(--text-main); padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 0.95rem;
-    box-shadow: var(--shadow-float); display: flex; align-items: center; gap: 10px;
-    transform: translateY(20px); opacity: 0; animation: toastIn 0.4s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+.toast-message { background: var(--surface-glass); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-glass); color: var(--text-main); padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 0.95rem; box-shadow: var(--shadow-float); display: flex; align-items: center; gap: 10px; transform: translateY(20px); opacity: 0; animation: toastIn 0.4s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .toast-message.fade-out { animation: toastOut 0.3s forwards ease-in; }
 @keyframes toastIn { to { transform: translateY(0); opacity: 1; } }
 @keyframes toastOut { to { transform: translateY(20px); opacity: 0; } }
@@ -63,7 +48,19 @@ body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-
 #processLoadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 17, 23, 0.85); backdrop-filter: blur(8px); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0.3s ease; }
 #processLoadingOverlay.hidden { opacity: 0; visibility: hidden; display: none !important; }
 
-/* اسکرول بار هماهنگ */
+/* صفحه لودینگ */
+#loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-base); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, visibility 0.5s ease; }
+#loading-screen.hidden-loader { opacity: 0; visibility: hidden; display: none !important; }
+.loader-geometric { position: relative; width: 80px; height: 80px; margin-bottom: 20px; }
+.loader-geometric .shape { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px solid var(--accent-main); border-radius: 20px; animation: spinShapes 3s infinite cubic-bezier(0.4, 0, 0.2, 1); }
+.loader-geometric .shape1 { transform: rotate(0deg); animation-delay: 0s; }
+.loader-geometric .shape2 { transform: rotate(45deg); animation-delay: 0.3s; border-color: var(--accent-soft); }
+.loader-geometric .shape3 { transform: rotate(90deg); animation-delay: 0.6s; }
+@keyframes spinShapes { 0% { transform: rotate(0deg) scale(1); opacity: 1; } 50% { transform: rotate(180deg) scale(0.8); opacity: 0.5; } 100% { transform: rotate(360deg) scale(1); opacity: 1; } }
+.loader-text { font-family: 'Aref Ruqaa', serif !important; font-size: 2.5rem; color: var(--accent-main); letter-spacing: 2px; animation: pulseText 2s infinite alternate; }
+@keyframes pulseText { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+/* اسکرول بار */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-button { display: none; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -83,12 +80,7 @@ body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-
 .custom-badge { background: linear-gradient(135deg, rgba(79, 117, 255, 0.2), rgba(30, 58, 138, 0.5)); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: .8rem; border: 1px solid rgba(79, 117, 255, 0.5); font-weight: 600; box-shadow: 0 0 10px rgba(79, 117, 255, 0.3); }
 .actions-block { gap: 12px; }
 
-.nav-btn, .nav-btn-text { 
-    pointer-events: auto; cursor: pointer; height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; 
-    color: var(--text-main); font-weight: 600; font-size: 0.95rem; background: var(--surface-solid) !important; 
-    border: 1px solid var(--border-glass) !important; box-shadow: var(--shadow-emboss); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 16px !important; 
-    overflow: hidden; padding: 0 15px;
-}
+.nav-btn, .nav-btn-text { pointer-events: auto; cursor: pointer; height: 46px; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-main); font-weight: 600; font-size: 0.95rem; background: var(--surface-solid) !important; border: 1px solid var(--border-glass) !important; box-shadow: var(--shadow-emboss); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-radius: 16px !important; overflow: hidden; padding: 0 15px; }
 .nav-btn { width: 46px; padding: 0; }
 .nav-btn-text span { max-width: 0; opacity: 0; overflow: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; }
 .nav-btn-text:hover span { max-width: 100px; opacity: 1; margin-right: 8px; }
@@ -144,7 +136,7 @@ body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-
 .documents-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
 .doc-card { background: var(--surface-solid); border: 1px solid var(--border-glass); border-radius: 20px; overflow: hidden; cursor: pointer; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: var(--shadow-emboss); position: relative; animation: cardEnter 0.5s ease forwards; }
 @keyframes cardEnter { from { transform: translateY(20px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-.doc-card:hover { transform: translateY(-5px); border-color: var(--accent-main); box-shadow: 0 15px 30px rgba(0,0,0,0.4), 0 0 15px rgba(79, 117, 255, 0.2); }
+.doc-card:hover { transform: translateY(-8px) scale(1.02); border-color: var(--accent-main); box-shadow: 0 15px 30px rgba(0,0,0,0.6), 0 0 20px rgba(79, 117, 255, 0.2); }
 .doc-card-img { height: 140px; background: #FFFFFF; display: flex; justify-content: center; align-items: center; font-size: 3rem; color: var(--text-muted); overflow: hidden; border-bottom: 1px solid var(--border-glass); }
 .doc-card-img img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .doc-card-body { padding: 15px; display: flex; flex-direction: column; gap: 6px; }
@@ -160,12 +152,14 @@ body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-
 /* ویرایشگر */
 .workspace-layout { display: flex; flex-direction: row; gap: 20px; max-width: 1800px; margin: 0 auto; padding: 0 30px; height: calc(100vh - 120px); align-items: stretch; justify-content: center; width: 100%; }
 .side-panel { width: 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; flex-shrink: 0; }
-.focus-mode .floating-top-nav { background: transparent !important; } /* در حالت تمرکز، پنل ها مخفی نمی شوند فقط هدر تغییر می کند */
+.focus-mode .floating-top-nav { background: transparent !important; }
 .focus-mode .workspace-layout { max-width: 1400px; padding-top: 20px; height: 100vh; }
 
 .editor-main { flex: 1; display: flex; flex-direction: column; gap: 15px; height: 100%; min-width: 0; position: relative; }
-.editor-top-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; padding: 10px 15px; border-radius: 20px; flex-shrink: 0; z-index: 100; max-height: 55px; transition: all 0.4s ease; width: 100%; overflow: visible; }
-.editor-top-toolbar.expanded { max-height: 300px; overflow: visible; padding-bottom: 15px; }
+
+/* نوار ابزار بالا (اصلاح شده و فیکس شده افقی) */
+.editor-top-toolbar { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; align-items: center !important; gap: 5px; padding: 10px 15px; border-radius: 20px; flex-shrink: 0; z-index: 100; width: 100%; overflow: visible; }
+.toolbar-row { display: flex; flex-direction: row; align-items: center; gap: 5px; flex-wrap: wrap; width: 100%; }
 .editor-top-toolbar .divider { height: 20px; width: 1px; background: var(--border-glass); margin: 0 5px; flex-shrink: 0; }
 .tool-btn { background: transparent; border: none; width: 34px; height: 34px; border-radius: 10px; color: var(--text-muted); cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: bold; flex-shrink: 0; }
 .tool-btn:hover { background: rgba(255,255,255,0.05); color: var(--accent-main); }
@@ -173,7 +167,6 @@ body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-
 .font-size-controls { display: flex; gap: 2px; background: rgba(0,0,0,0.1); border-radius: 10px; padding: 2px; flex-shrink: 0; }
 .font-size-controls .tool-btn { width: 26px; height: 26px; font-size: 0.8rem; }
 
-/* اصلاح سایز عنوان */
 .doc-title-input { width: 100%; padding: 12px 20px; font-size: 1.2rem; font-weight: 700; border: 1px solid var(--border-glass); background: var(--surface-solid); color: var(--text-main); outline: none; border-radius: 20px; transition: 0.3s; box-shadow: var(--shadow-emboss); }
 .doc-title-input:focus { border-color: var(--accent-main); }
 .doc-title-input[readonly] { background: transparent; border-color: transparent; box-shadow: none; cursor: default; }
