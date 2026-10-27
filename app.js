@@ -39,7 +39,8 @@ const i18n = {
         "btn-confirm": "تایید تغییرات", "btn-cancel": "انصراف", "btn-reset-role": "انتخاب مجدد نقش", "btn-clear-data": "حذف تمام داده‌ها",
         "placeholder-title": "عنوان جزوه...", "placeholder-editor": "اینجا بنویسید...", "placeholder-scratch": "ایده‌ها و متن‌های موقت...",
         "word-count": "کلمه", "saved": "با موفقیت ذخیره شد", "processing": "در حال پردازش...", "drop-file": "فایل را اینجا رها کنید",
-        "confirm-delete-doc": "آیا از حذف این جزوه مطمئن هستید؟", "confirm-delete-folder": "آیا از حذف این دسته‌بندی مطمئن هستید؟", "yes": "بله", "no": "خیر"
+        "confirm-delete-doc": "آیا از حذف این جزوه مطمئن هستید؟", "confirm-delete-folder": "آیا از حذف این دسته‌بندی مطمئن هستید؟", "yes": "بله", "no": "خیر",
+        "confirm-delete-note": "هشدار! با حذف این بخش، یادداشت مربوط به آن نیز حذف خواهد شد. آیا مطمئن هستید؟"
     },
     en: {
         "role-student": "Student", "role-teacher": "Teacher",
@@ -64,7 +65,8 @@ const i18n = {
         "btn-confirm": "Apply Changes", "btn-cancel": "Cancel", "btn-reset-role": "Reset Role", "btn-clear-data": "Clear All Data",
         "placeholder-title": "Note Title...", "placeholder-editor": "Type here...", "placeholder-scratch": "Ideas and drafts...",
         "word-count": "words", "saved": "Saved successfully", "processing": "Processing...", "drop-file": "Drop file here",
-        "confirm-delete-doc": "Are you sure you want to delete this note?", "confirm-delete-folder": "Are you sure you want to delete this category?", "yes": "Yes", "no": "No"
+        "confirm-delete-doc": "Are you sure you want to delete this note?", "confirm-delete-folder": "Are you sure you want to delete this category?", "yes": "Yes", "no": "No",
+        "confirm-delete-note": "Warning! Deleting this section will also delete its associated note. Are you sure?"
     },
     ar: {
         "role-student": "طالب", "role-teacher": "أستاذ",
@@ -89,7 +91,8 @@ const i18n = {
         "btn-confirm": "تطبيق التغييرات", "btn-cancel": "إلغاء", "btn-reset-role": "إعادة اختيار الدور", "btn-clear-data": "حذف جميع البيانات",
         "placeholder-title": "عنوان الملاحظة...", "placeholder-editor": "اكتب هنا...", "placeholder-scratch": "أفكار ومسودات...",
         "word-count": "كلمة", "saved": "تم الحفظ بنجاح", "processing": "جاري المعالجة...", "drop-file": "أفلت الملف هنا",
-        "confirm-delete-doc": "هل أنت متأكد من حذف هذه الملاحظة؟", "confirm-delete-folder": "هل أنت متأكد من حذف هذه الفئة؟", "yes": "نعم", "no": "لا"
+        "confirm-delete-doc": "هل أنت متأكد من حذف هذه الملاحظة؟", "confirm-delete-folder": "هل أنت متأكد من حذف هذه الفئة؟", "yes": "نعم", "no": "لا",
+        "confirm-delete-note": "تحذير! حذف هذا القسم سيحذف الملاحظة المرتبطة به أيضًا. هل أنت متأكد؟"
     }
 };
 
@@ -248,7 +251,6 @@ function renderFolders() {
         li.querySelector('.folder-header').oncontextmenu = (e) => {
             e.preventDefault(); 
             state.targetFolderIdToEdit = f.id;
-            // تنظیم متن پین
             const targetFolder = state.folders.find(x => x.id === f.id);
             $('pinFolderText').textContent = targetFolder.pinned ? i18n[state.lang]["unpin-folder"] : i18n[state.lang]["pin-folder"];
             openMenuAt(e, $('folderContextMenu'));
@@ -355,21 +357,19 @@ function changeFontSize(delta) {
     if (!sel.isCollapsed && sel.rangeCount > 0) {
         const range = sel.getRangeAt(0);
         let currentSize = state.baseFontSize;
-        // پیدا کردن سایز فونت فعلی
         const parentEl = range.commonAncestorContainer.parentElement;
         if (parentEl && parentEl.style.fontSize) {
             currentSize = parseInt(parentEl.style.fontSize);
         }
         
         const newSize = currentSize + delta;
-        if (newSize < 10 || newSize > 60) return; // محدودیت سایز
+        if (newSize < 10 || newSize > 60) return;
 
         const span = document.createElement('span');
         span.style.fontSize = newSize + 'px';
         span.appendChild(range.extractContents());
         range.insertNode(span);
     } else {
-        // اگر متنی انتخاب نشده بود، سایز کلی تغییر کند
         state.baseFontSize = Math.max(10, Math.min(state.baseFontSize + delta, 60));
         $('editor').style.fontSize = state.baseFontSize + 'px';
         $('fontSizeDisplay').textContent = state.baseFontSize;
@@ -403,14 +403,13 @@ function initEditor() {
         });
     });
 
-    // دکمه های جهت
     if($('ltrBtn')) {
         $('ltrBtn').addEventListener('mousedown', (e) => e.preventDefault());
         $('ltrBtn').addEventListener('click', () => { 
             editor.focus(); 
-            document.execCommand('styleWithCSS', false, true); // اجبار به استفاده از CSS
+            document.execCommand('styleWithCSS', false, true);
             document.execCommand('justifyLeft'); 
-            document.execCommand('outdent'); // برای درست شدن جهت در ادیتور
+            document.execCommand('outdent'); 
         });
     }
     if($('rtlBtn')) {
@@ -434,6 +433,27 @@ function initEditor() {
         }
     });
 
+    // هشدار حذف متن دارای یادداشت
+    editor.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            const sel = window.getSelection();
+            if (!sel.rangeCount) return;
+            const range = sel.getRangeAt(0);
+            let container = range.commonAncestorContainer;
+            if (container.nodeType === 3) container = container.parentNode;
+            
+            if (container.closest('.hl-word')) {
+                e.preventDefault();
+                showConfirm(i18n[state.lang]["confirm-delete-note"], () => {
+                    const hlElement = container.closest('.hl-word');
+                    hlElement.remove();
+                    if (state.activeDoc) { state.activeDoc.content = editor.innerHTML; saveState(); }
+                    renderPinnedNotes();
+                });
+            }
+        }
+    });
+
     titleInput.addEventListener('blur', () => {
         if (titleInput.value.trim()) {
             titleInput.setAttribute('readonly', 'readonly');
@@ -451,7 +471,6 @@ function initEditor() {
             e.preventDefault(); openMenuAt(e, $('scratchpadContextMenu'));
         });
 
-        // کنترل سایز فونت چرک نویس
         $('scratchFontInc').onclick = () => {
             state.scratchFontSize = Math.min(state.scratchFontSize + 2, 40);
             $('textScratchpad').style.fontSize = state.scratchFontSize + 'px';
@@ -616,7 +635,7 @@ function initSelectionTooltip() {
         if (e.target.closest('.hl-word')) {
             popup.classList.remove('show');
             blurOverlay.classList.remove('show');
-            setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 200);
+            setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 150); // سریعتر بسته شود
         }
     });
 }
@@ -694,7 +713,7 @@ function renderPinnedNotes() {
             }
         };
 
-        card.innerHTML = `<strong>${el.dataset.word}:</strong><br>${escapeHtml(el.dataset.note)}`;
+        card.innerHTML = `<strong>${el.dataset.word}</strong><p>${escapeHtml(el.dataset.note)}</p>`;
         card.appendChild(editBtn);
         area.appendChild(card);
     });
@@ -714,7 +733,12 @@ function openMenuAt(e, menuEl) {
 
 function initContextMenu() {
     const menu = $('customContextMenu');
-    if($('editor') && menu) $('editor').addEventListener('contextmenu', (e) => { e.preventDefault(); openMenuAt(e, menu); });
+    if($('editor') && menu) $('editor').addEventListener('contextmenu', (e) => { 
+        e.preventDefault(); 
+        const sel = window.getSelection();
+        if(sel.rangeCount > 0) state.selectionRange = sel.getRangeAt(0).cloneRange();
+        openMenuAt(e, menu); 
+    });
 
     document.addEventListener('click', (e) => {
         const menus = [menu, $('docContextMenu'), $('folderContextMenu'), $('scratchpadContextMenu')];
@@ -726,13 +750,61 @@ function initContextMenu() {
         });
     });
     
-    // اضافه کردن stopPropagation به آیتم‌های منو
-    if($('menuCopy')) $('menuCopy').onclick = (e) => { e.stopPropagation(); document.execCommand('copy'); menu.classList.add('hidden'); };
-    if($('menuCut')) $('menuCut').onclick = (e) => { e.stopPropagation(); document.execCommand('cut'); menu.classList.add('hidden'); };
-    if($('menuPaste')) $('menuPaste').onclick = async (e) => { e.stopPropagation(); try { const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); } catch(e) { showToast('دسترسی ندارید'); } menu.classList.add('hidden'); };
-    if($('menuBold')) $('menuBold').onclick = (e) => { e.stopPropagation(); document.execCommand('bold'); menu.classList.add('hidden'); };
-    if($('menuItalic')) $('menuItalic').onclick = (e) => { e.stopPropagation(); document.execCommand('italic'); menu.classList.add('hidden'); };
-    if($('menuDelete')) $('menuDelete').onclick = (e) => { e.stopPropagation(); document.execCommand('delete'); menu.classList.add('hidden'); };
+    if($('menuCopy')) $('menuCopy').onclick = (e) => { 
+        e.stopPropagation(); 
+        if (state.selectionRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(state.selectionRange);
+        }
+        document.execCommand('copy'); 
+        menu.classList.add('hidden'); 
+    };
+    if($('menuCut')) $('menuCut').onclick = (e) => { 
+        e.stopPropagation(); 
+        if (state.selectionRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(state.selectionRange);
+        }
+        document.execCommand('cut'); 
+        menu.classList.add('hidden'); 
+    };
+    if($('menuPaste')) $('menuPaste').onclick = async (e) => { 
+        e.stopPropagation(); 
+        try { const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); } catch(e) { showToast('دسترسی ندارید'); } 
+        menu.classList.add('hidden'); 
+    };
+    if($('menuBold')) $('menuBold').onclick = (e) => { 
+        e.stopPropagation(); 
+        if (state.selectionRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(state.selectionRange);
+        }
+        document.execCommand('bold'); 
+        menu.classList.add('hidden'); 
+    };
+    if($('menuItalic')) $('menuItalic').onclick = (e) => { 
+        e.stopPropagation(); 
+        if (state.selectionRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(state.selectionRange);
+        }
+        document.execCommand('italic'); 
+        menu.classList.add('hidden'); 
+    };
+    if($('menuDelete')) $('menuDelete').onclick = (e) => { 
+        e.stopPropagation(); 
+        if (state.selectionRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(state.selectionRange);
+        }
+        document.execCommand('delete'); 
+        menu.classList.add('hidden'); 
+    };
 
     if($('ctxEditTitle')) $('ctxEditTitle').onclick = (e) => {
         e.stopPropagation();
@@ -763,13 +835,11 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
 
-    // پین کردن (تغییر وضعیت)
     if($('ctxPinFolder')) $('ctxPinFolder').onclick = (e) => {
         e.stopPropagation();
         const folder = state.folders.find(f => f.id === state.targetFolderIdToEdit);
         if(folder) {
             folder.pinned = !folder.pinned;
-            // مرتب‌سازی (پین شده‌ها بالا)
             state.folders.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
             saveState(); renderFolders();
         }
@@ -833,7 +903,7 @@ function initFontDropdowns() {
     const colorBtn = $('textColorBtn'), colorPopup = $('colorPopup');
     if(colorBtn && colorPopup) {
         colorBtn.addEventListener('mousedown', (e) => {
-            e.preventDefault();
+            e.preventDefault(); // جلوگیری از دست رفتن انتخاب
             e.stopPropagation();
             const sel = window.getSelection();
             if (sel.rangeCount > 0) state.selectionRange = sel.getRangeAt(0).cloneRange();
@@ -1270,7 +1340,7 @@ function init() {
     }, 500);
 
     if($('backToDashBtn')) $('backToDashBtn').onclick = () => {
-        history.pushState({ view: 'dashboard' }, '', '#dashboard'); // مدیریت هیستوری
+        history.pushState({ view: 'dashboard' }, '', '#dashboard'); 
         if (state.activeDoc) {
             state.activeDoc.content = $('editor').innerHTML; 
             state.activeDoc.title = $('documentTitle').value.trim();
