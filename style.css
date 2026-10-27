@@ -429,3 +429,17 @@ input:checked + .slider:before { transform: translateX(26px); }
 .doc-card:hover .doc-card-img {
     transform: scale(1.05);
 }
+/* اصلاح آیکون داخل پنل بوم */
+.panel-title div > i {
+    color: var(--accent-main);
+    font-size: 1.3rem;
+    background: var(--accent-soft);
+    padding: 8px;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+.panel-title:hover div > i {
+    transform: rotate(-15deg) scale(1.1);
+    color: #fff;
+    background: var(--accent-main);
+}
