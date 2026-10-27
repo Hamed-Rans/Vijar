@@ -1,5 +1,6 @@
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 @import url('https://fonts.googleapis.com/css2?family=Lalezar&family=Gulzar&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/cinema-font@v1.0.0/dist/font-face.css');
 
 :root {
     --bg-base: #0D1117; 
@@ -347,4 +348,84 @@ input:checked + .slider:before { transform: translateX(26px); }
     flex: 1; width: 100%; border: none; background: transparent; color: var(--text-main); 
     padding: 20px; outline: none; line-height: 1.8; overflow-y: auto; 
     min-height: 300px; cursor: text; position: relative; z-index: 10;
+}
+
+/* ============================================================
+   اصلاحات جدید: فونت سینما، هدر یادداشت و دکمه سه نقطه
+   ============================================================ */
+
+/* 1. فونت سینما برای تیترهای اصلی و هدر پنل یادداشت */
+.sidebar-title h3, 
+.docs-title h2,
+.panel-title .header-title {
+    font-family: 'Cinema', Tahoma, sans-serif !important;
+    font-size: 1.2rem !important;
+    font-weight: bold;
+}
+
+/* 2. کلفت‌تر کردن بک‌گراند و بیضی هدر پنل‌ها (مخصوصا یادداشت) */
+.panel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px; /* افزایش پدینگ برای کلفت‌تر شدن */
+    border-width: 2px !important; /* کلفت‌تر کردن حاشیه */
+    border-color: var(--border-glass) !important;
+    border-radius: 50px !important; /* کاملا بیضی */
+    background: var(--surface-solid) !important;
+    box-shadow: var(--shadow-emboss);
+}
+.panel-title:hover {
+    border-color: var(--accent-main) !important;
+}
+
+/* 3. رنگ گرفتن آیکون پنل‌ها (که سمت چپ کادر قرار دارند) */
+.panel-title > i {
+    color: var(--accent-main);
+    font-size: 1.3rem;
+    background: var(--accent-soft);
+    padding: 8px;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+.panel-title:hover > i {
+    transform: rotate(-15deg) scale(1.1);
+    color: #fff;
+    background: var(--accent-main);
+}
+
+/* 4. اصلاح دکمه سه نقطه جزوه‌ها (رفع باگ غیب شدن و انتقال به پایین چپ) */
+.doc-menu-btn {
+    position: absolute;
+    bottom: 15px; /* انتقال به پایین */
+    left: 15px;   /* انتقال به چپ */
+    top: auto;
+    right: auto;
+    width: 32px; 
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+    z-index: 100; /* جلوگیری از رفتن زیر کارت */
+    opacity: 0;   /* مخفی در حالت عادی */
+    pointer-events: auto; /* حتما باید کلیک پذیر باشد */
+}
+.doc-card:hover .doc-menu-btn {
+    opacity: 1; /* فقط وقتی موس روی کارت است دیده شود */
+}
+.doc-menu-btn:hover {
+    background: var(--accent-main);
+    transform: scale(1.1);
+}
+
+/* 5. اصلاح هاور شدن عکس جزوه */
+.doc-card:hover .doc-card-img {
+    transform: scale(1.05);
 }
