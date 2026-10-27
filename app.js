@@ -145,9 +145,20 @@ function applyTheme(theme) {
 
 function initTheme() {
     applyTheme(localStorage.getItem(STORAGE_KEYS.theme) || 'dark');
-    $$('#themeToggle button').forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme)));
+    
+    // تغییر تم فقط ظاهر دکمه را عوض می‌کند و تا زدن دکمه تایید، اعمال نمی‌شود
+    $$('#themeToggle button').forEach(b => {
+        b.addEventListener('click', (e) => {
+            e.preventDefault();
+            $$('#themeToggle button').forEach(btn => btn.classList.remove('active'));
+            b.classList.add('active');
+            
+            // نمایش نوار دکمه‌های تایید و انصراف
+            const actionBar = $('settingsActionBar');
+            if(actionBar) actionBar.classList.add('show');
+        });
+    });
 }
-
 function showRoleView() {
     if($('role-view')) $('role-view').classList.remove('hidden'); 
     if($('dashboard-view')) $('dashboard-view').classList.add('hidden'); 
@@ -991,7 +1002,15 @@ function initSettings() {
         if(langDD) langDD.dataset.selectedLang = state.lang;
         if($('settingsModal')) $('settingsModal').classList.remove('show'); 
     };
-
+    
+    $('confirmSettingsBtn').onclick = () => {
+        // این ۴ خط را اضافه کنید تا تم فقط با زدن تایید اعمال شود
+        const activeThemeBtn = document.querySelector('#themeToggle button.active');
+        if (activeThemeBtn) {
+            applyTheme(activeThemeBtn.dataset.theme);
+        }
+        
+        // ... (بقیه کدهای موجود در دکمه تایید که از قبل داشتید)
     if($('confirmSettingsBtn')) $('confirmSettingsBtn').onclick = () => {
         if($('autoSaveToggle')) state.autoSave = $('autoSaveToggle').checked;
         if($('blurEffectToggle')) state.blurEffect = $('blurEffectToggle').checked;
