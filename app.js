@@ -306,10 +306,15 @@ function initEditor() {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', () => { 
             editor.focus(); 
-            document.execCommand(btn.dataset.command, false, null); 
+            if(btn.dataset.command === 'hiliteColor') {
+                document.execCommand('hiliteColor', false, 'rgba(234, 179, 8, 0.5)'); // رنگ هایلایتر
+            } else {
+                document.execCommand(btn.dataset.command, false, null); 
+            }
             updateToolbarState(); 
         });
     });
+    
     $$('.tool-btn[data-block]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', () => { 
@@ -568,7 +573,6 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
     
-    // استفاده از مودال اختصاصی به جای confirm
     $('ctxDeleteDoc').onclick = () => {
         showConfirm(i18n[state.lang]["confirm-delete-doc"], () => {
             state.docs = state.docs.filter(d => d.id !== state.targetDocIdToMove);
@@ -619,16 +623,31 @@ function initFontDropdowns() {
         };
     });
 
+    // فیکس کردن پالت رنگ متن
     const colorBtn = $('textColorBtn'), colorPopup = $('colorPopup');
-    colorBtn.onclick = (e) => { e.stopPropagation(); colorPopup.classList.toggle('show'); };
+    colorBtn.onclick = (e) => { 
+        e.stopPropagation(); 
+        colorPopup.classList.toggle('show'); 
+    };
     colorPopup.querySelectorAll('.color-swatch').forEach(sw => {
-        sw.onclick = () => { $('editor').focus(); document.execCommand('foreColor', false, sw.dataset.color); colorPopup.classList.remove('show'); };
+        sw.onclick = () => { 
+            $('editor').focus(); 
+            document.execCommand('foreColor', false, sw.dataset.color); 
+            colorPopup.classList.remove('show'); 
+        };
     });
 
+    // فیکس کردن پالت رنگ بوم
     const boardColorBtn = $('boardColorBtn'), boardColorPopup = $('boardColorPopup');
-    boardColorBtn.onclick = (e) => { e.stopPropagation(); boardColorPopup.classList.toggle('show'); };
+    boardColorBtn.onclick = (e) => { 
+        e.stopPropagation(); 
+        boardColorPopup.classList.toggle('show'); 
+    };
     boardColorPopup.querySelectorAll('.color-swatch').forEach(sw => {
-        sw.onclick = () => { canvasState.color = sw.dataset.color; boardColorPopup.classList.remove('show'); };
+        sw.onclick = () => { 
+            canvasState.color = sw.dataset.color; 
+            boardColorPopup.classList.remove('show'); 
+        };
     });
 
     document.addEventListener('click', (e) => {
@@ -650,6 +669,7 @@ function initFontDropdowns() {
         $('fontSizeDisplay').textContent = state.baseFontSize; 
         localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
     };
+    
     $('decreaseFontSize').onclick = () => { 
         $('editor').focus();
         const sel = window.getSelection();
@@ -664,11 +684,19 @@ function initFontDropdowns() {
         localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
     };
 
+    $('expandToolbarBtn').onclick = () => {
+        const tb = $('topToolbar');
+        tb.classList.toggle('expanded');
+        const icon = $('expandToolbarBtn').querySelector('i');
+        icon.className = tb.classList.contains('expanded') ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
+    };
+
     $('importBtn').onclick = () => { 
         $('importStep1').classList.remove('hidden'); 
         $('importStep2').classList.add('hidden'); 
         $('importModal').classList.add('show'); 
     };
+    
     $('backToStep1').onclick = () => {
         $('importStep1').classList.remove('hidden'); 
         $('importStep2').classList.add('hidden'); 
