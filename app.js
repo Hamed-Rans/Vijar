@@ -17,8 +17,8 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 const i18n = {
     fa: {
-        "role-student": "دانشجو", "role-teacher": "استاد",
-        "panel-left": "پنل چپ", "panel-right": "چرک‌نویس",
+        "role-student": "دانشجو / دانش‌آموز", "role-teacher": "استاد / معلم",
+        "panel-left": "بوم و یادداشت", "panel-right": "چرک‌نویس",
         "welcome-title": "به <span>ویژار</span> خوش آمدید", "welcome-subtitle": "جهت تنظیم محیط، نقش خود را انتخاب کنید",
         "folders": "دسته‌بندی‌ها", "my-notes": "جزوه‌های من", "create-note": "ایجاد جزوه", "empty-state": "هیچ جزوه‌ای در اینجا یافت نشد.",
         "notes-panel": "یادداشت", "canvas-panel": "بوم", "scratch-panel": "چرک‌نویس", "btn-insert": "درج در متن",
@@ -36,14 +36,16 @@ const i18n = {
         "settings-title": "پیکربندی", "settings-theme": "پوسته ظاهری", "settings-lang": "زبان برنامه",
         "settings-autosave": "ذخیره خودکار", "settings-blur": "محو کردن هنگام هاور نکات",
         "settings-notes-panel": "پنل یادداشت‌ها", "settings-canvas-panel": "پنل بوم نقاشی", "settings-scratch-panel": "پنل چرک‌نویس",
-        "btn-confirm": "تایید تغییرات", "btn-cancel": "انصراف", "btn-reset-role": "انتخاب مجدد نقش", "btn-clear-data": "حذف تمام داده‌ها"
+        "btn-confirm": "تایید تغییرات", "btn-cancel": "انصراف", "btn-reset-role": "انتخاب مجدد نقش", "btn-clear-data": "حذف تمام داده‌ها",
+        "placeholder-title": "عنوان جزوه...", "placeholder-editor": "اینجا بنویسید...", "placeholder-scratch": "ایده‌ها و متن‌های موقت...",
+        "word-count": "کلمه", "saved": "با موفقیت ذخیره شد", "processing": "در حال پردازش...", "drop-file": "فایل را اینجا رها کنید"
     },
     en: {
         "role-student": "Student", "role-teacher": "Teacher",
-        "panel-left": "Left Panel", "panel-right": "Scratchpad",
+        "panel-left": "Canvas & Notes", "panel-right": "Scratchpad",
         "welcome-title": "Welcome to <span>Vizhar</span>", "welcome-subtitle": "Select your role to configure the environment",
         "folders": "Categories", "my-notes": "My Notes", "create-note": "Create Note", "empty-state": "No notes found here.",
-        "notes-panel": "Notes", "canvas-panel": "Canvas", "scratch-panel": "Scratchpad", "btn-insert": "Insert into Text",
+        "notes-panel": "Notes", "canvas-panel": "Canvas", "scratch-panel": "Scratchpad", "btn-insert": "Insert",
         "btn-import": "Media", "btn-export": "Export", "font": "Font", "paper-style": "Paper Style",
         "add-note": "Add Note", "copy": "Copy", "cut": "Cut", "paste": "Paste",
         "bold": "Bold", "italic": "Italic", "underline": "Underline", "list": "List", "delete": "Delete",
@@ -58,14 +60,16 @@ const i18n = {
         "settings-title": "Settings", "settings-theme": "Appearance", "settings-lang": "Language",
         "settings-autosave": "Auto Save", "settings-blur": "Blur Background on Note Hover",
         "settings-notes-panel": "Notes Panel", "settings-canvas-panel": "Canvas Panel", "settings-scratch-panel": "Scratchpad Panel",
-        "btn-confirm": "Apply Changes", "btn-cancel": "Cancel", "btn-reset-role": "Reset Role", "btn-clear-data": "Clear All Data"
+        "btn-confirm": "Apply Changes", "btn-cancel": "Cancel", "btn-reset-role": "Reset Role", "btn-clear-data": "Clear All Data",
+        "placeholder-title": "Note Title...", "placeholder-editor": "Type here...", "placeholder-scratch": "Ideas and drafts...",
+        "word-count": "words", "saved": "Saved successfully", "processing": "Processing...", "drop-file": "Drop file here"
     },
     ar: {
         "role-student": "طالب", "role-teacher": "أستاذ",
-        "panel-left": "اللوحة اليسرى", "panel-right": "مسودة",
+        "panel-left": "اللوحة والملاحظات", "panel-right": "مسودة",
         "welcome-title": "مرحبًا بك في <span>فيژار</span>", "welcome-subtitle": "حدد دورك لتهيئة البيئة",
         "folders": "الفئات", "my-notes": "ملاحظاتي", "create-note": "إنشاء ملاحظة", "empty-state": "لم يتم العثور على ملاحظات هنا.",
-        "notes-panel": "ملاحظات", "canvas-panel": "لوحة", "scratch-panel": "مسودة", "btn-insert": "إدراج في النص",
+        "notes-panel": "ملاحظات", "canvas-panel": "لوحة", "scratch-panel": "مسودة", "btn-insert": "إدراج",
         "btn-import": "وسائط", "btn-export": "تصدير", "font": "خط", "paper-style": "نمط الورق",
         "add-note": "إضافة ملاحظة", "copy": "نسخ", "cut": "قص", "paste": "لصق",
         "bold": "غامق", "italic": "مائل", "underline": "تحته خط", "list": "قائمة", "delete": "حذف",
@@ -80,7 +84,9 @@ const i18n = {
         "settings-title": "الإعدادات", "settings-theme": "المظهر", "settings-lang": "اللغة",
         "settings-autosave": "حفظ تلقائي", "settings-blur": "تمويه عند التمرير على الملاحظات",
         "settings-notes-panel": "لوحة الملاحظات", "settings-canvas-panel": "لوحة الرسم", "settings-scratch-panel": "لوحة المسودة",
-        "btn-confirm": "تطبيق التغييرات", "btn-cancel": "إلغاء", "btn-reset-role": "إعادة اختيار الدور", "btn-clear-data": "حذف جميع البيانات"
+        "btn-confirm": "تطبيق التغييرات", "btn-cancel": "إلغاء", "btn-reset-role": "إعادة اختيار الدور", "btn-clear-data": "حذف جميع البيانات",
+        "placeholder-title": "عنوان الملاحظة...", "placeholder-editor": "اكتب هنا...", "placeholder-scratch": "أفكار ومسودات...",
+        "word-count": "كلمة", "saved": "تم الحفظ بنجاح", "processing": "جاري المعالجة...", "drop-file": "أفلت الملف هنا"
     }
 };
 
@@ -91,13 +97,19 @@ function applyLanguage(lang) {
     $$('[data-lang]').forEach(el => {
         const key = el.getAttribute('data-lang');
         if (i18n[lang] && i18n[lang][key]) {
-            // Handle elements that might have HTML inside
             if(el.tagName === 'H2' && key === 'welcome-title') el.innerHTML = i18n[lang][key];
             else el.textContent = i18n[lang][key];
         }
     });
+    
+    // Update Placeholders
+    $('documentTitle').placeholder = i18n[lang]["placeholder-title"];
+    $('editor').setAttribute('placeholder', i18n[lang]["placeholder-editor"]);
+    $('textScratchpad').setAttribute('placeholder', i18n[lang]["placeholder-scratch"]);
+    
     const langDisplay = $('currentLangDisplay');
     if (langDisplay) langDisplay.textContent = lang === 'en' ? 'English' : (lang === 'ar' ? 'العربية' : 'فارسی');
+    updateWordCount();
 }
 
 function saveState() {
@@ -280,7 +292,7 @@ function openDoc(id) {
 function updateWordCount() {
     const text = $('editor').innerText || '';
     const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
-    const wordStr = state.lang === 'fa' ? 'کلمه' : (state.lang === 'ar' ? 'كلمة' : 'words');
+    const wordStr = i18n[state.lang]["word-count"];
     $('wordCounter').textContent = words.toLocaleString(state.lang === 'fa' ? 'fa-IR' : 'en-US') + ' ' + wordStr;
 }
 
@@ -343,12 +355,24 @@ function initEditor() {
     });
     $$('.scratch-cmd').forEach(li => { li.onclick = () => { $('textScratchpad').focus(); document.execCommand(li.dataset.cmd, false, null); $('scratchpadContextMenu').classList.add('hidden'); }; });
 
+    // انیمیشن باز شدن ابزارها
     $('expandToolbarBtn').onclick = () => {
         const tb = $('topToolbar');
         tb.classList.toggle('expanded');
         const icon = $('expandToolbarBtn').querySelector('i');
         icon.className = tb.classList.contains('expanded') ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
     };
+
+    // دکمه ذخیره با نوتیفیکیشن
+    $('saveDocBtn').addEventListener('click', () => {
+        if (state.activeDoc) {
+            state.activeDoc.title = titleInput.value.trim();
+            state.activeDoc.content = editor.innerHTML;
+            state.activeDoc.scratchpad = $('textScratchpad').innerHTML;
+            saveState(); 
+            showToast(i18n[state.lang]["saved"]);
+        }
+    });
 
     initSelectionTooltip();
     initContextMenu();
@@ -598,15 +622,30 @@ function initFontDropdowns() {
         };
     });
 
+    // پالت رنگ متن
     const colorBtn = $('textColorBtn'), colorPopup = $('colorPopup');
-    colorBtn.onclick = (e) => { e.stopPropagation(); colorPopup.classList.toggle('show'); };
+    colorBtn.onclick = (e) => { 
+        e.stopPropagation(); 
+        colorPopup.classList.toggle('show'); 
+    };
     colorPopup.querySelectorAll('.color-swatch').forEach(sw => {
         sw.onclick = () => { $('editor').focus(); document.execCommand('foreColor', false, sw.dataset.color); colorPopup.classList.remove('show'); };
     });
 
+    // پالت رنگ بوم
+    const boardColorBtn = $('boardColorBtn'), boardColorPopup = $('boardColorPopup');
+    boardColorBtn.onclick = (e) => {
+        e.stopPropagation();
+        boardColorPopup.classList.toggle('show');
+    };
+    boardColorPopup.querySelectorAll('.color-swatch').forEach(sw => {
+        sw.onclick = () => { canvasState.color = sw.dataset.color; boardColorPopup.classList.remove('show'); };
+    });
+
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.custom-dropdown')) $$('.custom-dropdown').forEach(d => d.classList.remove('active'));
-        if (!e.target.closest('.color-menu-wrapper')) $$('.custom-color-popup').forEach(p => p.classList.remove('show'));
+        if (!e.target.closest('#fontDropdown') && !e.target.closest('#sizeDropdown') && !e.target.closest('#paperStyleDropdown')) $$('.custom-dropdown').forEach(d => d.classList.remove('active'));
+        if (!e.target.closest('#textColorWrapper')) colorPopup.classList.remove('show');
+        if (!e.target.closest('#boardColorWrapper')) boardColorPopup.classList.remove('show');
     });
 
     $('increaseFontSize').onclick = () => { 
@@ -823,19 +862,10 @@ function initCanvas() {
             $$('.board-tool[data-tool]').forEach(b => b.classList.remove('active')); 
             btn.classList.add('active'); 
             canvasState.tool = btn.dataset.tool; 
-            // Update Cursor
-            canvas.className = ''; // clear
+            canvas.className = ''; 
             if(canvasState.tool === 'eraser') canvas.classList.add('cursor-eraser');
             else if(canvasState.tool === 'highlighter') canvas.classList.add('cursor-highlighter');
         };
-    });
-    
-    $('boardColorBtn').onclick = (e) => { 
-        e.stopPropagation(); 
-        $('boardColorPopup').classList.toggle('show'); 
-    };
-    $$('#boardColorPopup .color-swatch').forEach(sw => { 
-        sw.onclick = () => { canvasState.color = sw.dataset.color; $('boardColorPopup').classList.remove('show'); }; 
     });
     
     $('clearBoardBtn').onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); };
@@ -922,7 +952,7 @@ function initSettings() {
         $('rightPanel').style.display = isScratchChecked ? 'flex' : 'none';
 
         $('settingsModal').classList.remove('show');
-        showToast('تنظیمات ذخیره شد');
+        showToast(i18n[newLang]["saved"]);
         setTimeout(resizeCanvas, 300);
     };
 
@@ -931,9 +961,16 @@ function initSettings() {
 }
 
 function showToast(msg) {
-    const t = document.createElement('div'); t.textContent = msg;
-    t.style.cssText = `position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:var(--accent-main); color:#fff; padding:10px 20px; border-radius:12px; z-index:99999; font-family:'YekanBakh'; box-shadow:var(--shadow-float);`;
-    document.body.appendChild(t); setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 2000);
+    const container = $('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast-message';
+    t.innerHTML = `<i class="fa-solid fa-check-circle" style="color:var(--accent-main);"></i> <span>${msg}</span>`;
+    container.appendChild(t);
+    
+    setTimeout(() => {
+        t.classList.add('fade-out');
+        setTimeout(() => t.remove(), 300);
+    }, 2500);
 }
 
 function escapeHtml(str) { return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
@@ -949,23 +986,38 @@ function init() {
 
     $$('.role-card').forEach(card => { card.addEventListener('click', () => { state.role = card.dataset.role; saveState(); showDashboard(); }); });
 
+    // دکمه خانه با انیمیشن سریع‌تر و بدون تاخیر
     $('backToDashBtn').onclick = () => {
         if (state.activeDoc) {
-            state.activeDoc.content = $('editor').innerHTML; state.activeDoc.title = $('documentTitle').value.trim();
+            state.activeDoc.content = $('editor').innerHTML; 
+            state.activeDoc.title = $('documentTitle').value.trim();
+            saveState(); // ذخیره فوری
+            
+            $('editor-view').style.opacity = '0';
+            setTimeout(() => { 
+                showDashboard(); 
+                $('dashboard-view').style.opacity = '1'; 
+            }, 200);
+            
+            // تولید عکس در پس‌زمینه
             html2canvas($('editor'), { scale: 0.5, backgroundColor: getComputedStyle(document.body).getPropertyValue('--surface-solid').trim() }).then(canvas => {
                 state.activeDoc.thumbnail = canvas.toDataURL('image/jpeg');
-                saveState(); showDashboard();
-            }).catch(() => { saveState(); showDashboard(); });
-        } else { showDashboard(); }
+                saveState(); renderDocs(); // فقط کارت‌ها را آپدیت می‌کند
+            }).catch(() => {});
+        } else { 
+            showDashboard(); 
+        }
     };
     
     $('createNewDocBtn').onclick = createDoc;
+    $('createEmptyDocBtn').onclick = createDoc;
     $('addFolderBtn').onclick = () => $('addFolderModal').classList.add('show');
     $('confirmAddFolderBtn').onclick = () => {
         const name = $('newFolderName').value.trim(); if (!name) return;
         state.folders.push({ id: 'f_' + Date.now(), name }); saveState(); $('newFolderName').value = ''; $('addFolderModal').classList.remove('show'); renderFolders();
     };
 
+    // حالت تمام صفحه واقعی
     $('focusModeBtn').onclick = () => { 
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => { showToast('مرورگر اجازه نداد.'); });
