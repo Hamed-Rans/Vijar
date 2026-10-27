@@ -98,7 +98,7 @@ function applyLanguage(lang) {
     localStorage.setItem(STORAGE_KEYS.language, lang);
     document.documentElement.dir = (lang === 'ar' || lang === 'fa') ? 'rtl' : 'ltr';
     
-    if (!i18n[lang]) lang = 'fa'; // Fallback
+    if (!i18n[lang]) lang = 'fa';
 
     $$('[data-lang]').forEach(el => {
         const key = el.getAttribute('data-lang');
@@ -146,19 +146,19 @@ function applyTheme(theme) {
 function initTheme() {
     applyTheme(localStorage.getItem(STORAGE_KEYS.theme) || 'dark');
     
-    // تغییر تم فقط ظاهر دکمه را عوض می‌کند و تا زدن دکمه تایید، اعمال نمی‌شود
+    // تغییر تم بدون تایید اعمال نمی‌شود، فقط دکمه اکتیو می‌شود
     $$('#themeToggle button').forEach(b => {
         b.addEventListener('click', (e) => {
             e.preventDefault();
             $$('#themeToggle button').forEach(btn => btn.classList.remove('active'));
             b.classList.add('active');
             
-            // نمایش نوار دکمه‌های تایید و انصراف
             const actionBar = $('settingsActionBar');
             if(actionBar) actionBar.classList.add('show');
         });
     });
 }
+
 function showRoleView() {
     if($('role-view')) $('role-view').classList.remove('hidden'); 
     if($('dashboard-view')) $('dashboard-view').classList.add('hidden'); 
@@ -1002,16 +1002,14 @@ function initSettings() {
         if(langDD) langDD.dataset.selectedLang = state.lang;
         if($('settingsModal')) $('settingsModal').classList.remove('show'); 
     };
-    
-    $('confirmSettingsBtn').onclick = () => {
-        // این ۴ خط را اضافه کنید تا تم فقط با زدن تایید اعمال شود
+
+    if($('confirmSettingsBtn')) $('confirmSettingsBtn').onclick = () => {
+        // اعمال تغییرات تم فقط در صورت تایید
         const activeThemeBtn = document.querySelector('#themeToggle button.active');
         if (activeThemeBtn) {
             applyTheme(activeThemeBtn.dataset.theme);
         }
-        
-        // ... (بقیه کدهای موجود در دکمه تایید که از قبل داشتید)
-    if($('confirmSettingsBtn')) $('confirmSettingsBtn').onclick = () => {
+
         if($('autoSaveToggle')) state.autoSave = $('autoSaveToggle').checked;
         if($('blurEffectToggle')) state.blurEffect = $('blurEffectToggle').checked;
         const newLang = (langDD && langDD.dataset.selectedLang) ? langDD.dataset.selectedLang : state.lang;
@@ -1083,7 +1081,7 @@ function showConfirm(message, onYes) {
 function escapeHtml(str) { return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
 function init() {
-    // 1. اتصال رویداد کلیک برای کارت‌های انتخاب نقش (مطمئن‌ترین روش)
+    // 1. اتصال رویداد کلیک برای کارت‌های انتخاب نقش (مستقل از بقیه کدها)
     document.addEventListener('click', (e) => {
         const card = e.target.closest('.role-card');
         if (card) {
@@ -1093,7 +1091,7 @@ function init() {
         }
     });
 
-    // 2. لود اولیه با مدیریت خطا
+    // 2. لود اولیه با مدیریت خطا (تا صفحه گیر نکند)
     try { loadState(); } catch(e) { console.error('loadState', e); }
     try { initTheme(); } catch(e) { console.error('initTheme', e); }
     try { initEditor(); } catch(e) { console.error('initEditor', e); }
