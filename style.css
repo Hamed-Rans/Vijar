@@ -1,6 +1,7 @@
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 @import url('https://fonts.googleapis.com/css2?family=Lalezar&family=Gulzar&display=swap');
 @import url('https://cdn.fontcdn.ir/Font/Persian/Cinema/Cinema.css');
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/morabba-font@v1.0.0/dist/font-face.css');
 
 :root {
     --bg-base: #0D1117; 
@@ -40,13 +41,13 @@ body, html, div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, selec
 i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important; }
 body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-color: var(--bg-base); color: var(--text-main); transition: background 0.4s ease, color 0.4s ease; }
 
-/* فونت سینما و رنگ هدرها */
+/* فونت مربا و رنگ هدرها */
 .sidebar-title h3, 
 .docs-title h2,
 .panel-title .header-title {
-    font-family: 'Cinema', 'Lalezar', Tahoma, sans-serif !important;
-    font-size: 1.1rem !important;
-    font-weight: 500 !important;
+    font-family: 'Morabba', Tahoma, sans-serif !important;
+    font-size: 1.15rem !important;
+    font-weight: 600 !important;
     color: var(--accent-main) !important;
 }
 
