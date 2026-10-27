@@ -11,6 +11,9 @@
 </head>
 <body>
 
+    <!-- سیستم نوتیفیکیشن -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <div id="loading-screen">
         <div class="loader-geometric">
             <div class="shape shape1"></div>
@@ -26,20 +29,19 @@
             <div class="shape shape2"></div>
             <div class="shape shape3"></div>
         </div>
-        <p style="color: var(--text-main); font-weight: bold; margin-top: 20px;">در حال پردازش...</p>
+        <p style="color: var(--text-main); font-weight: bold; margin-top: 20px;" data-lang="processing">در حال پردازش...</p>
     </div>
 
-    <!-- هدر شناور (اصلاح شده) -->
+    <!-- هدر شناور -->
     <div class="floating-top-nav">
         <div class="nav-block brand-block glass-element">
             <i class="fa-solid fa-feather-pointed logo-icon"></i>
             <h1 class="brand-name">ویژار</h1>
-            <span id="userRoleBadge" class="custom-badge hidden" data-lang="role-student">دانشجو</span>
+            <span id="userRoleBadge" class="custom-badge hidden">دانشجو</span>
         </div>
         
-        <!-- دکمه های کناری پنل ها -->
         <div class="nav-block panel-toggles hidden">
-            <button id="toggleLeftPanelBtn" class="nav-btn-text" title="بوم و یادداشت"><i class="fa-solid fa-arrow-right"></i> <span data-lang="panel-left">پنل چپ</span></button>
+            <button id="toggleLeftPanelBtn" class="nav-btn-text" title="بوم و یادداشت"><i class="fa-solid fa-arrow-right"></i> <span data-lang="panel-left">بوم و یادداشت</span></button>
             <button id="toggleRightPanelBtn" class="nav-btn-text" title="چرک‌نویس"><i class="fa-solid fa-arrow-left"></i> <span data-lang="panel-right">چرک‌نویس</span></button>
         </div>
 
@@ -94,6 +96,7 @@
                     <div id="emptyState" class="empty-state hidden">
                         <i class="fa-regular fa-folder-open empty-icon"></i>
                         <p data-lang="empty-state">هیچ جزوه‌ای در اینجا یافت نشد.</p>
+                        <button id="createEmptyDocBtn" class="btn-primary" style="margin-top: 15px;"><i class="fa-solid fa-plus"></i> <span data-lang="create-note">ایجاد جزوه</span></button>
                     </div>
                     <div class="documents-grid" id="documentsGrid"></div>
                 </div>
@@ -128,7 +131,7 @@
                         <button class="board-tool" data-tool="circle" title="دایره"><i class="fa-regular fa-circle"></i></button>
                         
                         <!-- پالت رنگ بوم -->
-                        <div class="color-menu-wrapper">
+                        <div class="color-menu-wrapper" id="boardColorWrapper">
                             <button class="board-tool" id="boardColorBtn" title="رنگ"><i class="fa-solid fa-palette"></i></button>
                             <div class="custom-color-popup glass-panel hidden" id="boardColorPopup">
                                 <div class="preset-colors">
@@ -153,54 +156,57 @@
             <main class="editor-main">
                 <!-- نوار ابزار بالا -->
                 <div class="editor-top-toolbar glass-panel" id="topToolbar">
-                    <div class="custom-dropdown" id="fontDropdown">
-                        <div class="dropdown-selected" data-lang="font">فونت <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
-                        <div class="dropdown-list">
-                            <div class="dropdown-item" data-value="YekanBakh">یکان‌بخ</div>
-                            <div class="dropdown-item" data-value="Lalezar" style="font-family:'Lalezar'">لاله‌زار</div>
-                            <div class="dropdown-item" data-value="Gulzar" style="font-family:'Gulzar'">گلزار</div>
-                            <div class="dropdown-item" data-value="Vazirmatn">وزیرمتن</div>
-                        </div>
-                    </div>
-                    <div class="custom-dropdown" id="sizeDropdown">
-                        <div class="dropdown-selected" id="fontSizeDisplay">۱۶</div>
-                    </div>
-                    <div class="font-size-controls">
-                        <button class="tool-btn" id="decreaseFontSize"><i class="fa-solid fa-minus"></i></button>
-                        <button class="tool-btn" id="increaseFontSize"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                    <div class="divider"></div>
-                    <button class="tool-btn" data-block="p" title="پاراگراف"><i class="fa-solid fa-paragraph"></i></button>
-                    <button class="tool-btn" data-command="insertHorizontalRule" title="خط جداکننده"><i class="fa-solid fa-minus"></i></button>
-                    <div class="divider"></div>
-                    <button class="tool-btn align-tool" data-command="justifyRight" title="راست‌چین"><i class="fa-solid fa-align-right"></i></button>
-                    <button class="tool-btn align-tool" data-command="justifyCenter" title="وسط‌چین"><i class="fa-solid fa-align-center"></i></button>
-                    <button class="tool-btn align-tool" data-command="justifyLeft" title="چپ‌چین"><i class="fa-solid fa-align-left"></i></button>
-                    <div class="divider"></div>
-                    <div class="custom-dropdown" id="paperStyleDropdown">
-                        <div class="dropdown-selected" data-lang="paper-style">بافت کاغذ <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
-                        <div class="dropdown-list">
-                            <div class="dropdown-item" data-style="plain">ساده</div>
-                            <div class="dropdown-item" data-style="lined">دفتر خط‌دار</div>
-                            <div class="dropdown-item" data-style="grid">شطرنجی</div>
-                        </div>
-                    </div>
-                    <div class="divider"></div>
-                    <div class="color-menu-wrapper">
-                        <button class="tool-btn" id="textColorBtn" title="رنگ متن"><i class="fa-solid fa-palette"></i></button>
-                        <div class="custom-color-popup glass-panel hidden" id="colorPopup">
-                            <div class="preset-colors">
-                                <div class="color-swatch" data-color="#F8FAFC" style="background:#F8FAFC;"></div>
-                                <div class="color-swatch" data-color="#4F75FF" style="background:#4F75FF;"></div>
-                                <div class="color-swatch" data-color="#EF4444" style="background:#EF4444;"></div>
-                                <div class="color-swatch" data-color="#10B981" style="background:#10B981;"></div>
-                                <div class="color-swatch" data-color="#F59E0B" style="background:#F59E0B;"></div>
-                                <div class="color-swatch" data-color="#39FF14" style="background:#39FF14; box-shadow: 0 0 10px #39FF14;"></div>
+                    <!-- ردیف اول ابزارها -->
+                    <div class="toolbar-row main-row">
+                        <div class="custom-dropdown" id="fontDropdown">
+                            <div class="dropdown-selected" data-lang="font">فونت <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
+                            <div class="dropdown-list">
+                                <div class="dropdown-item" data-value="YekanBakh">یکان‌بخ</div>
+                                <div class="dropdown-item" data-value="Lalezar" style="font-family:'Lalezar'">لاله‌زار</div>
+                                <div class="dropdown-item" data-value="Gulzar" style="font-family:'Gulzar'">گلزار</div>
+                                <div class="dropdown-item" data-value="Vazirmatn">وزیرمتن</div>
                             </div>
                         </div>
+                        <div class="custom-dropdown" id="sizeDropdown">
+                            <div class="dropdown-selected" id="fontSizeDisplay">۱۶</div>
+                        </div>
+                        <div class="font-size-controls">
+                            <button class="tool-btn" id="decreaseFontSize"><i class="fa-solid fa-minus"></i></button>
+                            <button class="tool-btn" id="increaseFontSize"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div class="divider"></div>
+                        <button class="tool-btn" data-block="p" title="پاراگراف"><i class="fa-solid fa-paragraph"></i></button>
+                        <button class="tool-btn" data-command="insertHorizontalRule" title="خط جداکننده"><i class="fa-solid fa-minus"></i></button>
+                        <div class="divider"></div>
+                        <button class="tool-btn align-tool" data-command="justifyRight" title="راست‌چین"><i class="fa-solid fa-align-right"></i></button>
+                        <button class="tool-btn align-tool" data-command="justifyCenter" title="وسط‌چین"><i class="fa-solid fa-align-center"></i></button>
+                        <button class="tool-btn align-tool" data-command="justifyLeft" title="چپ‌چین"><i class="fa-solid fa-align-left"></i></button>
+                        <div class="divider"></div>
+                        <div class="custom-dropdown" id="paperStyleDropdown">
+                            <div class="dropdown-selected" data-lang="paper-style">بافت کاغذ <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
+                            <div class="dropdown-list">
+                                <div class="dropdown-item" data-style="plain">ساده</div>
+                                <div class="dropdown-item" data-style="lined">دفتر خط‌دار</div>
+                                <div class="dropdown-item" data-style="grid">شطرنجی</div>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="color-menu-wrapper" id="textColorWrapper">
+                            <button class="tool-btn" id="textColorBtn" title="رنگ متن"><i class="fa-solid fa-palette"></i></button>
+                            <div class="custom-color-popup glass-panel hidden" id="colorPopup">
+                                <div class="preset-colors">
+                                    <div class="color-swatch" data-color="#F8FAFC" style="background:#F8FAFC;"></div>
+                                    <div class="color-swatch" data-color="#4F75FF" style="background:#4F75FF;"></div>
+                                    <div class="color-swatch" data-color="#EF4444" style="background:#EF4444;"></div>
+                                    <div class="color-swatch" data-color="#10B981" style="background:#10B981;"></div>
+                                    <div class="color-swatch" data-color="#F59E0B" style="background:#F59E0B;"></div>
+                                    <div class="color-swatch" data-color="#39FF14" style="background:#39FF14; box-shadow: 0 0 10px #39FF14;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- دکمه باز کردن ابزارهای بیشتر (درون نوار) -->
+                        <button class="tool-btn" id="expandToolbarBtn" title="ابزارهای بیشتر" style="margin-right: auto;"><i class="fa-solid fa-chevron-down"></i></button>
                     </div>
-                    <!-- دکمه باز کردن ابزارهای بیشتر -->
-                    <button class="tool-btn" id="expandToolbarBtn" title="ابزارهای بیشتر" style="margin-right: auto;"><i class="fa-solid fa-chevron-down"></i></button>
                 </div>
 
                 <div class="editor-title-wrapper">
@@ -212,9 +218,8 @@
                     <div id="editor" contenteditable="true" class="editor-box paper-plain" placeholder="اینجا بنویسید..."></div>
                     <div id="dragOverlay" class="drag-overlay hidden">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
-                        <p>فایل را اینجا رها کنید</p>
+                        <p data-lang="drop-file">فایل را اینجا رها کنید</p>
                     </div>
-                    <!-- شمارشگر کلمات -->
                     <div id="wordCounter" class="word-counter glass-element">۰ کلمه</div>
                 </div>
 
@@ -414,7 +419,6 @@
                 </label>
             </div>
             
-            <!-- بازگشت تنظیمات پنل‌ها -->
             <div class="settings-row">
                 <div><strong data-lang="settings-notes-panel">پنل یادداشت‌ها</strong></div>
                 <label class="switch">
