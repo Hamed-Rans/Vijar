@@ -17,7 +17,7 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 const i18n = {
     fa: {
-        "btn-import": "افزودن", "btn-export": "خروجی",
+        "btn-import": "رسانه", "btn-export": "دریافت",
         "settings-title": "پیکربندی", "settings-theme": "پوسته ظاهری",
         "settings-lang": "زبان برنامه", "settings-autosave": "ذخیره خودکار",
         "settings-blur": "محو کردن هنگام هاور نکات", "settings-notes-panel": "پنل یادداشت‌ها",
@@ -27,7 +27,7 @@ const i18n = {
         "btn-reset-role": "انتخاب مجدد نقش", "btn-clear-data": "حذف تمام داده‌ها"
     },
     en: {
-        "btn-import": "Add", "btn-export": "Export",
+        "btn-import": "Media", "btn-export": "Export",
         "settings-title": "Settings", "settings-theme": "Appearance",
         "settings-lang": "Language", "settings-autosave": "Auto Save",
         "settings-blur": "Blur Background on Note Hover", "settings-notes-panel": "Notes Panel",
@@ -37,7 +37,7 @@ const i18n = {
         "btn-reset-role": "Reset Role", "btn-clear-data": "Clear All Data"
     },
     ar: {
-        "btn-import": "إضافة", "btn-export": "تصدير",
+        "btn-import": "وسائط", "btn-export": "تصدير",
         "settings-title": "الإعدادات", "settings-theme": "المظهر",
         "settings-lang": "اللغة", "settings-autosave": "حفظ تلقائي",
         "settings-blur": "تمويه عند التمرير على الملاحظات", "settings-notes-panel": "لوحة الملاحظات",
@@ -58,9 +58,7 @@ function applyLanguage(lang) {
             el.textContent = i18n[lang][key];
         }
     });
-    
-    // رفع باگ: حذف علامت # اضافه
-    const langDisplay = $('currentLangDisplay'); 
+    const langDisplay = $('currentLangDisplay');
     if (langDisplay) {
         langDisplay.textContent = lang === 'en' ? 'English' : (lang === 'ar' ? 'العربية' : 'فارسی');
     }
@@ -294,6 +292,14 @@ function initEditor() {
     });
     $$('.scratch-cmd').forEach(li => { li.onclick = () => { $('textScratchpad').focus(); document.execCommand(li.dataset.cmd, false, null); $('scratchpadContextMenu').classList.add('hidden'); }; });
 
+    // دکمه باز کردن ابزارهای بیشتر
+    $('expandToolbarBtn').onclick = () => {
+        const tb = $('topToolbar');
+        tb.classList.toggle('expanded');
+        const icon = $('expandToolbarBtn').querySelector('i');
+        icon.className = tb.classList.contains('expanded') ? 'fa-solid fa-chevron-up' : 'fa-solid fa-ellipsis';
+    };
+
     initSelectionTooltip();
     initContextMenu();
 }
@@ -313,6 +319,7 @@ function initSelectionTooltip() {
     const editor = $('editor');
     const tooltip = $('quickTooltip');
     const popup = $('noteViewPopup');
+    const blurOverlay = $('blurOverlay');
 
     document.addEventListener('selectionchange', () => {
         const sel = window.getSelection();
@@ -343,13 +350,13 @@ function initSelectionTooltip() {
             $('noteViewContent').textContent = el.dataset.note;
             const rect = el.getBoundingClientRect();
             
+            // Position fixed exactly above the word
             popup.className = 'note-view-popup ' + el.classList[1] + ' hidden';
-            
-            popup.style.left = (rect.left + rect.width/2) + 'px'; 
-            popup.style.top = (rect.top - 40) + 'px'; 
+            popup.style.left = (rect.left + rect.width / 2) + 'px'; 
+            popup.style.top = (rect.top - 15) + 'px'; 
             popup.style.transform = 'translate(-50%, -100%)'; 
             
-            if (state.blurEffect) editor.classList.add('blur-active');
+            if (state.blurEffect) blurOverlay.classList.add('show');
 
             popup.classList.remove('hidden');
             requestAnimationFrame(() => popup.classList.add('show'));
@@ -358,7 +365,7 @@ function initSelectionTooltip() {
     editor.addEventListener('mouseout', (e) => {
         if (e.target.closest('.hl-word')) {
             popup.classList.remove('show');
-            editor.classList.remove('blur-active');
+            blurOverlay.classList.remove('show');
             setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 300);
         }
     });
@@ -413,12 +420,19 @@ function renderPinnedNotes() {
     });
 }
 
+// محاسبه دقیق مبدا انیمیشن از نقطه کلیک
 function openMenuAt(e, menuEl) {
-    menuEl.style.setProperty('--origin-x', e.clientX + 'px');
-    menuEl.style.setProperty('--origin-y', e.clientY + 'px');
-    menuEl.classList.remove('hidden'); menuEl.classList.remove('closing');
-    menuEl.style.left = Math.min(e.pageX, window.innerWidth - 180) + 'px'; 
-    menuEl.style.top = Math.min(e.pageY, window.innerHeight - 250) + 'px';
+    menuEl.classList.remove('hidden'); 
+    menuEl.classList.remove('closing');
+    
+    let x = Math.min(e.clientX, window.innerWidth - 200);
+    let y = Math.min(e.clientY, window.innerHeight - 250);
+    
+    menuEl.style.left = x + 'px';
+    menuEl.style.top = y + 'px';
+    
+    menuEl.style.setProperty('--origin-x', (e.clientX - x) + 'px');
+    menuEl.style.setProperty('--origin-y', (e.clientY - y) + 'px');
 }
 
 function initContextMenu() {
@@ -712,7 +726,6 @@ function initSettings() {
     $('autoSaveToggle').checked = state.autoSave;
     $('blurEffectToggle').checked = state.blurEffect;
     
-    // رفع باگ: حذف علامت # اضافه
     const langDisplay = $('currentLangDisplay');
     if (langDisplay) {
         langDisplay.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
@@ -725,8 +738,10 @@ function initSettings() {
     const langDD = $('languageDropdown');
     langDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); langDD.classList.toggle('active'); };
     $$('#languageDropdown .dropdown-item').forEach(item => {
-        item.onclick = () => {
-            $('#currentLangDisplay').textContent = item.textContent; // Also fixed here just in case, wait no, this is inside string.
+        item.onclick = (e) => {
+            e.stopPropagation();
+            const langDisp = $('currentLangDisplay');
+            if (langDisp) langDisp.textContent = item.textContent;
             langDD.dataset.selectedLang = item.dataset.langVal;
             langDD.classList.remove('active');
             actionBar.classList.add('show');
@@ -747,7 +762,6 @@ function initSettings() {
     $('cancelSettingsBtn').onclick = () => { 
         $('autoSaveToggle').checked = state.autoSave;
         $('blurEffectToggle').checked = state.blurEffect;
-        // رفع باگ
         const langDisplay2 = $('currentLangDisplay');
         if (langDisplay2) langDisplay2.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
         
