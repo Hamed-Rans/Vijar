@@ -62,7 +62,6 @@
             
             <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house-chimney"></i></button>
             
-            <!-- ایکون تنظیمات جدید (چرخ‌دنده) -->
             <button id="settingsBtn" class="nav-btn" title="پیکربندی"><i class="fa-solid fa-gear"></i></button>
         </div>
     </div>
@@ -122,6 +121,7 @@
         <div class="workspace-layout" id="workspaceLayout">
             
             <aside class="side-panel left-panel transition-panel" id="leftPanel">
+                <!-- هدر یادداشت (آیکون چپ، متن راست) -->
                 <div class="panel-title">
                     <span class="header-title" data-lang="notes-panel">یادداشت</span>
                     <i class="fa-solid fa-note-sticky"></i>
@@ -130,17 +130,26 @@
                     <div id="pinnedNotesArea" class="notes-container"></div>
                 </div>
 
+                <!-- هدر بوم -->
                 <div class="panel-title" style="margin-top: 15px;">
                     <span class="header-title" data-lang="canvas-panel">بوم</span>
                     <div style="display:flex; gap:10px; align-items:center;">
-                        <button id="exportBoardToDocBtn" data-lang="btn-insert">درج در متن</button>
                         <i class="fa-solid fa-paintbrush"></i>
+                        <button id="exportBoardToDocBtn" data-lang="btn-insert">درج در متن</button>
                     </div>
                 </div>
                 <div class="panel-content glass-panel" style="flex: 1;">
                     <div class="scratchpad-tools">
                         <button class="board-tool active" data-tool="pencil" title="قلم"><i class="fa-solid fa-pencil"></i></button>
-                        <button class="board-tool" data-tool="highlighter" title="هایلایتر"><i class="fa-solid fa-highlighter"></i></button>
+                        <div class="tool-wrapper" id="boardHighlighterWrapper">
+                            <button class="board-tool" id="boardHighlighterBtn" title="هایلایتر"><i class="fa-solid fa-highlighter"></i></button>
+                            <!-- منوی تنظیمات هایلایتر بوم -->
+                            <div class="tool-settings glass-panel hidden" id="boardHighlighterSettings">
+                                <label>رنگ و سایز</label>
+                                <input type="color" id="boardHighlighterColor" value="#F59E0B" style="width:100%; height:30px; margin-bottom:5px;">
+                                <input type="range" id="boardHighlighterSize" min="5" max="30" value="15">
+                            </div>
+                        </div>
                         <button class="board-tool" data-tool="eraser" title="پاک‌کن"><i class="fa-solid fa-eraser"></i></button>
                         <div class="divider"></div>
                         <button class="board-tool" data-tool="line" title="خط"><i class="fa-solid fa-minus"></i></button>
@@ -192,7 +201,6 @@
                         
                         <button class="tool-btn" data-block="p" title="پاراگراف"><i class="fa-solid fa-paragraph"></i></button>
                         <button class="tool-btn" data-command="insertHorizontalRule" title="خط جداکننده"><i class="fa-solid fa-minus"></i></button>
-                        
                         <div class="divider"></div>
                         
                         <button class="tool-btn align-tool" data-command="justifyRight" title="راست‌چین"><i class="fa-solid fa-align-right"></i></button>
@@ -220,23 +228,7 @@
                             </div>
                         </div>
                         
-                        <!-- دکمه فلش در سمت چپ (انتهای نوار) -->
-                        <button class="tool-btn" id="expandToolbarBtn" title="ابزارهای بیشتر" style="margin-right: auto;"><i class="fa-solid fa-chevron-down"></i></button>
-                    </div>
-                    
-                    <div class="extra-tools-row">
-                        <div class="custom-dropdown" id="paperStyleDropdown">
-                            <div class="dropdown-selected" data-lang="paper-style">بافت کاغذ <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
-                            <div class="dropdown-list">
-                                <div class="dropdown-item" data-style="plain">ساده</div>
-                                <div class="dropdown-item" data-style="lined">دفتر خط‌دار</div>
-                                <div class="dropdown-item" data-style="grid">شطرنجی</div>
-                            </div>
-                        </div>
-                        <div class="divider"></div>
                         <button class="tool-btn" data-command="removeFormat" title="حذف استایل‌ها"><i class="fa-solid fa-eraser"></i></button>
-                        <button class="tool-btn" data-command="insertImage" title="درج لینک عکس"><i class="fa-regular fa-image"></i></button>
-                        <button class="tool-btn" data-command="createLink" title="درج لینک"><i class="fa-solid fa-link"></i></button>
                     </div>
                 </div>
 
@@ -254,23 +246,35 @@
                     <div id="wordCounter" class="word-counter glass-element">۰ کلمه</div>
                 </div>
 
+                <!-- نوار ابزار پایین (ابزارهای دم دستی) -->
                 <div class="floating-doc-toolbar glass-element">
-                    <button class="tool-btn toggle-tool" data-command="bold"><i class="fa-solid fa-bold"></i></button>
-                    <button class="tool-btn toggle-tool" data-command="italic"><i class="fa-solid fa-italic"></i></button>
-                    <button class="tool-btn toggle-tool" data-command="underline"><i class="fa-solid fa-underline"></i></button>
-                    <button class="tool-btn toggle-tool" data-command="strikeThrough"><i class="fa-solid fa-strikethrough"></i></button>
+                    <button class="tool-btn toggle-tool" data-command="bold" title="درشت"><i class="fa-solid fa-bold"></i></button>
+                    <button class="tool-btn toggle-tool" data-command="italic" title="مورب"><i class="fa-solid fa-italic"></i></button>
+                    <button class="tool-btn toggle-tool" data-command="underline" title="زیرخط"><i class="fa-solid fa-underline"></i></button>
+                    <button class="tool-btn toggle-tool" data-command="strikeThrough" title="خط‌خورده"><i class="fa-solid fa-strikethrough"></i></button>
                     <div class="divider"></div>
-                    <button class="tool-btn" data-command="insertUnorderedList"><i class="fa-solid fa-list-ul"></i></button>
-                    <button class="tool-btn" data-command="insertOrderedList"><i class="fa-solid fa-list-ol"></i></button>
-                    <div class="divider"></div>
-                    <button id="highlightBtn" class="tool-btn" title="برجسته‌سازی"><i class="fa-solid fa-highlighter"></i></button>
+                    
+                    <div class="tool-wrapper" id="highlighterWrapper">
+                        <button id="highlightBtn" class="tool-btn" title="هایلایت"><i class="fa-solid fa-highlighter"></i></button>
+                        <div class="tool-settings glass-panel hidden" id="highlighterSettings">
+                            <label>رنگ و سایز</label>
+                            <input type="color" id="highlighterColor" value="#EAB308" style="width:100%; height:30px; margin-bottom:5px;">
+                            <input type="range" id="highlighterSize" min="10" max="40" value="20">
+                        </div>
+                    </div>
                     <button id="linkBtn" class="tool-btn" title="پیوند"><i class="fa-solid fa-link"></i></button>
+                    
+                    <div class="divider"></div>
+                    <button class="tool-btn" data-command="insertUnorderedList" title="لیست"><i class="fa-solid fa-list-ul"></i></button>
+                    <button class="tool-btn" data-command="insertOrderedList" title="لیست شماره‌دار"><i class="fa-solid fa-list-ol"></i></button>
+                    
                     <div class="divider"></div>
                     <button id="saveDocBtn" class="tool-btn primary-glow" title="ذخیره"><i class="fa-solid fa-floppy-disk"></i></button>
                 </div>
             </main>
 
             <aside class="side-panel right-panel transition-panel" id="rightPanel">
+                <!-- هدر چرک‌نویس -->
                 <div class="panel-title">
                     <span class="header-title" data-lang="scratch-panel">چرک‌نویس</span>
                     <div style="display:flex; gap:5px; align-items:center;">
@@ -489,7 +493,6 @@
                 <button id="cancelSettingsBtn" class="btn-ghost" style="flex:1; justify-content:center;" data-lang="btn-cancel">انصراف</button>
             </div>
             
-            <!-- دکمه انتخاب مجدد نقش با طراحی جدید -->
             <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
                 <button id="resetRoleBtn" class="btn-primary" style="background: transparent; border: 1px solid var(--accent-main); color: var(--accent-main);"><i class="fa-solid fa-rotate-left"></i> <span data-lang="btn-reset-role">انتخاب مجدد نقش</span></button>
                 <button id="clearDataBtn" class="settings-btn danger"><i class="fa-solid fa-trash-can"></i> <span data-lang="btn-clear-data">حذف تمام داده‌ها</span></button>
