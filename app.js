@@ -9,7 +9,7 @@ let state = {
     role: null, folders: [], docs: [], activeFolder: 'all', activeDoc: null,
     selectionRange: null, selectedWord: '', autoSave: true, blurEffect: true, baseFontSize: 16,
     targetDocIdToMove: null, targetFolderIdToEdit: null, currentFileToImport: null,
-    lang: 'fa', tempSettings: {}, hasSettingsChanged: false
+    lang: 'fa', isLeftPanelCollapsed: false, isRightPanelCollapsed: false
 };
 
 const $ = (id) => document.getElementById(id);
@@ -54,14 +54,10 @@ function applyLanguage(lang) {
     document.documentElement.dir = (lang === 'ar' || lang === 'fa') ? 'rtl' : 'ltr';
     $$('[data-lang]').forEach(el => {
         const key = el.getAttribute('data-lang');
-        if (i18n[lang] && i18n[lang][key]) {
-            el.textContent = i18n[lang][key];
-        }
+        if (i18n[lang] && i18n[lang][key]) el.textContent = i18n[lang][key];
     });
     const langDisplay = $('currentLangDisplay');
-    if (langDisplay) {
-        langDisplay.textContent = lang === 'en' ? 'English' : (lang === 'ar' ? 'العربية' : 'فارسی');
-    }
+    if (langDisplay) langDisplay.textContent = lang === 'en' ? 'English' : (lang === 'ar' ? 'العربية' : 'فارسی');
 }
 
 function saveState() {
@@ -98,6 +94,7 @@ function initTheme() {
 function showRoleView() {
     $('role-view').classList.remove('hidden'); $('dashboard-view').classList.add('hidden'); $('editor-view').classList.add('hidden');
     $('backToDashBtn').classList.add('hidden'); $$('.action-nav').forEach(el => el.classList.add('hidden')); $('userRoleBadge').classList.add('hidden');
+    document.querySelector('.panel-toggles').classList.add('hidden');
 }
 
 function showDashboard() {
@@ -106,12 +103,14 @@ function showDashboard() {
     $('userRoleBadge').classList.remove('hidden'); $('userRoleBadge').textContent = state.role === 'teacher' ? 'استاد' : 'دانشجو';
     $('dashboard-view').style.opacity = '1';
     renderFolders(); renderDocs();
+    document.querySelector('.panel-toggles').classList.add('hidden');
 }
 
 function showEditor() {
     $('role-view').classList.add('hidden'); $('dashboard-view').classList.add('hidden'); $('editor-view').classList.remove('hidden');
     $('backToDashBtn').classList.remove('hidden'); $$('.action-nav').forEach(el => el.classList.remove('hidden'));
     $('editor-view').style.opacity = '1';
+    document.querySelector('.panel-toggles').classList.remove('hidden');
 }
 
 function renderFolders() {
@@ -153,8 +152,7 @@ function renderFolders() {
 
         li.querySelector('.folder-header').oncontextmenu = (e) => {
             e.preventDefault(); state.targetFolderIdToEdit = f.id;
-            const menu = $('folderContextMenu');
-            openMenuAt(e, menu);
+            openMenuAt(e, $('folderContextMenu'));
         };
 
         li.querySelectorAll('.folder-doc-item').forEach(item => { item.onclick = () => openDoc(item.dataset.docId); });
@@ -195,8 +193,7 @@ function renderDocs() {
         const menuBtn = card.querySelector('.doc-menu-btn');
         const showDocMenu = (e) => {
             state.targetDocIdToMove = d.id; 
-            const menu = $('docContextMenu');
-            openMenuAt(e, menu);
+            openMenuAt(e, $('docContextMenu'));
         };
         menuBtn.onclick = (e) => { 
             e.stopPropagation(); const menu = $('docContextMenu');
@@ -234,26 +231,51 @@ function openDoc(id) {
         $('editor-view').style.opacity = '0';
         setTimeout(() => $('editor-view').style.opacity = '1', 50);
         
-        setTimeout(() => { resizeCanvas(); restoreCanvas(); }, 150);
+        setTimeout(() => { resizeCanvas(); restoreCanvas(); updateWordCount(); }, 150);
         renderPinnedNotes();
     }, 200);
+}
+
+/* ---------------- ادیتور ---------------- */
+function updateWordCount() {
+    const text = $('editor').innerText || '';
+    const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+    $('wordCounter').textContent = words.toLocaleString('fa-IR') + ' کلمه';
 }
 
 function initEditor() {
     const editor = $('editor');
     const titleInput = $('documentTitle');
 
+    // رفع باگ اعمال فونت روی کل متن (فوکوس روی ادیتور)
     $$('.tool-btn[data-command]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
-        btn.addEventListener('click', () => { editor.focus(); document.execCommand(btn.dataset.command, false, null); updateToolbarState(); });
+        btn.addEventListener('click', () => { 
+            editor.focus(); 
+            document.execCommand(btn.dataset.command, false, null); 
+            updateToolbarState(); 
+        });
     });
     $$('.tool-btn[data-block]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
-        btn.addEventListener('click', () => { editor.focus(); document.execCommand('formatBlock', false, btn.dataset.block); });
+        btn.addEventListener('click', () => { 
+            editor.focus(); 
+            document.execCommand('formatBlock', false, btn.dataset.block); 
+        });
     });
 
     editor.addEventListener('keyup', updateToolbarState);
     editor.addEventListener('mouseup', updateToolbarState);
+    
+    // شمارش کلمات
+    editor.addEventListener('input', () => {
+        updateWordCount();
+        if (state.activeDoc) { 
+            state.activeDoc.content = editor.innerHTML; 
+            clearTimeout(window.saveT);
+            window.saveT = setTimeout(() => { if (state.autoSave) saveState(); }, 1000);
+        }
+    });
 
     titleInput.addEventListener('blur', () => {
         if (titleInput.value.trim()) {
@@ -263,15 +285,6 @@ function initEditor() {
     });
     titleInput.addEventListener('contextmenu', (e) => { e.preventDefault(); titleInput.removeAttribute('readonly'); titleInput.focus(); titleInput.select(); });
 
-    let saveTimeout;
-    editor.addEventListener('input', () => {
-        if (state.activeDoc) { 
-            state.activeDoc.content = editor.innerHTML; 
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => { if (state.autoSave) saveState(); }, 1000);
-        }
-    });
-    
     $('textScratchpad').addEventListener('input', () => {
         if (state.activeDoc) { state.activeDoc.scratchpad = $('textScratchpad').innerHTML; if(state.autoSave) saveState(); }
     });
@@ -286,9 +299,9 @@ function initEditor() {
         };
     });
 
+    // منوی راست کلیک چرک نویس
     $('textScratchpad').addEventListener('contextmenu', (e) => {
-        e.preventDefault(); const menu = $('scratchpadContextMenu');
-        openMenuAt(e, menu);
+        e.preventDefault(); openMenuAt(e, $('scratchpadContextMenu'));
     });
     $$('.scratch-cmd').forEach(li => { li.onclick = () => { $('textScratchpad').focus(); document.execCommand(li.dataset.cmd, false, null); $('scratchpadContextMenu').classList.add('hidden'); }; });
 
@@ -315,25 +328,38 @@ function updateToolbarState() {
     });
 }
 
+/* ---------------- تولتیپ و نکات ---------------- */
 function initSelectionTooltip() {
     const editor = $('editor');
     const tooltip = $('quickTooltip');
     const popup = $('noteViewPopup');
     const blurOverlay = $('blurOverlay');
 
-    document.addEventListener('selectionchange', () => {
-        const sel = window.getSelection();
-        if (!sel.rangeCount || sel.isCollapsed) { tooltip.classList.add('hidden'); return; }
-        const range = sel.getRangeAt(0);
-        if (!editor.contains(range.commonAncestorContainer)) { tooltip.classList.add('hidden'); return; }
-        const rect = range.getBoundingClientRect();
-        
-        tooltip.classList.remove('hidden');
-        tooltip.style.left = (rect.left + rect.width / 2) + 'px';
-        tooltip.style.top = (rect.top - 45) + 'px'; 
-        
-        state.selectionRange = range.cloneRange();
-        state.selectedWord = sel.toString().trim();
+    // نمایش تولتیپ با تاخیر (وقتی موس رها شد)
+    document.addEventListener('mouseup', () => {
+        setTimeout(() => {
+            const sel = window.getSelection();
+            if (!sel.rangeCount || sel.isCollapsed) { tooltip.classList.remove('show'); setTimeout(()=>tooltip.classList.add('hidden'), 300); return; }
+            const range = sel.getRangeAt(0);
+            if (!editor.contains(range.commonAncestorContainer)) { tooltip.classList.remove('show'); setTimeout(()=>tooltip.classList.add('hidden'), 300); return; }
+            
+            const rect = range.getBoundingClientRect();
+            tooltip.classList.remove('hidden');
+            tooltip.style.left = (rect.left + rect.width / 2) + 'px';
+            tooltip.style.top = (rect.top - 45) + 'px'; 
+            
+            requestAnimationFrame(() => tooltip.classList.add('show'));
+            
+            state.selectionRange = range.cloneRange();
+            state.selectedWord = sel.toString().trim();
+        }, 100);
+    });
+
+    document.addEventListener('mousedown', (e) => {
+        if (!e.target.closest('#quickTooltip')) {
+            tooltip.classList.remove('show');
+            setTimeout(()=>tooltip.classList.add('hidden'), 300);
+        }
     });
 
     $('quickAddNoteBtn').addEventListener('click', () => {
@@ -350,10 +376,9 @@ function initSelectionTooltip() {
             $('noteViewContent').textContent = el.dataset.note;
             const rect = el.getBoundingClientRect();
             
-            // Position fixed exactly above the word
             popup.className = 'note-view-popup ' + el.classList[1] + ' hidden';
             popup.style.left = (rect.left + rect.width / 2) + 'px'; 
-            popup.style.top = (rect.top - 15) + 'px'; 
+            popup.style.top = (rect.top - 10) + 'px'; 
             popup.style.transform = 'translate(-50%, -100%)'; 
             
             if (state.blurEffect) blurOverlay.classList.add('show');
@@ -413,24 +438,50 @@ function renderPinnedNotes() {
     if (!state.activeDoc) return;
     const temp = document.createElement('div');
     temp.innerHTML = state.activeDoc.content || '';
+    
     temp.querySelectorAll('.hl-word[data-pinned="1"]').forEach(el => {
-        const card = document.createElement('div'); card.className = 'note-card';
-        card.innerHTML = `<strong>${el.dataset.word || 'یادداشت'}:</strong> ${escapeHtml(el.dataset.note)}`;
+        const card = document.createElement('div'); 
+        card.className = `note-card ${el.classList[1]}`; // اعمال رنگ برچسب
+        
+        // دکمه ویرایش
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-note-btn';
+        editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
+        editBtn.onclick = () => {
+            // پیدا کردن المان اصلی در ادیتور و باز کردن مودال برای ویرایش
+            const editorEl = $('editor').querySelector(`.hl-word[data-note="${escapeHtml(el.dataset.note)}"]`);
+            if(editorEl) {
+                $('selectedWordDisplay').textContent = editorEl.dataset.word;
+                $('noteInput').value = editorEl.dataset.note;
+                $('pinNoteCheck').checked = editorEl.dataset.pinned === '1';
+                
+                // انتخاب رنگ
+                const currentColor = editorEl.classList[1].replace('hl-', '');
+                $$('#labelColorOptions .color-dot').forEach(d => {
+                    d.classList.toggle('active', d.dataset.color === currentColor);
+                });
+
+                $('noteModal').classList.add('show');
+                // حذف المان قبلی برای اینکه با ثبت مجدد جایگزین شود
+                state.selectionRange = document.createRange();
+                state.selectionRange.selectNode(editorEl);
+            }
+        };
+
+        card.innerHTML = `<strong>${el.dataset.word}:</strong><br>${escapeHtml(el.dataset.note)}`;
+        card.appendChild(editBtn);
         area.appendChild(card);
     });
 }
 
-// محاسبه دقیق مبدا انیمیشن از نقطه کلیک
+/* ---------------- منوهای راست کلیک ---------------- */
 function openMenuAt(e, menuEl) {
     menuEl.classList.remove('hidden'); 
     menuEl.classList.remove('closing');
-    
     let x = Math.min(e.clientX, window.innerWidth - 200);
     let y = Math.min(e.clientY, window.innerHeight - 250);
-    
     menuEl.style.left = x + 'px';
     menuEl.style.top = y + 'px';
-    
     menuEl.style.setProperty('--origin-x', (e.clientX - x) + 'px');
     menuEl.style.setProperty('--origin-y', (e.clientY - y) + 'px');
 }
@@ -491,7 +542,7 @@ function initContextMenu() {
         $('folderContextMenu').classList.add('hidden');
     };
     $('ctxDeleteFolder').onclick = () => {
-        if(confirm('حذف شود؟ (جزوه‌ها به همه منتقل می‌شوند)')) {
+        if(confirm('حذف شود؟')) {
             state.folders = state.folders.filter(f => f.id !== state.targetFolderIdToEdit);
             state.docs.forEach(d => { if(d.folderId === state.targetFolderIdToEdit) d.folderId = null; });
             saveState(); renderFolders(); renderDocs();
@@ -500,11 +551,17 @@ function initContextMenu() {
     };
 }
 
+/* ---------------- فونت و آپلود ---------------- */
 function initFontDropdowns() {
     const fontDD = $('fontDropdown');
     fontDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); fontDD.classList.toggle('active'); };
     fontDD.querySelectorAll('.dropdown-item').forEach(item => {
-        item.onclick = () => { $('editor').focus(); document.execCommand('fontName', false, item.dataset.value); fontDD.querySelector('.dropdown-selected').childNodes[0].nodeValue = item.textContent + ' '; fontDD.classList.remove('active'); };
+        item.onclick = () => { 
+            $('editor').focus(); 
+            document.execCommand('fontName', false, item.dataset.value); 
+            fontDD.querySelector('.dropdown-selected').childNodes[0].nodeValue = item.textContent + ' '; 
+            fontDD.classList.remove('active'); 
+        };
     });
 
     const colorBtn = $('textColorBtn'), colorPopup = $('colorPopup');
@@ -518,16 +575,58 @@ function initFontDropdowns() {
         if (!e.target.closest('.color-menu-wrapper')) $$('.custom-color-popup').forEach(p => p.classList.remove('show'));
     });
 
-    $('increaseFontSize').onclick = () => { state.baseFontSize = Math.min(state.baseFontSize + 2, 40); $('fontSizeDisplay').textContent = state.baseFontSize; $('editor').style.fontSize = state.baseFontSize + 'px'; localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); };
-    $('decreaseFontSize').onclick = () => { state.baseFontSize = Math.max(state.baseFontSize - 2, 10); $('fontSizeDisplay').textContent = state.baseFontSize; $('editor').style.fontSize = state.baseFontSize + 'px'; localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); };
+    // کنترل سایز فونت با انتخاب متن
+    $('increaseFontSize').onclick = () => { 
+        $('editor').focus();
+        const sel = window.getSelection();
+        if(!sel.isCollapsed) {
+            document.execCommand('fontSize', false, '7');
+            $('editor').querySelectorAll('font[size="7"]').forEach(el => { el.removeAttribute('size'); el.style.fontSize = (state.baseFontSize + 2) + 'px'; });
+        } else {
+            state.baseFontSize = Math.min(state.baseFontSize + 2, 40); 
+            $('editor').style.fontSize = state.baseFontSize + 'px'; 
+        }
+        $('fontSizeDisplay').textContent = state.baseFontSize; 
+        localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
+    };
+    $('decreaseFontSize').onclick = () => { 
+        $('editor').focus();
+        const sel = window.getSelection();
+        if(!sel.isCollapsed) {
+            document.execCommand('fontSize', false, '7');
+            $('editor').querySelectorAll('font[size="7"]').forEach(el => { el.removeAttribute('size'); el.style.fontSize = Math.max(state.baseFontSize - 2, 10) + 'px'; });
+        } else {
+            state.baseFontSize = Math.max(state.baseFontSize - 2, 10); 
+            $('editor').style.fontSize = state.baseFontSize + 'px'; 
+        }
+        $('fontSizeDisplay').textContent = state.baseFontSize; 
+        localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
+    };
 
-    $('importBtn').onclick = () => { $('importActionOptions').classList.add('hidden'); $('importModal').classList.add('show'); };
+    // آپلود دو مرحله ای
+    $('importBtn').onclick = () => { 
+        $('importStep1').classList.remove('hidden'); 
+        $('importStep2').classList.add('hidden'); 
+        $('importModal').classList.add('show'); 
+    };
+    $('backToStep1').onclick = () => {
+        $('importStep1').classList.remove('hidden'); 
+        $('importStep2').classList.add('hidden'); 
+    };
+
     $$('.media-cat-item').forEach(cat => {
-        cat.onclick = () => { $('fileInput').accept = cat.dataset.accept; $('fileInput').click(); };
+        cat.onclick = () => { 
+            $('fileInput').accept = cat.dataset.accept; 
+            $('fileInput').click(); 
+        };
     });
+    
     $('fileInput').onchange = (e) => {
-        const file = e.target.files[0]; if (!file) return; state.currentFileToImport = file;
-        $('importActionOptions').classList.remove('hidden');
+        const file = e.target.files[0]; if (!file) return; 
+        state.currentFileToImport = file;
+        // رفتن به مرحله 2
+        $('importStep1').classList.add('hidden'); 
+        $('importStep2').classList.remove('hidden');
         if (file.type === 'application/pdf') $('actionOpenPdf').classList.remove('hidden');
         else $('actionOpenPdf').classList.add('hidden');
     };
@@ -542,6 +641,8 @@ function initFontDropdowns() {
             else if (file.type.startsWith('audio/')) html += `<audio src="${event.target.result}" controls style="width:100%;"></audio>`;
             else html += `<a href="${event.target.result}" download="${file.name}" style="color:var(--accent-main); text-decoration:underline;">دریافت فایل: ${file.name}</a>`;
             html += `</div>`;
+            
+            $('editor').focus();
             document.execCommand('insertHTML', false, html);
             if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
             $('importModal').classList.remove('show'); $('fileInput').value = '';
@@ -555,6 +656,7 @@ function initFontDropdowns() {
         reader.onload = (event) => {
             let html = `<div class="media-attachment"><button class="delete-media-btn" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>
                         <embed src="${event.target.result}" type="application/pdf" width="100%" height="500px" style="border-radius:12px;"></div>`;
+            $('editor').focus();
             document.execCommand('insertHTML', false, html);
             if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
             $('importModal').classList.remove('show'); $('fileInput').value = '';
@@ -578,6 +680,7 @@ function initFontDropdowns() {
                     Promise.all(textPromises).then(pagesText => {
                         const fullText = pagesText.join('\n');
                         const paragraphs = fullText.split('\n').filter(p=>p.trim()).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+                        $('editor').focus();
                         document.execCommand('insertHTML', false, paragraphs);
                         if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
                         
@@ -598,6 +701,7 @@ function initFontDropdowns() {
             const reader = new FileReader();
             reader.onload = (event) => {
                 const paragraphs = event.target.result.split('\n').filter(p=>p.trim()).map(p => `<p>${escapeHtml(p)}</p>`).join('');
+                $('editor').focus();
                 document.execCommand('insertHTML', false, paragraphs);
                 if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
                 $('importModal').classList.remove('show'); $('fileInput').value = '';
@@ -609,6 +713,7 @@ function initFontDropdowns() {
     };
 }
 
+/* ---------------- بوم ---------------- */
 let canvasState = { drawing: false, tool: 'pencil', color: '#4F75FF', size: 3, points: [], snapshot: null, startPos: null };
 
 function resizeCanvas() {
@@ -647,17 +752,15 @@ function initCanvas() {
 
     canvas.addEventListener('pointerenter', () => { 
         cursor.style.display = 'block'; 
-        if (canvasState.tool === 'eraser') { cursor.style.backgroundColor = 'rgba(255,255,255,0.5)'; cursor.style.border = '2px solid white'; }
-        else if (canvasState.tool === 'highlighter') { cursor.style.backgroundColor = 'rgba(255, 255, 0, 0.3)'; cursor.style.border = '1px solid yellow'; }
-        else { cursor.style.backgroundColor = 'transparent'; cursor.style.border = '1.5px solid var(--accent-main)'; }
+        // تغییر نشانگر
+        if (canvasState.tool === 'eraser') cursor.style.backgroundImage = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23EF4444'%3E%3Cpath d='M16 3l5 5-11 11H5v-5L16 3zm-2.5 7.5l-7 7H7v1.5h1.5l7-7-2-2z'/%3E%3C/svg%3E\")";
+        else if (canvasState.tool === 'highlighter') cursor.classList.add('cursor-highlighter');
+        else { cursor.classList.remove('cursor-highlighter'); cursor.style.backgroundImage = ""; }
     });
     canvas.addEventListener('pointerleave', () => { cursor.style.display = 'none'; canvasState.drawing = false; });
     
     canvas.addEventListener('pointermove', (e) => {
-        const size = canvasState.tool === 'eraser' || canvasState.tool === 'highlighter' ? 20 : canvasState.size;
-        cursor.style.width = size + 'px'; cursor.style.height = size + 'px';
         cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
-        
         if (!canvasState.drawing) return;
         const pos = getPos(e);
         if (['pencil', 'highlighter', 'eraser'].includes(canvasState.tool)) {
@@ -705,6 +808,7 @@ function initCanvas() {
     
     $('boardColorBtn').onclick = (e) => { e.stopPropagation(); $('boardColorPopup').classList.toggle('show'); };
     $$('#boardColorPopup .color-swatch').forEach(sw => { sw.onclick = () => { canvasState.color = sw.dataset.color; $('boardColorPopup').classList.remove('show'); }; });
+    $('boardColorNative').oninput = (e) => canvasState.color = e.target.value;
     $('clearBoardBtn').onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); };
     $('exportBoardToDocBtn').onclick = () => {
         const img = document.createElement('img'); img.src = canvas.toDataURL(); img.style.maxWidth = '100%'; img.style.borderRadius = '12px'; img.style.margin = '10px 0';
@@ -722,14 +826,13 @@ function restoreCanvas() {
     img.src = state.activeDoc.board;
 }
 
+/* ---------------- تنظیمات ---------------- */
 function initSettings() {
     $('autoSaveToggle').checked = state.autoSave;
     $('blurEffectToggle').checked = state.blurEffect;
     
     const langDisplay = $('currentLangDisplay');
-    if (langDisplay) {
-        langDisplay.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
-    }
+    if (langDisplay) langDisplay.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
     applyLanguage(state.lang);
 
     const settingsInputs = $$('#settingsModal input, #settingsModal select, #settingsModal .custom-dropdown');
@@ -764,7 +867,6 @@ function initSettings() {
         $('blurEffectToggle').checked = state.blurEffect;
         const langDisplay2 = $('currentLangDisplay');
         if (langDisplay2) langDisplay2.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
-        
         langDD.dataset.selectedLang = state.lang;
         $('settingsModal').classList.remove('show'); 
     };
@@ -778,22 +880,8 @@ function initSettings() {
         localStorage.setItem('vizhar_blur', state.blurEffect);
         
         applyLanguage(newLang);
-
-        const isNotesChecked = $('toggleNotesPanel').checked;
-        const isCanvasChecked = $('toggleCanvasPanel').checked;
-        const isScratchChecked = $('toggleScratchPanel').checked;
-        
-        $('pinnedNotesArea').parentElement.style.display = isNotesChecked ? 'flex' : 'none';
-        $('pinnedNotesArea').parentElement.previousElementSibling.style.display = isNotesChecked ? 'flex' : 'none';
-        
-        $('canvasContainer').parentElement.style.display = isCanvasChecked ? 'flex' : 'none';
-        $('canvasContainer').parentElement.previousElementSibling.style.display = isCanvasChecked ? 'flex' : 'none';
-        
-        $('rightPanel').style.display = isScratchChecked ? 'flex' : 'none';
-
         $('settingsModal').classList.remove('show');
         showToast('تنظیمات ذخیره شد');
-        setTimeout(resizeCanvas, 300);
     };
 
     $('resetRoleBtn').onclick = () => { state.role = null; localStorage.removeItem(STORAGE_KEYS.role); $('settingsModal').classList.remove('show'); showRoleView(); };
@@ -836,7 +924,29 @@ function init() {
         state.folders.push({ id: 'f_' + Date.now(), name }); saveState(); $('newFolderName').value = ''; $('addFolderModal').classList.remove('show'); renderFolders();
     };
 
-    $('focusModeBtn').onclick = () => { document.body.classList.toggle('focus-mode'); const icon = $('focusModeBtn').querySelector('i'); icon.className = document.body.classList.contains('focus-mode') ? 'fa-solid fa-compress' : 'fa-solid fa-expand'; };
+    // تمام صفحه شدن
+    $('focusModeBtn').onclick = () => { 
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => { showToast('مرورگر اجازه نداد.'); });
+            document.body.classList.add('focus-mode'); 
+            $('focusModeBtn').querySelector('i').className = 'fa-solid fa-compress';
+        } else {
+            document.exitFullscreen();
+            document.body.classList.remove('focus-mode');
+            $('focusModeBtn').querySelector('i').className = 'fa-solid fa-expand';
+        }
+    };
+
+    // کلاپس کردن پنل ها
+    $('toggleLeftPanelBtn').onclick = () => {
+        $('leftPanel').classList.toggle('collapsed-left');
+        $('toggleLeftPanelBtn').querySelector('i').classList.toggle('fa-rotate-180');
+    };
+    $('toggleRightPanelBtn').onclick = () => {
+        $('rightPanel').classList.toggle('collapsed-right');
+        $('toggleRightPanelBtn').querySelector('i').classList.toggle('fa-rotate-180');
+    };
+
     $$('.btn-close-modal').forEach(btn => btn.onclick = () => btn.closest('.modal').classList.remove('show'));
     $$('.modal').forEach(modal => { modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('show'); }; });
 
