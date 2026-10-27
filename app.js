@@ -97,6 +97,9 @@ function applyLanguage(lang) {
     state.lang = lang;
     localStorage.setItem(STORAGE_KEYS.language, lang);
     document.documentElement.dir = (lang === 'ar' || lang === 'fa') ? 'rtl' : 'ltr';
+    
+    if (!i18n[lang]) lang = 'fa'; // Fallback
+
     $$('[data-lang]').forEach(el => {
         const key = el.getAttribute('data-lang');
         if (i18n[lang] && i18n[lang][key]) {
@@ -105,9 +108,9 @@ function applyLanguage(lang) {
         }
     });
     
-    $('documentTitle').placeholder = i18n[lang]["placeholder-title"];
-    $('editor').setAttribute('placeholder', i18n[lang]["placeholder-editor"]);
-    $('textScratchpad').setAttribute('placeholder', i18n[lang]["placeholder-scratch"]);
+    if($('documentTitle')) $('documentTitle').placeholder = i18n[lang]["placeholder-title"];
+    if($('editor')) $('editor').setAttribute('placeholder', i18n[lang]["placeholder-editor"]);
+    if($('textScratchpad')) $('textScratchpad').setAttribute('placeholder', i18n[lang]["placeholder-scratch"]);
     
     const langDisplay = $('currentLangDisplay');
     if (langDisplay) langDisplay.textContent = lang === 'en' ? 'English' : (lang === 'ar' ? 'العربية' : 'فارسی');
@@ -146,30 +149,52 @@ function initTheme() {
 }
 
 function showRoleView() {
-    $('role-view').classList.remove('hidden'); $('dashboard-view').classList.add('hidden'); $('editor-view').classList.add('hidden');
-    $('backToDashBtn').classList.add('hidden'); $$('.action-nav').forEach(el => el.classList.add('hidden')); $('userRoleBadge').classList.add('hidden');
-    document.querySelector('.panel-toggles').classList.add('hidden');
+    if($('role-view')) $('role-view').classList.remove('hidden'); 
+    if($('dashboard-view')) $('dashboard-view').classList.add('hidden'); 
+    if($('editor-view')) $('editor-view').classList.add('hidden');
+    if($('backToDashBtn')) $('backToDashBtn').classList.add('hidden'); 
+    $$('.action-nav').forEach(el => el.classList.add('hidden')); 
+    if($('userRoleBadge')) $('userRoleBadge').classList.add('hidden');
+    const panelToggles = document.querySelector('.panel-toggles');
+    if(panelToggles) panelToggles.classList.add('hidden');
 }
 
 function showDashboard() {
-    $('role-view').classList.add('hidden'); $('dashboard-view').classList.remove('hidden'); $('editor-view').classList.add('hidden');
-    $('backToDashBtn').classList.add('hidden'); $$('.action-nav').forEach(el => el.classList.add('hidden'));
-    $('userRoleBadge').classList.remove('hidden'); 
-    $('userRoleBadge').textContent = state.role === 'teacher' ? i18n[state.lang]["role-teacher"] : i18n[state.lang]["role-student"];
-    $('dashboard-view').style.opacity = '1';
-    renderFolders(); renderDocs();
-    document.querySelector('.panel-toggles').classList.add('hidden');
+    if($('role-view')) $('role-view').classList.add('hidden'); 
+    if($('dashboard-view')) $('dashboard-view').classList.remove('hidden'); 
+    if($('editor-view')) $('editor-view').classList.add('hidden');
+    if($('backToDashBtn')) $('backToDashBtn').classList.add('hidden'); 
+    $$('.action-nav').forEach(el => el.classList.add('hidden'));
+    
+    if($('userRoleBadge')) {
+        $('userRoleBadge').classList.remove('hidden'); 
+        $('userRoleBadge').textContent = state.role === 'teacher' ? i18n[state.lang]["role-teacher"] : i18n[state.lang]["role-student"];
+    }
+    
+    if($('dashboard-view')) $('dashboard-view').style.opacity = '1';
+    
+    renderFolders(); 
+    renderDocs();
+    
+    const panelToggles = document.querySelector('.panel-toggles');
+    if(panelToggles) panelToggles.classList.add('hidden');
 }
 
 function showEditor() {
-    $('role-view').classList.add('hidden'); $('dashboard-view').classList.add('hidden'); $('editor-view').classList.remove('hidden');
-    $('backToDashBtn').classList.remove('hidden'); $$('.action-nav').forEach(el => el.classList.remove('hidden'));
-    $('editor-view').style.opacity = '1';
-    document.querySelector('.panel-toggles').classList.remove('hidden');
+    if($('role-view')) $('role-view').classList.add('hidden'); 
+    if($('dashboard-view')) $('dashboard-view').classList.add('hidden'); 
+    if($('editor-view')) $('editor-view').classList.remove('hidden');
+    if($('backToDashBtn')) $('backToDashBtn').classList.remove('hidden'); 
+    $$('.action-nav').forEach(el => el.classList.remove('hidden'));
+    if($('editor-view')) $('editor-view').style.opacity = '1';
+    
+    const panelToggles = document.querySelector('.panel-toggles');
+    if(panelToggles) panelToggles.classList.remove('hidden');
 }
 
 function renderFolders() {
-    const list = $('folderList'); list.innerHTML = '';
+    const list = $('folderList'); if(!list) return;
+    list.innerHTML = '';
     const allLi = document.createElement('li'); allLi.className = 'folder-item';
     allLi.innerHTML = `<div class="folder-header ${state.activeFolder === 'all' ? 'active' : ''}" data-id="all"><div class="folder-title-wrap ${state.activeFolder === 'all' ? 'active' : ''}"><i class="fa-solid fa-inbox"></i> ${state.lang==='fa'?'همه جزوه‌ها':(state.lang==='ar'?'جميع الملاحظات':'All Notes')}</div></div>`;
     allLi.querySelector('.folder-title-wrap').onclick = () => { state.activeFolder = 'all'; renderFolders(); renderDocs(); };
@@ -216,12 +241,13 @@ function renderFolders() {
 }
 
 function renderDocs() {
-    const grid = $('documentsGrid'); grid.innerHTML = '';
+    const grid = $('documentsGrid'); if(!grid) return;
+    grid.innerHTML = '';
     let docs = state.docs;
     if (state.activeFolder !== 'all') docs = docs.filter(d => d.folderId === state.activeFolder);
 
-    if (docs.length === 0) { $('emptyState').classList.remove('hidden'); return; }
-    $('emptyState').classList.add('hidden');
+    if (docs.length === 0) { if($('emptyState')) $('emptyState').classList.remove('hidden'); return; }
+    if($('emptyState')) $('emptyState').classList.add('hidden');
 
     docs.forEach(d => {
         const card = document.createElement('div'); card.className = 'doc-card'; card.dataset.id = d.id;
@@ -269,22 +295,26 @@ function openDoc(id) {
     state.activeDoc = state.docs.find(d => d.id === id);
     if (!state.activeDoc) return;
     
-    $('dashboard-view').style.opacity = '0';
+    if($('dashboard-view')) $('dashboard-view').style.opacity = '0';
     setTimeout(() => {
-        $('documentTitle').value = state.activeDoc.title || '';
-        $('documentTitle').classList.toggle('locked', !!state.activeDoc.title);
-        if (state.activeDoc.title) $('documentTitle').setAttribute('readonly', 'readonly');
-        else $('documentTitle').removeAttribute('readonly');
+        if($('documentTitle')) {
+            $('documentTitle').value = state.activeDoc.title || '';
+            $('documentTitle').classList.toggle('locked', !!state.activeDoc.title);
+            if (state.activeDoc.title) $('documentTitle').setAttribute('readonly', 'readonly');
+            else $('documentTitle').removeAttribute('readonly');
+        }
         
-        $('editor').innerHTML = state.activeDoc.content || '';
-        $('textScratchpad').innerHTML = state.activeDoc.scratchpad || '';
-        $('fontSizeDisplay').textContent = state.baseFontSize;
-        $('editor').style.fontSize = state.baseFontSize + 'px';
-        $('editor').className = `editor-box paper-${state.activeDoc.paperStyle || 'plain'}`;
+        if($('editor')) {
+            $('editor').innerHTML = state.activeDoc.content || '';
+            $('editor').style.fontSize = state.baseFontSize + 'px';
+            $('editor').className = `editor-box paper-${state.activeDoc.paperStyle || 'plain'}`;
+        }
+        if($('textScratchpad')) $('textScratchpad').innerHTML = state.activeDoc.scratchpad || '';
+        if($('fontSizeDisplay')) $('fontSizeDisplay').textContent = state.baseFontSize;
         
         showEditor();
-        $('editor-view').style.opacity = '0';
-        setTimeout(() => $('editor-view').style.opacity = '1', 50);
+        if($('editor-view')) $('editor-view').style.opacity = '0';
+        setTimeout(() => { if($('editor-view')) $('editor-view').style.opacity = '1'; }, 50);
         
         setTimeout(() => { resizeCanvas(); restoreCanvas(); updateWordCount(); }, 150);
         renderPinnedNotes();
@@ -292,6 +322,7 @@ function openDoc(id) {
 }
 
 function updateWordCount() {
+    if(!$('editor') || !$('wordCounter')) return;
     const text = $('editor').innerText || '';
     const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
     const wordStr = i18n[state.lang]["word-count"];
@@ -301,13 +332,14 @@ function updateWordCount() {
 function initEditor() {
     const editor = $('editor');
     const titleInput = $('documentTitle');
+    if(!editor || !titleInput) return;
 
     $$('.tool-btn[data-command]').forEach(btn => {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', () => { 
             editor.focus(); 
             if(btn.dataset.command === 'hiliteColor') {
-                document.execCommand('hiliteColor', false, 'rgba(234, 179, 8, 0.5)'); // رنگ هایلایتر
+                document.execCommand('hiliteColor', false, 'rgba(234, 179, 8, 0.5)'); 
             } else {
                 document.execCommand(btn.dataset.command, false, null); 
             }
@@ -343,34 +375,41 @@ function initEditor() {
     });
     titleInput.addEventListener('contextmenu', (e) => { e.preventDefault(); titleInput.removeAttribute('readonly'); titleInput.focus(); titleInput.select(); });
 
-    $('textScratchpad').addEventListener('input', () => {
-        if (state.activeDoc) { state.activeDoc.scratchpad = $('textScratchpad').innerHTML; if(state.autoSave) saveState(); }
-    });
+    if($('textScratchpad')) {
+        $('textScratchpad').addEventListener('input', () => {
+            if (state.activeDoc) { state.activeDoc.scratchpad = $('textScratchpad').innerHTML; if(state.autoSave) saveState(); }
+        });
 
-    $('paperStyleDropdown').querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); $('paperStyleDropdown').classList.toggle('active'); };
-    $$('#paperStyleDropdown .dropdown-item').forEach(item => {
-        item.onclick = () => {
-            const style = item.dataset.style;
-            if(state.activeDoc) { state.activeDoc.paperStyle = style; saveState(); }
-            $('editor').className = `editor-box paper-${style}`;
-            $('paperStyleDropdown').classList.remove('active');
-        };
-    });
+        $('textScratchpad').addEventListener('contextmenu', (e) => {
+            e.preventDefault(); openMenuAt(e, $('scratchpadContextMenu'));
+        });
+    }
 
-    $('textScratchpad').addEventListener('contextmenu', (e) => {
-        e.preventDefault(); openMenuAt(e, $('scratchpadContextMenu'));
-    });
+    if($('paperStyleDropdown')) {
+        $('paperStyleDropdown').querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); $('paperStyleDropdown').classList.toggle('active'); };
+        $$('#paperStyleDropdown .dropdown-item').forEach(item => {
+            item.onclick = () => {
+                const style = item.dataset.style;
+                if(state.activeDoc) { state.activeDoc.paperStyle = style; saveState(); }
+                $('editor').className = `editor-box paper-${style}`;
+                $('paperStyleDropdown').classList.remove('active');
+            };
+        });
+    }
+
     $$('.scratch-cmd').forEach(li => { li.onclick = () => { $('textScratchpad').focus(); document.execCommand(li.dataset.cmd, false, null); $('scratchpadContextMenu').classList.add('hidden'); }; });
 
-    $('saveDocBtn').addEventListener('click', () => {
-        if (state.activeDoc) {
-            state.activeDoc.title = titleInput.value.trim();
-            state.activeDoc.content = editor.innerHTML;
-            state.activeDoc.scratchpad = $('textScratchpad').innerHTML;
-            saveState(); 
-            showToast(i18n[state.lang]["saved"]);
-        }
-    });
+    if($('saveDocBtn')) {
+        $('saveDocBtn').addEventListener('click', () => {
+            if (state.activeDoc) {
+                state.activeDoc.title = titleInput.value.trim();
+                state.activeDoc.content = editor.innerHTML;
+                state.activeDoc.scratchpad = $('textScratchpad') ? $('textScratchpad').innerHTML : '';
+                saveState(); 
+                showToast(i18n[state.lang]["saved"]);
+            }
+        });
+    }
 
     initSelectionTooltip();
     initContextMenu();
@@ -392,6 +431,7 @@ function initSelectionTooltip() {
     const tooltip = $('quickTooltip');
     const popup = $('noteViewPopup');
     const blurOverlay = $('blurOverlay');
+    if(!editor || !tooltip || !popup || !blurOverlay) return;
 
     document.addEventListener('mouseup', () => {
         setTimeout(() => {
@@ -419,13 +459,15 @@ function initSelectionTooltip() {
         }
     });
 
-    $('quickAddNoteBtn').addEventListener('click', () => {
-        if (!state.selectedWord) return;
-        $('selectedWordDisplay').textContent = state.selectedWord;
-        $('noteInput').value = '';
-        $('noteModal').classList.add('show');
-        tooltip.classList.add('hidden');
-    });
+    if($('quickAddNoteBtn')) {
+        $('quickAddNoteBtn').addEventListener('click', () => {
+            if (!state.selectedWord) return;
+            $('selectedWordDisplay').textContent = state.selectedWord;
+            $('noteInput').value = '';
+            $('noteModal').classList.add('show');
+            tooltip.classList.add('hidden');
+        });
+    }
 
     editor.addEventListener('mouseover', (e) => {
         const el = e.target.closest('.hl-word');
@@ -459,6 +501,8 @@ function initSelectionTooltip() {
 }
 
 function initNoteModal() {
+    if(!$('saveNoteBtn')) return;
+    
     $$('#labelColorOptions .color-dot').forEach(dot => {
         dot.addEventListener('click', () => {
             $$('#labelColorOptions .color-dot').forEach(d => d.classList.remove('active'));
@@ -496,7 +540,8 @@ function initNoteModal() {
 }
 
 function renderPinnedNotes() {
-    const area = $('pinnedNotesArea'); area.innerHTML = '';
+    const area = $('pinnedNotesArea'); if(!area) return;
+    area.innerHTML = '';
     if (!state.activeDoc) return;
     const temp = document.createElement('div');
     temp.innerHTML = state.activeDoc.content || '';
@@ -533,6 +578,7 @@ function renderPinnedNotes() {
 }
 
 function openMenuAt(e, menuEl) {
+    if(!menuEl) return;
     menuEl.classList.remove('hidden'); 
     menuEl.classList.remove('closing');
     let x = Math.min(e.clientX, window.innerWidth - 200);
@@ -545,26 +591,26 @@ function openMenuAt(e, menuEl) {
 
 function initContextMenu() {
     const menu = $('customContextMenu');
-    $('editor').addEventListener('contextmenu', (e) => { e.preventDefault(); openMenuAt(e, menu); });
+    if($('editor') && menu) $('editor').addEventListener('contextmenu', (e) => { e.preventDefault(); openMenuAt(e, menu); });
 
     document.addEventListener('click', (e) => {
         const menus = [menu, $('docContextMenu'), $('folderContextMenu'), $('scratchpadContextMenu')];
         menus.forEach(m => {
-            if (!m.contains(e.target) && !e.target.closest('.doc-menu-btn') && !e.target.closest('.folder-header')) {
+            if (m && !m.contains(e.target) && !e.target.closest('.doc-menu-btn') && !e.target.closest('.folder-header')) {
                 m.classList.add('closing');
                 setTimeout(()=>m.classList.add('hidden'), 300);
             }
         });
     });
     
-    $('menuCopy').onclick = () => { document.execCommand('copy'); menu.classList.add('hidden'); };
-    $('menuCut').onclick = () => { document.execCommand('cut'); menu.classList.add('hidden'); };
-    $('menuPaste').onclick = async () => { try { const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); } catch(e) { showToast('دسترسی ندارید'); } menu.classList.add('hidden'); };
-    $('menuBold').onclick = () => { document.execCommand('bold'); menu.classList.add('hidden'); };
-    $('menuItalic').onclick = () => { document.execCommand('italic'); menu.classList.add('hidden'); };
-    $('menuDelete').onclick = () => { document.execCommand('delete'); menu.classList.add('hidden'); };
+    if($('menuCopy')) $('menuCopy').onclick = () => { document.execCommand('copy'); menu.classList.add('hidden'); };
+    if($('menuCut')) $('menuCut').onclick = () => { document.execCommand('cut'); menu.classList.add('hidden'); };
+    if($('menuPaste')) $('menuPaste').onclick = async () => { try { const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); } catch(e) { showToast('دسترسی ندارید'); } menu.classList.add('hidden'); };
+    if($('menuBold')) $('menuBold').onclick = () => { document.execCommand('bold'); menu.classList.add('hidden'); };
+    if($('menuItalic')) $('menuItalic').onclick = () => { document.execCommand('italic'); menu.classList.add('hidden'); };
+    if($('menuDelete')) $('menuDelete').onclick = () => { document.execCommand('delete'); menu.classList.add('hidden'); };
 
-    $('ctxEditTitle').onclick = () => {
+    if($('ctxEditTitle')) $('ctxEditTitle').onclick = () => {
         const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
         if(doc) {
             const newTitle = prompt('عنوان جدید را وارد کنید:', doc.title);
@@ -573,7 +619,7 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
     
-    $('ctxDeleteDoc').onclick = () => {
+    if($('ctxDeleteDoc')) $('ctxDeleteDoc').onclick = () => {
         showConfirm(i18n[state.lang]["confirm-delete-doc"], () => {
             state.docs = state.docs.filter(d => d.id !== state.targetDocIdToMove);
             saveState(); renderDocs(); renderFolders();
@@ -581,7 +627,7 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
     
-    $('ctxMoveToFolder').onclick = () => {
+    if($('ctxMoveToFolder')) $('ctxMoveToFolder').onclick = () => {
         const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
         if(!doc) return;
         const options = state.folders.map(f => `${f.id}:${f.name}`).join('\n');
@@ -590,18 +636,18 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
 
-    $('ctxPinFolder').onclick = () => {
+    if($('ctxPinFolder')) $('ctxPinFolder').onclick = () => {
         const idx = state.folders.findIndex(f => f.id === state.targetFolderIdToEdit);
         if(idx > 0) { const temp = state.folders[idx]; state.folders[idx] = state.folders[idx-1]; state.folders[idx-1] = temp; saveState(); renderFolders(); }
         $('folderContextMenu').classList.add('hidden');
     };
-    $('ctxEditFolder').onclick = () => {
+    if($('ctxEditFolder')) $('ctxEditFolder').onclick = () => {
         const folder = state.folders.find(f => f.id === state.targetFolderIdToEdit);
         if(folder) { const newName = prompt('نام جدید:', folder.name); if(newName) { folder.name = newName; saveState(); renderFolders(); } }
         $('folderContextMenu').classList.add('hidden');
     };
     
-    $('ctxDeleteFolder').onclick = () => {
+    if($('ctxDeleteFolder')) $('ctxDeleteFolder').onclick = () => {
         showConfirm(i18n[state.lang]["confirm-delete-folder"], () => {
             state.folders = state.folders.filter(f => f.id !== state.targetFolderIdToEdit);
             state.docs.forEach(d => { if(d.folderId === state.targetFolderIdToEdit) d.folderId = null; });
@@ -613,50 +659,41 @@ function initContextMenu() {
 
 function initFontDropdowns() {
     const fontDD = $('fontDropdown');
-    fontDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); fontDD.classList.toggle('active'); };
-    fontDD.querySelectorAll('.dropdown-item').forEach(item => {
-        item.onclick = () => { 
-            $('editor').focus(); 
-            document.execCommand('fontName', false, item.dataset.value); 
-            fontDD.querySelector('.dropdown-selected').childNodes[0].nodeValue = item.textContent + ' '; 
-            fontDD.classList.remove('active'); 
-        };
-    });
+    if(fontDD) {
+        fontDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); fontDD.classList.toggle('active'); };
+        fontDD.querySelectorAll('.dropdown-item').forEach(item => {
+            item.onclick = () => { 
+                $('editor').focus(); 
+                document.execCommand('fontName', false, item.dataset.value); 
+                fontDD.querySelector('.dropdown-selected').childNodes[0].nodeValue = item.textContent + ' '; 
+                fontDD.classList.remove('active'); 
+            };
+        });
+    }
 
-    // فیکس کردن پالت رنگ متن
     const colorBtn = $('textColorBtn'), colorPopup = $('colorPopup');
-    colorBtn.onclick = (e) => { 
-        e.stopPropagation(); 
-        colorPopup.classList.toggle('show'); 
-    };
-    colorPopup.querySelectorAll('.color-swatch').forEach(sw => {
-        sw.onclick = () => { 
-            $('editor').focus(); 
-            document.execCommand('foreColor', false, sw.dataset.color); 
-            colorPopup.classList.remove('show'); 
-        };
-    });
+    if(colorBtn && colorPopup) {
+        colorBtn.onclick = (e) => { e.stopPropagation(); colorPopup.classList.toggle('show'); };
+        colorPopup.querySelectorAll('.color-swatch').forEach(sw => {
+            sw.onclick = () => { $('editor').focus(); document.execCommand('foreColor', false, sw.dataset.color); colorPopup.classList.remove('show'); };
+        });
+    }
 
-    // فیکس کردن پالت رنگ بوم
     const boardColorBtn = $('boardColorBtn'), boardColorPopup = $('boardColorPopup');
-    boardColorBtn.onclick = (e) => { 
-        e.stopPropagation(); 
-        boardColorPopup.classList.toggle('show'); 
-    };
-    boardColorPopup.querySelectorAll('.color-swatch').forEach(sw => {
-        sw.onclick = () => { 
-            canvasState.color = sw.dataset.color; 
-            boardColorPopup.classList.remove('show'); 
-        };
-    });
+    if(boardColorBtn && boardColorPopup) {
+        boardColorBtn.onclick = (e) => { e.stopPropagation(); boardColorPopup.classList.toggle('show'); };
+        boardColorPopup.querySelectorAll('.color-swatch').forEach(sw => {
+            sw.onclick = () => { canvasState.color = sw.dataset.color; boardColorPopup.classList.remove('show'); };
+        });
+    }
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('#fontDropdown') && !e.target.closest('#sizeDropdown') && !e.target.closest('#paperStyleDropdown')) $$('.custom-dropdown').forEach(d => d.classList.remove('active'));
-        if (!e.target.closest('#textColorWrapper')) colorPopup.classList.remove('show');
-        if (!e.target.closest('#boardColorWrapper')) boardColorPopup.classList.remove('show');
+        if (!e.target.closest('#textColorWrapper') && colorPopup) colorPopup.classList.remove('show');
+        if (!e.target.closest('#boardColorWrapper') && boardColorPopup) boardColorPopup.classList.remove('show');
     });
 
-    $('increaseFontSize').onclick = () => { 
+    if($('increaseFontSize')) $('increaseFontSize').onclick = () => { 
         $('editor').focus();
         const sel = window.getSelection();
         if(!sel.isCollapsed) {
@@ -670,7 +707,7 @@ function initFontDropdowns() {
         localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
     };
     
-    $('decreaseFontSize').onclick = () => { 
+    if($('decreaseFontSize')) $('decreaseFontSize').onclick = () => { 
         $('editor').focus();
         const sel = window.getSelection();
         if(!sel.isCollapsed) {
@@ -684,41 +721,46 @@ function initFontDropdowns() {
         localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
     };
 
-    $('expandToolbarBtn').onclick = () => {
+    if($('expandToolbarBtn')) $('expandToolbarBtn').onclick = () => {
         const tb = $('topToolbar');
         tb.classList.toggle('expanded');
         const icon = $('expandToolbarBtn').querySelector('i');
         icon.className = tb.classList.contains('expanded') ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
     };
 
-    $('importBtn').onclick = () => { 
-        $('importStep1').classList.remove('hidden'); 
-        $('importStep2').classList.add('hidden'); 
-        $('importModal').classList.add('show'); 
+    if($('importBtn')) $('importBtn').onclick = () => { 
+        if($('importStep1')) $('importStep1').classList.remove('hidden'); 
+        if($('importStep2')) $('importStep2').classList.add('hidden'); 
+        if($('importModal')) $('importModal').classList.add('show'); 
     };
     
-    $('backToStep1').onclick = () => {
-        $('importStep1').classList.remove('hidden'); 
-        $('importStep2').classList.add('hidden'); 
+    if($('backToStep1')) $('backToStep1').onclick = () => {
+        if($('importStep1')) $('importStep1').classList.remove('hidden'); 
+        if($('importStep2')) $('importStep2').classList.add('hidden'); 
     };
 
     $$('.media-cat-item').forEach(cat => {
         cat.onclick = () => { 
-            $('fileInput').accept = cat.dataset.accept; 
-            $('fileInput').click(); 
+            if($('fileInput')) {
+                $('fileInput').accept = cat.dataset.accept; 
+                $('fileInput').click(); 
+            }
         };
     });
     
-    $('fileInput').onchange = (e) => {
+    if($('fileInput')) $('fileInput').onchange = (e) => {
         const file = e.target.files[0]; if (!file) return; 
         state.currentFileToImport = file;
-        $('importStep1').classList.add('hidden'); 
-        $('importStep2').classList.remove('hidden');
-        if (file.type === 'application/pdf') $('actionOpenPdf').classList.remove('hidden');
-        else $('actionOpenPdf').classList.add('hidden');
+        if($('importStep1')) $('importStep1').classList.add('hidden'); 
+        if($('importStep2')) $('importStep2').classList.remove('hidden');
+        if (file.type === 'application/pdf') {
+            if($('actionOpenPdf')) $('actionOpenPdf').classList.remove('hidden');
+        } else {
+            if($('actionOpenPdf')) $('actionOpenPdf').classList.add('hidden');
+        }
     };
 
-    $('actionEmbedFile').onclick = () => {
+    if($('actionEmbedFile')) $('actionEmbedFile').onclick = () => {
         const file = state.currentFileToImport; if(!file) return;
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -737,7 +779,7 @@ function initFontDropdowns() {
         reader.readAsDataURL(file);
     };
 
-    $('actionOpenPdf').onclick = () => {
+    if($('actionOpenPdf')) $('actionOpenPdf').onclick = () => {
         const file = state.currentFileToImport; if(!file) return;
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -751,11 +793,11 @@ function initFontDropdowns() {
         reader.readAsDataURL(file);
     };
 
-    $('actionExtractText').onclick = () => {
+    if($('actionExtractText')) $('actionExtractText').onclick = () => {
         const file = state.currentFileToImport; if(!file) return;
         
         if(file.type === 'application/pdf') {
-            $('processLoadingOverlay').classList.remove('hidden');
+            if($('processLoadingOverlay')) $('processLoadingOverlay').classList.remove('hidden');
             const reader = new FileReader();
             reader.onload = function() {
                 const typedarray = new Uint8Array(this.result);
@@ -771,15 +813,15 @@ function initFontDropdowns() {
                         document.execCommand('insertHTML', false, paragraphs);
                         if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
                         
-                        $('processLoadingOverlay').classList.add('hidden');
+                        if($('processLoadingOverlay')) $('processLoadingOverlay').classList.add('hidden');
                         $('importModal').classList.remove('show'); $('fileInput').value = '';
                         showToast('متن استخراج شد.');
                     }).catch(err => {
-                        $('processLoadingOverlay').classList.add('hidden');
+                        if($('processLoadingOverlay')) $('processLoadingOverlay').classList.add('hidden');
                         showToast('خطا در استخراج متن PDF');
                     });
                 }).catch(err => {
-                    $('processLoadingOverlay').classList.add('hidden');
+                    if($('processLoadingOverlay')) $('processLoadingOverlay').classList.add('hidden');
                     showToast('خطا در خواندن فایل PDF');
                 });
             };
@@ -819,6 +861,7 @@ function resizeCanvas() {
 
 function initCanvas() {
     const canvas = $('scratchpadCanvas');
+    if(!canvas) return;
     const ctx = canvas.getContext('2d');
     setTimeout(resizeCanvas, 100);
     window.addEventListener('resize', resizeCanvas);
@@ -885,8 +928,8 @@ function initCanvas() {
         };
     });
     
-    $('clearBoardBtn').onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); };
-    $('exportBoardToDocBtn').onclick = () => {
+    if($('clearBoardBtn')) $('clearBoardBtn').onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); };
+    if($('exportBoardToDocBtn')) $('exportBoardToDocBtn').onclick = () => {
         const img = document.createElement('img'); img.src = canvas.toDataURL(); img.style.maxWidth = '100%'; img.style.borderRadius = '12px'; img.style.margin = '10px 0';
         $('editor').appendChild(img);
         if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
@@ -896,15 +939,16 @@ function initCanvas() {
 
 function restoreCanvas() {
     if (!state.activeDoc || !state.activeDoc.board) return;
-    const canvas = $('scratchpadCanvas'); const ctx = canvas.getContext('2d');
+    const canvas = $('scratchpadCanvas'); if(!canvas) return;
+    const ctx = canvas.getContext('2d');
     const img = new Image();
     img.onload = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0, canvas.width, canvas.height); };
     img.src = state.activeDoc.board;
 }
 
 function initSettings() {
-    $('autoSaveToggle').checked = state.autoSave;
-    $('blurEffectToggle').checked = state.blurEffect;
+    if($('autoSaveToggle')) $('autoSaveToggle').checked = state.autoSave;
+    if($('blurEffectToggle')) $('blurEffectToggle').checked = state.blurEffect;
     
     const langDisplay = $('currentLangDisplay');
     if (langDisplay) langDisplay.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
@@ -914,68 +958,74 @@ function initSettings() {
     const actionBar = $('settingsActionBar');
     
     const langDD = $('languageDropdown');
-    langDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); langDD.classList.toggle('active'); };
-    $$('#languageDropdown .dropdown-item').forEach(item => {
-        item.onclick = (e) => {
-            e.stopPropagation();
-            const langDisp = $('currentLangDisplay');
-            if (langDisp) langDisp.textContent = item.textContent;
-            langDD.dataset.selectedLang = item.dataset.langVal;
-            langDD.classList.remove('active');
-            actionBar.classList.add('show');
-        };
-    });
+    if(langDD) {
+        langDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); langDD.classList.toggle('active'); };
+        $$('#languageDropdown .dropdown-item').forEach(item => {
+            item.onclick = (e) => {
+                e.stopPropagation();
+                const langDisp = $('currentLangDisplay');
+                if (langDisp) langDisp.textContent = item.textContent;
+                langDD.dataset.selectedLang = item.dataset.langVal;
+                langDD.classList.remove('active');
+                if(actionBar) actionBar.classList.add('show');
+            };
+        });
+    }
 
     settingsInputs.forEach(input => {
         input.addEventListener('change', () => {
-            actionBar.classList.add('show');
+            if(actionBar) actionBar.classList.add('show');
         });
     });
 
-    $('settingsBtn').onclick = () => {
-        actionBar.classList.remove('show'); 
-        $('settingsModal').classList.add('show');
+    if($('settingsBtn')) $('settingsBtn').onclick = () => {
+        if(actionBar) actionBar.classList.remove('show'); 
+        if($('settingsModal')) $('settingsModal').classList.add('show');
     };
 
-    $('cancelSettingsBtn').onclick = () => { 
-        $('autoSaveToggle').checked = state.autoSave;
-        $('blurEffectToggle').checked = state.blurEffect;
+    if($('cancelSettingsBtn')) $('cancelSettingsBtn').onclick = () => { 
+        if($('autoSaveToggle')) $('autoSaveToggle').checked = state.autoSave;
+        if($('blurEffectToggle')) $('blurEffectToggle').checked = state.blurEffect;
         const langDisplay2 = $('currentLangDisplay');
         if (langDisplay2) langDisplay2.textContent = state.lang === 'en' ? 'English' : (state.lang === 'ar' ? 'العربية' : 'فارسی');
-        langDD.dataset.selectedLang = state.lang;
-        $('settingsModal').classList.remove('show'); 
+        if(langDD) langDD.dataset.selectedLang = state.lang;
+        if($('settingsModal')) $('settingsModal').classList.remove('show'); 
     };
 
-    $('confirmSettingsBtn').onclick = () => {
-        state.autoSave = $('autoSaveToggle').checked;
-        state.blurEffect = $('blurEffectToggle').checked;
-        const newLang = langDD.dataset.selectedLang || state.lang;
+    if($('confirmSettingsBtn')) $('confirmSettingsBtn').onclick = () => {
+        if($('autoSaveToggle')) state.autoSave = $('autoSaveToggle').checked;
+        if($('blurEffectToggle')) state.blurEffect = $('blurEffectToggle').checked;
+        const newLang = (langDD && langDD.dataset.selectedLang) ? langDD.dataset.selectedLang : state.lang;
         
         localStorage.setItem('vizhar_autosave', state.autoSave);
         localStorage.setItem('vizhar_blur', state.blurEffect);
         
         applyLanguage(newLang);
 
-        const isNotesChecked = $('toggleNotesPanel').checked;
-        const isCanvasChecked = $('toggleCanvasPanel').checked;
-        const isScratchChecked = $('toggleScratchPanel').checked;
+        const isNotesChecked = $('toggleNotesPanel') ? $('toggleNotesPanel').checked : true;
+        const isCanvasChecked = $('toggleCanvasPanel') ? $('toggleCanvasPanel').checked : true;
+        const isScratchChecked = $('toggleScratchPanel') ? $('toggleScratchPanel').checked : true;
         
-        $('pinnedNotesArea').parentElement.style.display = isNotesChecked ? 'flex' : 'none';
-        $('pinnedNotesArea').parentElement.previousElementSibling.style.display = isNotesChecked ? 'flex' : 'none';
+        if($('pinnedNotesArea') && $('pinnedNotesArea').parentElement) {
+            $('pinnedNotesArea').parentElement.style.display = isNotesChecked ? 'flex' : 'none';
+            if($('pinnedNotesArea').parentElement.previousElementSibling) $('pinnedNotesArea').parentElement.previousElementSibling.style.display = isNotesChecked ? 'flex' : 'none';
+        }
         
-        $('canvasContainer').parentElement.style.display = isCanvasChecked ? 'flex' : 'none';
-        $('canvasContainer').parentElement.previousElementSibling.style.display = isCanvasChecked ? 'flex' : 'none';
+        if($('canvasContainer') && $('canvasContainer').parentElement) {
+            $('canvasContainer').parentElement.style.display = isCanvasChecked ? 'flex' : 'none';
+            if($('canvasContainer').parentElement.previousElementSibling) $('canvasContainer').parentElement.previousElementSibling.style.display = isCanvasChecked ? 'flex' : 'none';
+        }
         
-        $('rightPanel').style.display = isScratchChecked ? 'flex' : 'none';
+        if($('rightPanel')) $('rightPanel').style.display = isScratchChecked ? 'flex' : 'none';
 
-        $('settingsModal').classList.remove('show');
+        if($('settingsModal')) $('settingsModal').classList.remove('show');
         showToast(i18n[newLang]["saved"]);
         setTimeout(resizeCanvas, 300);
     };
 
-    $('resetRoleBtn').onclick = () => { state.role = null; localStorage.removeItem(STORAGE_KEYS.role); $('settingsModal').classList.remove('show'); showRoleView(); };
+    if($('resetRoleBtn')) $('resetRoleBtn').onclick = () => { state.role = null; localStorage.removeItem(STORAGE_KEYS.role); if($('settingsModal')) $('settingsModal').classList.remove('show'); showRoleView(); };
     
-    $('clearDataBtn').onclick = () => { 
+    if($('clearDataBtn')) $('clearDataBtn').onclick = () => { 
         showConfirm('آیا مطمئن هستید؟ تمام اطلاعات حذف خواهد شد.', () => {
             localStorage.clear(); location.reload(); 
         });
@@ -984,6 +1034,7 @@ function initSettings() {
 
 function showToast(msg) {
     const container = $('toastContainer');
+    if(!container) return;
     const t = document.createElement('div');
     t.className = 'toast-message';
     t.innerHTML = `<i class="fa-solid fa-check-circle" style="color:var(--accent-main);"></i> <span>${msg}</span>`;
@@ -995,9 +1046,9 @@ function showToast(msg) {
     }, 2500);
 }
 
-// سیستم مودال اختصاصی
 function showConfirm(message, onYes) {
     const modal = $('confirmModal');
+    if(!modal) return;
     $('confirmMessage').textContent = message;
     modal.classList.add('show');
     
@@ -1013,13 +1064,24 @@ function showConfirm(message, onYes) {
 function escapeHtml(str) { return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
 function init() {
-    loadState(); 
-    initTheme(); 
-    initEditor(); 
-    initFontDropdowns(); 
-    initNoteModal(); 
-    initCanvas(); 
-    initSettings();
+    // 1. اتصال رویداد کلیک برای کارت‌های انتخاب نقش (مطمئن‌ترین روش)
+    document.addEventListener('click', (e) => {
+        const card = e.target.closest('.role-card');
+        if (card) {
+            state.role = card.dataset.role;
+            saveState();
+            showDashboard();
+        }
+    });
+
+    // 2. لود اولیه با مدیریت خطا
+    try { loadState(); } catch(e) { console.error('loadState', e); }
+    try { initTheme(); } catch(e) { console.error('initTheme', e); }
+    try { initEditor(); } catch(e) { console.error('initEditor', e); }
+    try { initFontDropdowns(); } catch(e) { console.error('initFontDropdowns', e); }
+    try { initNoteModal(); } catch(e) { console.error('initNoteModal', e); }
+    try { initCanvas(); } catch(e) { console.error('initCanvas', e); }
+    try { initSettings(); } catch(e) { console.error('initSettings', e); }
 
     // حذف کامل صفحه لودینگ
     setTimeout(() => {
@@ -1027,9 +1089,7 @@ function init() {
         if(loader) loader.style.display = 'none';
     }, 500);
 
-    $$('.role-card').forEach(card => { card.addEventListener('click', () => { state.role = card.dataset.role; saveState(); showDashboard(); }); });
-
-    $('backToDashBtn').onclick = () => {
+    if($('backToDashBtn')) $('backToDashBtn').onclick = () => {
         if (state.activeDoc) {
             state.activeDoc.content = $('editor').innerHTML; 
             state.activeDoc.title = $('documentTitle').value.trim();
@@ -1050,15 +1110,15 @@ function init() {
         }
     };
     
-    $('createNewDocBtn').onclick = createDoc;
-    $('createEmptyDocBtn').onclick = createDoc;
-    $('addFolderBtn').onclick = () => $('addFolderModal').classList.add('show');
-    $('confirmAddFolderBtn').onclick = () => {
+    if($('createNewDocBtn')) $('createNewDocBtn').onclick = createDoc;
+    if($('createEmptyDocBtn')) $('createEmptyDocBtn').onclick = createDoc;
+    if($('addFolderBtn')) $('addFolderBtn').onclick = () => $('addFolderModal').classList.add('show');
+    if($('confirmAddFolderBtn')) $('confirmAddFolderBtn').onclick = () => {
         const name = $('newFolderName').value.trim(); if (!name) return;
         state.folders.push({ id: 'f_' + Date.now(), name }); saveState(); $('newFolderName').value = ''; $('addFolderModal').classList.remove('show'); renderFolders();
     };
 
-    $('focusModeBtn').onclick = () => { 
+    if($('focusModeBtn')) $('focusModeBtn').onclick = () => { 
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen().catch(err => { showToast('مرورگر اجازه نداد.'); });
             document.body.classList.add('focus-mode'); 
@@ -1070,11 +1130,11 @@ function init() {
         }
     };
 
-    $('toggleLeftPanelBtn').onclick = () => {
+    if($('toggleLeftPanelBtn')) $('toggleLeftPanelBtn').onclick = () => {
         $('leftPanel').classList.toggle('collapsed-left');
         $('toggleLeftPanelBtn').querySelector('i').classList.toggle('fa-rotate-180');
     };
-    $('toggleRightPanelBtn').onclick = () => {
+    if($('toggleRightPanelBtn')) $('toggleRightPanelBtn').onclick = () => {
         $('rightPanel').classList.toggle('collapsed-right');
         $('toggleRightPanelBtn').querySelector('i').classList.toggle('fa-rotate-180');
     };
