@@ -9,7 +9,7 @@ let state = {
     role: null, folders: [], docs: [], activeFolder: 'all', activeDoc: null,
     selectionRange: null, selectedWord: '', autoSave: true, blurEffect: true, baseFontSize: 16,
     targetDocIdToMove: null, targetFolderIdToEdit: null, currentFileToImport: null,
-    lang: 'fa'
+    lang: 'fa', scratchFontSize: 16
 };
 
 const $ = (id) => document.getElementById(id);
@@ -18,7 +18,7 @@ const $$ = (sel) => document.querySelectorAll(sel);
 const i18n = {
     fa: {
         "role-student": "دانشجو / دانش‌آموز", "role-teacher": "استاد / معلم",
-        "panel-left": "پنل چپ", "panel-right": "چرک‌نویس",
+        "panel-left": "یادداشت و بوم", "panel-right": "چرک‌نویس",
         "welcome-title": "به <span>ویژار</span> خوش آمدید", "welcome-subtitle": "جهت تنظیم محیط، نقش خود را انتخاب کنید",
         "folders": "دسته‌بندی‌ها", "my-notes": "جزوه‌های من", "create-note": "ایجاد جزوه", "empty-state": "هیچ جزوه‌ای در اینجا یافت نشد.",
         "notes-panel": "یادداشت", "canvas-panel": "بوم", "scratch-panel": "چرک‌نویس", "btn-insert": "درج در متن",
@@ -26,7 +26,7 @@ const i18n = {
         "add-note": "افزودن یادداشت", "copy": "رونوشت", "cut": "برش", "paste": "چسباندن",
         "bold": "درشت‌نویسی", "italic": "مورب", "underline": "زیرخط", "list": "فهرست", "delete": "حذف",
         "edit-title": "ویرایش عنوان", "move-to": "انتقال به دسته‌بندی", "delete-note": "حذف جزوه",
-        "pin-folder": "سنجاق به بالا", "edit-folder": "تغییر نام",
+        "pin-folder": "سنجاق به بالا", "unpin-folder": "برداشتن سنجاق", "edit-folder": "تغییر نام",
         "note-for": "یادداشت برای:", "label-color": "دسته‌بندی رنگ:", "pin-note": "سنجاق در پنل یادداشت‌ها",
         "cancel": "انصراف", "save": "ثبت", "create": "ایجاد", "new-folder": "دسته‌بندی جدید",
         "add-media": "افزودن به جزوه", "select-media-type": "نوع رسانه خود را انتخاب کنید",
@@ -43,7 +43,7 @@ const i18n = {
     },
     en: {
         "role-student": "Student", "role-teacher": "Teacher",
-        "panel-left": "Left Panel", "panel-right": "Scratchpad",
+        "panel-left": "Notes & Canvas", "panel-right": "Scratchpad",
         "welcome-title": "Welcome to <span>Vizhar</span>", "welcome-subtitle": "Select your role to configure the environment",
         "folders": "Categories", "my-notes": "My Notes", "create-note": "Create Note", "empty-state": "No notes found here.",
         "notes-panel": "Notes", "canvas-panel": "Canvas", "scratch-panel": "Scratchpad", "btn-insert": "Insert",
@@ -51,7 +51,7 @@ const i18n = {
         "add-note": "Add Note", "copy": "Copy", "cut": "Cut", "paste": "Paste",
         "bold": "Bold", "italic": "Italic", "underline": "Underline", "list": "List", "delete": "Delete",
         "edit-title": "Edit Title", "move-to": "Move to Category", "delete-note": "Delete Note",
-        "pin-folder": "Pin to Top", "edit-folder": "Rename",
+        "pin-folder": "Pin to Top", "unpin-folder": "Unpin", "edit-folder": "Rename",
         "note-for": "Note for:", "label-color": "Label Color:", "pin-note": "Pin in Notes Panel",
         "cancel": "Cancel", "save": "Save", "create": "Create", "new-folder": "New Category",
         "add-media": "Add to Note", "select-media-type": "Select media type",
@@ -68,7 +68,7 @@ const i18n = {
     },
     ar: {
         "role-student": "طالب", "role-teacher": "أستاذ",
-        "panel-left": "اللوحة اليسرى", "panel-right": "مسودة",
+        "panel-left": "اللوحة والملاحظات", "panel-right": "مسودة",
         "welcome-title": "مرحبًا بك في <span>فيژار</span>", "welcome-subtitle": "حدد دورك لتهيئة البيئة",
         "folders": "الفئات", "my-notes": "ملاحظاتي", "create-note": "إنشاء ملاحظة", "empty-state": "لم يتم العثور على ملاحظات هنا.",
         "notes-panel": "ملاحظات", "canvas-panel": "لوحة", "scratch-panel": "مسودة", "btn-insert": "إدراج",
@@ -76,7 +76,7 @@ const i18n = {
         "add-note": "إضافة ملاحظة", "copy": "نسخ", "cut": "قص", "paste": "لصق",
         "bold": "غامق", "italic": "مائل", "underline": "تحته خط", "list": "قائمة", "delete": "حذف",
         "edit-title": "تعديل العنوان", "move-to": "نقل إلى فئة", "delete-note": "حذف الملاحظة",
-        "pin-folder": "تثبيت في الأعلى", "edit-folder": "تغيير الاسم",
+        "pin-folder": "تثبيت في الأعلى", "unpin-folder": "إلغاء التثبيت", "edit-folder": "تغيير الاسم",
         "note-for": "ملاحظة لـ:", "label-color": "لون التصنيف:", "pin-note": "تثبيت في لوحة الملاحظات",
         "cancel": "إلغاء", "save": "حفظ", "create": "إنشاء", "new-folder": "فئة جديدة",
         "add-media": "إضافة إلى الملاحظة", "select-media-type": "حدد نوع الوسائط",
@@ -211,13 +211,18 @@ function renderFolders() {
     list.appendChild(allLi);
 
     state.folders.forEach(f => {
-        const li = document.createElement('li'); li.className = 'folder-item';
+        const li = document.createElement('li'); 
+        li.className = 'folder-item' + (f.pinned ? ' pinned' : '');
+        
         const folderDocs = state.docs.filter(d => d.folderId === f.id);
         const isOpen = state.activeFolder === f.id;
         
         li.innerHTML = `
             <div class="folder-header ${isOpen ? 'active open' : ''}" data-id="${f.id}">
-                <div class="folder-title-wrap ${isOpen ? 'active' : ''}"><i class="fa-solid fa-folder"></i> ${escapeHtml(f.name)}</div>
+                <div class="folder-title-wrap ${isOpen ? 'active' : ''}">
+                    <i class="fa-solid fa-folder"></i> ${escapeHtml(f.name)}
+                    ${f.pinned ? '<i class="fa-solid fa-thumbtack pin-icon"></i>' : ''}
+                </div>
                 <button class="folder-arrow-btn"><i class="fa-solid fa-chevron-left"></i></button>
             </div>
             <ul class="folder-docs">
@@ -241,7 +246,11 @@ function renderFolders() {
         };
 
         li.querySelector('.folder-header').oncontextmenu = (e) => {
-            e.preventDefault(); state.targetFolderIdToEdit = f.id;
+            e.preventDefault(); 
+            state.targetFolderIdToEdit = f.id;
+            // تنظیم متن پین
+            const targetFolder = state.folders.find(x => x.id === f.id);
+            $('pinFolderText').textContent = targetFolder.pinned ? i18n[state.lang]["unpin-folder"] : i18n[state.lang]["pin-folder"];
             openMenuAt(e, $('folderContextMenu'));
         };
 
@@ -341,6 +350,33 @@ function updateWordCount() {
     $('wordCounter').textContent = words.toLocaleString(state.lang === 'fa' ? 'fa-IR' : 'en-US') + ' ' + wordStr;
 }
 
+function changeFontSize(delta) {
+    const sel = window.getSelection();
+    if (!sel.isCollapsed && sel.rangeCount > 0) {
+        const range = sel.getRangeAt(0);
+        let currentSize = state.baseFontSize;
+        // پیدا کردن سایز فونت فعلی
+        const parentEl = range.commonAncestorContainer.parentElement;
+        if (parentEl && parentEl.style.fontSize) {
+            currentSize = parseInt(parentEl.style.fontSize);
+        }
+        
+        const newSize = currentSize + delta;
+        if (newSize < 10 || newSize > 60) return; // محدودیت سایز
+
+        const span = document.createElement('span');
+        span.style.fontSize = newSize + 'px';
+        span.appendChild(range.extractContents());
+        range.insertNode(span);
+    } else {
+        // اگر متنی انتخاب نشده بود، سایز کلی تغییر کند
+        state.baseFontSize = Math.max(10, Math.min(state.baseFontSize + delta, 60));
+        $('editor').style.fontSize = state.baseFontSize + 'px';
+        $('fontSizeDisplay').textContent = state.baseFontSize;
+        localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize);
+    }
+}
+
 function initEditor() {
     const editor = $('editor');
     const titleInput = $('documentTitle');
@@ -367,13 +403,23 @@ function initEditor() {
         });
     });
 
+    // دکمه های جهت
     if($('ltrBtn')) {
         $('ltrBtn').addEventListener('mousedown', (e) => e.preventDefault());
-        $('ltrBtn').addEventListener('click', () => { editor.focus(); document.execCommand('justifyLeft'); document.execCommand('formatBlock', false, 'div'); document.execCommand('outdent'); });
+        $('ltrBtn').addEventListener('click', () => { 
+            editor.focus(); 
+            document.execCommand('styleWithCSS', false, true); // اجبار به استفاده از CSS
+            document.execCommand('justifyLeft'); 
+            document.execCommand('outdent'); // برای درست شدن جهت در ادیتور
+        });
     }
     if($('rtlBtn')) {
         $('rtlBtn').addEventListener('mousedown', (e) => e.preventDefault());
-        $('rtlBtn').addEventListener('click', () => { editor.focus(); document.execCommand('justifyRight'); });
+        $('rtlBtn').addEventListener('click', () => { 
+            editor.focus(); 
+            document.execCommand('styleWithCSS', false, true);
+            document.execCommand('justifyRight'); 
+        });
     }
 
     editor.addEventListener('keyup', updateToolbarState);
@@ -404,6 +450,16 @@ function initEditor() {
         $('textScratchpad').addEventListener('contextmenu', (e) => {
             e.preventDefault(); openMenuAt(e, $('scratchpadContextMenu'));
         });
+
+        // کنترل سایز فونت چرک نویس
+        $('scratchFontInc').onclick = () => {
+            state.scratchFontSize = Math.min(state.scratchFontSize + 2, 40);
+            $('textScratchpad').style.fontSize = state.scratchFontSize + 'px';
+        };
+        $('scratchFontDec').onclick = () => {
+            state.scratchFontSize = Math.max(state.scratchFontSize - 2, 10);
+            $('textScratchpad').style.fontSize = state.scratchFontSize + 'px';
+        };
     }
 
     if($('paperStyleDropdown')) {
@@ -670,14 +726,16 @@ function initContextMenu() {
         });
     });
     
-    if($('menuCopy')) $('menuCopy').onclick = () => { document.execCommand('copy'); menu.classList.add('hidden'); };
-    if($('menuCut')) $('menuCut').onclick = () => { document.execCommand('cut'); menu.classList.add('hidden'); };
-    if($('menuPaste')) $('menuPaste').onclick = async () => { try { const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); } catch(e) { showToast('دسترسی ندارید'); } menu.classList.add('hidden'); };
-    if($('menuBold')) $('menuBold').onclick = () => { document.execCommand('bold'); menu.classList.add('hidden'); };
-    if($('menuItalic')) $('menuItalic').onclick = () => { document.execCommand('italic'); menu.classList.add('hidden'); };
-    if($('menuDelete')) $('menuDelete').onclick = () => { document.execCommand('delete'); menu.classList.add('hidden'); };
+    // اضافه کردن stopPropagation به آیتم‌های منو
+    if($('menuCopy')) $('menuCopy').onclick = (e) => { e.stopPropagation(); document.execCommand('copy'); menu.classList.add('hidden'); };
+    if($('menuCut')) $('menuCut').onclick = (e) => { e.stopPropagation(); document.execCommand('cut'); menu.classList.add('hidden'); };
+    if($('menuPaste')) $('menuPaste').onclick = async (e) => { e.stopPropagation(); try { const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); } catch(e) { showToast('دسترسی ندارید'); } menu.classList.add('hidden'); };
+    if($('menuBold')) $('menuBold').onclick = (e) => { e.stopPropagation(); document.execCommand('bold'); menu.classList.add('hidden'); };
+    if($('menuItalic')) $('menuItalic').onclick = (e) => { e.stopPropagation(); document.execCommand('italic'); menu.classList.add('hidden'); };
+    if($('menuDelete')) $('menuDelete').onclick = (e) => { e.stopPropagation(); document.execCommand('delete'); menu.classList.add('hidden'); };
 
-    if($('ctxEditTitle')) $('ctxEditTitle').onclick = () => {
+    if($('ctxEditTitle')) $('ctxEditTitle').onclick = (e) => {
+        e.stopPropagation();
         const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
         if(doc) {
             const newTitle = prompt('عنوان جدید را وارد کنید:', doc.title);
@@ -686,7 +744,8 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
     
-    if($('ctxDeleteDoc')) $('ctxDeleteDoc').onclick = () => {
+    if($('ctxDeleteDoc')) $('ctxDeleteDoc').onclick = (e) => {
+        e.stopPropagation();
         showConfirm(i18n[state.lang]["confirm-delete-doc"], () => {
             state.docs = state.docs.filter(d => d.id !== state.targetDocIdToMove);
             saveState(); renderDocs(); renderFolders();
@@ -694,7 +753,8 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
     
-    if($('ctxMoveToFolder')) $('ctxMoveToFolder').onclick = () => {
+    if($('ctxMoveToFolder')) $('ctxMoveToFolder').onclick = (e) => {
+        e.stopPropagation();
         const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
         if(!doc) return;
         const options = state.folders.map(f => `${f.id}:${f.name}`).join('\n');
@@ -703,18 +763,28 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
 
-    if($('ctxPinFolder')) $('ctxPinFolder').onclick = () => {
-        const idx = state.folders.findIndex(f => f.id === state.targetFolderIdToEdit);
-        if(idx > 0) { const temp = state.folders[idx]; state.folders[idx] = state.folders[idx-1]; state.folders[idx-1] = temp; saveState(); renderFolders(); }
+    // پین کردن (تغییر وضعیت)
+    if($('ctxPinFolder')) $('ctxPinFolder').onclick = (e) => {
+        e.stopPropagation();
+        const folder = state.folders.find(f => f.id === state.targetFolderIdToEdit);
+        if(folder) {
+            folder.pinned = !folder.pinned;
+            // مرتب‌سازی (پین شده‌ها بالا)
+            state.folders.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+            saveState(); renderFolders();
+        }
         $('folderContextMenu').classList.add('hidden');
     };
-    if($('ctxEditFolder')) $('ctxEditFolder').onclick = () => {
+    
+    if($('ctxEditFolder')) $('ctxEditFolder').onclick = (e) => {
+        e.stopPropagation();
         const folder = state.folders.find(f => f.id === state.targetFolderIdToEdit);
         if(folder) { const newName = prompt('نام جدید:', folder.name); if(newName) { folder.name = newName; saveState(); renderFolders(); } }
         $('folderContextMenu').classList.add('hidden');
     };
     
-    if($('ctxDeleteFolder')) $('ctxDeleteFolder').onclick = () => {
+    if($('ctxDeleteFolder')) $('ctxDeleteFolder').onclick = (e) => {
+        e.stopPropagation();
         showConfirm(i18n[state.lang]["confirm-delete-folder"], () => {
             state.folders = state.folders.filter(f => f.id !== state.targetFolderIdToEdit);
             state.docs.forEach(d => { if(d.folderId === state.targetFolderIdToEdit) d.folderId = null; });
@@ -773,7 +843,8 @@ function initFontDropdowns() {
             colorPopup.classList.toggle('show'); 
         });
         colorPopup.querySelectorAll('.color-swatch').forEach(sw => {
-            sw.onclick = () => { 
+            sw.onclick = (e) => { 
+                e.stopPropagation(); // جلوگیری از بسته شدن
                 $('editor').focus(); 
                 if (state.selectionRange) {
                     const sel = window.getSelection();
@@ -798,7 +869,11 @@ function initFontDropdowns() {
             boardColorPopup.classList.toggle('show'); 
         });
         boardColorPopup.querySelectorAll('.color-swatch').forEach(sw => {
-            sw.onclick = () => { canvasState.color = sw.dataset.color; boardColorPopup.classList.remove('show'); };
+            sw.onclick = (e) => { 
+                e.stopPropagation();
+                canvasState.color = sw.dataset.color; 
+                boardColorPopup.classList.remove('show'); 
+            };
         });
     }
 
@@ -810,42 +885,12 @@ function initFontDropdowns() {
 
     if($('increaseFontSize')) $('increaseFontSize').onmousedown = (e) => e.preventDefault();
     if($('increaseFontSize')) $('increaseFontSize').onclick = () => { 
-        $('editor').focus();
-        if (state.selectionRange) {
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(state.selectionRange);
-        }
-        const sel = window.getSelection();
-        if(!sel.isCollapsed) {
-            document.execCommand('fontSize', false, '7');
-            $('editor').querySelectorAll('font[size="7"]').forEach(el => { el.removeAttribute('size'); el.style.fontSize = (state.baseFontSize + 2) + 'px'; });
-        } else {
-            state.baseFontSize = Math.min(state.baseFontSize + 2, 40); 
-            $('editor').style.fontSize = state.baseFontSize + 'px'; 
-        }
-        $('fontSizeDisplay').textContent = state.baseFontSize; 
-        localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
+        changeFontSize(2);
     };
     
     if($('decreaseFontSize')) $('decreaseFontSize').onmousedown = (e) => e.preventDefault();
     if($('decreaseFontSize')) $('decreaseFontSize').onclick = () => { 
-        $('editor').focus();
-        if (state.selectionRange) {
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(state.selectionRange);
-        }
-        const sel = window.getSelection();
-        if(!sel.isCollapsed) {
-            document.execCommand('fontSize', false, '7');
-            $('editor').querySelectorAll('font[size="7"]').forEach(el => { el.removeAttribute('size'); el.style.fontSize = Math.max(state.baseFontSize - 2, 10) + 'px'; });
-        } else {
-            state.baseFontSize = Math.max(state.baseFontSize - 2, 10); 
-            $('editor').style.fontSize = state.baseFontSize + 'px'; 
-        }
-        $('fontSizeDisplay').textContent = state.baseFontSize; 
-        localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
+        changeFontSize(-2);
     };
 
     if($('importBtn')) $('importBtn').onclick = () => { 
@@ -1251,7 +1296,7 @@ function init() {
     if($('addFolderBtn')) $('addFolderBtn').onclick = () => $('addFolderModal').classList.add('show');
     if($('confirmAddFolderBtn')) $('confirmAddFolderBtn').onclick = () => {
         const name = $('newFolderName').value.trim(); if (!name) return;
-        state.folders.push({ id: 'f_' + Date.now(), name }); saveState(); $('newFolderName').value = ''; $('addFolderModal').classList.remove('show'); renderFolders();
+        state.folders.push({ id: 'f_' + Date.now(), name, pinned: false }); saveState(); $('newFolderName').value = ''; $('addFolderModal').classList.remove('show'); renderFolders();
     };
 
     if($('focusModeBtn')) $('focusModeBtn').onclick = () => { 
