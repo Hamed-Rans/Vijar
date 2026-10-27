@@ -6,7 +6,6 @@
     <title>ویژار | دستیار هوشمند جزوه‌نویسی</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <!-- فونت Cinema -->
     <link href="https://cdn.fontcdn.ir/Font/Persian/Cinema/Cinema.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Lalezar&family=Gulzar&family=Vazirmatn:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -42,13 +41,11 @@
         </div>
         
         <div class="nav-block panel-toggles hidden">
-            <!-- دکمه سمت راست با متن -->
             <button id="toggleLeftPanelBtn" class="nav-btn-text" title="یادداشت و بوم">
                 <i class="fa-solid fa-arrow-right"></i> <span data-lang="panel-left">یادداشت و بوم</span>
             </button>
-            <!-- دکمه سمت چپ فقط آیکون -->
-            <button id="toggleRightPanelBtn" class="nav-btn" title="چرک‌نویس">
-                <i class="fa-solid fa-arrow-left"></i>
+            <button id="toggleRightPanelBtn" class="nav-btn-text" title="چرک‌نویس">
+                <i class="fa-solid fa-arrow-left"></i> <span data-lang="panel-right">چرک‌نویس</span>
             </button>
         </div>
 
@@ -65,7 +62,8 @@
             
             <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house-chimney"></i></button>
             
-            <button id="settingsBtn" class="nav-btn" title="پیکربندی"><i class="fa-solid fa-sliders"></i></button>
+            <!-- ایکون تنظیمات جدید (چرخ‌دنده) -->
+            <button id="settingsBtn" class="nav-btn" title="پیکربندی"><i class="fa-solid fa-gear"></i></button>
         </div>
     </div>
 
@@ -124,7 +122,6 @@
         <div class="workspace-layout" id="workspaceLayout">
             
             <aside class="side-panel left-panel transition-panel" id="leftPanel">
-                <!-- هدر یادداشت -->
                 <div class="panel-title">
                     <span class="header-title" data-lang="notes-panel">یادداشت</span>
                     <i class="fa-solid fa-note-sticky"></i>
@@ -133,7 +130,6 @@
                     <div id="pinnedNotesArea" class="notes-container"></div>
                 </div>
 
-                <!-- هدر بوم -->
                 <div class="panel-title" style="margin-top: 15px;">
                     <span class="header-title" data-lang="canvas-panel">بوم</span>
                     <div style="display:flex; gap:10px; align-items:center;">
@@ -199,20 +195,17 @@
                         
                         <div class="divider"></div>
                         
-                        <!-- دکمه های چینش -->
                         <button class="tool-btn align-tool" data-command="justifyRight" title="راست‌چین"><i class="fa-solid fa-align-right"></i></button>
                         <button class="tool-btn align-tool" data-command="justifyCenter" title="وسط‌چین"><i class="fa-solid fa-align-center"></i></button>
                         <button class="tool-btn align-tool" data-command="justifyLeft" title="چپ‌چین"><i class="fa-solid fa-align-left"></i></button>
                         
                         <div class="divider"></div>
                         
-                        <!-- دکمه های جهت LTR/RTL -->
                         <button class="tool-btn" id="ltrBtn" title="چپ به راست"><i class="fa-solid fa-arrow-right-long"></i></button>
                         <button class="tool-btn" id="rtlBtn" title="راست به چپ"><i class="fa-solid fa-arrow-left-long"></i></button>
 
                         <div class="divider"></div>
 
-                        <!-- پالت رنگ -->
                         <div class="color-menu-wrapper" id="textColorWrapper">
                             <button class="tool-btn" id="textColorBtn" title="رنگ متن"><i class="fa-solid fa-palette"></i></button>
                             <div class="custom-color-popup glass-panel hidden" id="colorPopup">
@@ -227,8 +220,8 @@
                             </div>
                         </div>
                         
-                        <!-- فلش باز کردن -->
-                        <button class="tool-btn" id="expandToolbarBtn" title="ابزارهای بیشتر"><i class="fa-solid fa-chevron-down"></i></button>
+                        <!-- دکمه فلش در سمت چپ (انتهای نوار) -->
+                        <button class="tool-btn" id="expandToolbarBtn" title="ابزارهای بیشتر" style="margin-right: auto;"><i class="fa-solid fa-chevron-down"></i></button>
                     </div>
                     
                     <div class="extra-tools-row">
@@ -278,7 +271,6 @@
             </main>
 
             <aside class="side-panel right-panel transition-panel" id="rightPanel">
-                <!-- هدر چرک‌نویس -->
                 <div class="panel-title">
                     <span class="header-title" data-lang="scratch-panel">چرک‌نویس</span>
                     <div style="display:flex; gap:5px; align-items:center;">
@@ -423,7 +415,7 @@
     <div id="settingsModal" class="modal">
         <div class="modal-content glass-panel border-top-accent" style="max-height: 85vh; overflow-y: auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-sliders" style="color:var(--accent-main);"></i> <span data-lang="settings-title">پیکربندی</span></h3>
+                <h3 style="margin:0; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-gear" style="color:var(--accent-main);"></i> <span data-lang="settings-title">پیکربندی</span></h3>
                 <button class="settings-close-btn btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
 
@@ -497,8 +489,9 @@
                 <button id="cancelSettingsBtn" class="btn-ghost" style="flex:1; justify-content:center;" data-lang="btn-cancel">انصراف</button>
             </div>
             
+            <!-- دکمه انتخاب مجدد نقش با طراحی جدید -->
             <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
-                <button id="resetRoleBtn" class="settings-btn"><i class="fa-solid fa-rotate-left"></i> <span data-lang="btn-reset-role">انتخاب مجدد نقش</span></button>
+                <button id="resetRoleBtn" class="btn-primary" style="background: transparent; border: 1px solid var(--accent-main); color: var(--accent-main);"><i class="fa-solid fa-rotate-left"></i> <span data-lang="btn-reset-role">انتخاب مجدد نقش</span></button>
                 <button id="clearDataBtn" class="settings-btn danger"><i class="fa-solid fa-trash-can"></i> <span data-lang="btn-clear-data">حذف تمام داده‌ها</span></button>
             </div>
         </div>
