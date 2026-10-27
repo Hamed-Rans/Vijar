@@ -444,12 +444,21 @@ function initSelectionTooltip() {
     const blurOverlay = $('blurOverlay');
     if(!editor || !tooltip || !popup || !blurOverlay) return;
 
+    // نمایش تولتیپ با تاخیر (فقط وقتی متن انتخاب شد)
     document.addEventListener('mouseup', () => {
         setTimeout(() => {
             const sel = window.getSelection();
-            if (!sel.rangeCount || sel.isCollapsed) { tooltip.classList.remove('show'); setTimeout(()=>tooltip.classList.add('hidden'), 300); return; }
+            if (!sel.rangeCount || sel.isCollapsed) { 
+                tooltip.classList.remove('show'); 
+                setTimeout(()=>tooltip.classList.add('hidden'), 300); 
+                return; 
+            }
             const range = sel.getRangeAt(0);
-            if (!editor.contains(range.commonAncestorContainer)) { tooltip.classList.remove('show'); setTimeout(()=>tooltip.classList.add('hidden'), 300); return; }
+            if (!editor.contains(range.commonAncestorContainer)) { 
+                tooltip.classList.remove('show'); 
+                setTimeout(()=>tooltip.classList.add('hidden'), 300); 
+                return; 
+            }
             
             const rect = range.getBoundingClientRect();
             tooltip.classList.remove('hidden');
@@ -470,16 +479,44 @@ function initSelectionTooltip() {
         }
     });
 
+    // دکمه ثبت نکته
     if($('quickAddNoteBtn')) {
         $('quickAddNoteBtn').addEventListener('click', () => {
             if (!state.selectedWord) return;
             $('selectedWordDisplay').textContent = state.selectedWord;
             $('noteInput').value = '';
             $('noteModal').classList.add('show');
-            tooltip.classList.add('hidden');
+            tooltip.classList.remove('show');
+            setTimeout(()=>tooltip.classList.add('hidden'), 300);
         });
     }
 
+    // دکمه جدید رنگ‌آمیزی (هایلایت بدون نکته)
+    if($('quickHighlightBtn')) {
+        $('quickHighlightBtn').addEventListener('click', () => {
+            if (!state.selectionRange) return;
+            const span = document.createElement('span');
+            span.className = 'hl-yellow'; // رنگ زرد پیش‌فرض
+            
+            try { 
+                state.selectionRange.surroundContents(span); 
+                const space = document.createTextNode('\u200B');
+                span.after(space);
+            }
+            catch (e) { 
+                const contents = state.selectionRange.extractContents(); 
+                span.appendChild(contents); 
+                state.selectionRange.insertNode(span); 
+            }
+
+            if (state.activeDoc) { state.activeDoc.content = $('editor').innerHTML; saveState(); }
+            tooltip.classList.remove('show');
+            setTimeout(()=>tooltip.classList.add('hidden'), 300);
+            window.getSelection().removeAllRanges();
+        });
+    }
+
+    // هاور روی کلمات دارای نکته (پاپ‌آپ از داخل کلمه باز می‌شود)
     editor.addEventListener('mouseover', (e) => {
         const el = e.target.closest('.hl-word');
         if (el && el.dataset.note) {
@@ -488,23 +525,20 @@ function initSelectionTooltip() {
             
             popup.className = 'note-view-popup ' + el.classList[1] + ' hidden';
             popup.style.left = (rect.left + rect.width / 2) + 'px'; 
-            popup.style.top = (rect.top - 5) + 'px'; 
-            popup.style.transformOrigin = 'bottom center';
-            popup.style.transform = 'translate(-50%, -100%) scaleY(0)'; 
+            popup.style.top = (rect.top - 5) + 'px'; // چسبیده به متن
             
             if (state.blurEffect) blurOverlay.classList.add('show');
 
             popup.classList.remove('hidden');
             requestAnimationFrame(() => {
                 popup.classList.add('show');
-                popup.style.transform = 'translate(-50%, -100%) scaleY(1)'; 
             });
         }
     });
+    
     editor.addEventListener('mouseout', (e) => {
         if (e.target.closest('.hl-word')) {
             popup.classList.remove('show');
-            popup.style.transform = 'translate(-50%, -100%) scaleY(0)';
             blurOverlay.classList.remove('show');
             setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 300);
         }
