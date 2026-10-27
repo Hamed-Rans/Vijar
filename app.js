@@ -12,6 +12,9 @@ let state = {
     lang: 'fa', scratchFontSize: 16
 };
 
+let isHighlighterActive = false;
+let isBoardHighlighterActive = false;
+
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
@@ -329,7 +332,8 @@ function openDoc(id) {
         
         if($('editor')) {
             $('editor').innerHTML = state.activeDoc.content || '';
-            $('editor').style.fontSize = state.baseFontSize + 'px';
+            // اعمال سایز فونت پیش‌فرض فقط روی ادیتور (متن‌های جدید)
+            $('editor').style.fontSize = state.baseFontSize + 'px'; 
             $('editor').className = `editor-box paper-${state.activeDoc.paperStyle || 'plain'}`;
         }
         if($('textScratchpad')) $('textScratchpad').innerHTML = state.activeDoc.scratchpad || '';
@@ -356,23 +360,52 @@ function changeFontSize(delta) {
     const sel = window.getSelection();
     if (!sel.isCollapsed && sel.rangeCount > 0) {
         const range = sel.getRangeAt(0);
-        let currentSize = state.baseFontSize;
+        let currentSize = 16;
         const parentEl = range.commonAncestorContainer.parentElement;
-        if (parentEl && parentEl.style.fontSize) {
-            currentSize = parseInt(parentEl.style.fontSize);
+        
+        if (parentEl) {
+            if(parentEl.style.fontSize) {
+                currentSize = parseInt(parentEl.style.fontSize);
+            } else if (parentEl.tagName === 'FONT' && parentEl.getAttribute('size')) {
+                 // اگر از execCommand استفاده شده باشد
+                 currentSize = state.baseFontSize; // تقریب
+            } else {
+                currentSize = parseInt(window.getComputedStyle(parentEl).fontSize);
+            }
         }
         
-        const newSize = currentSize + delta;
-        if (newSize < 10 || newSize > 60) return;
+        // اگر سایز قبلی خوانده نشد، از سایز پایه استفاده کن
+        if(isNaN(currentSize) || currentSize === 0) currentSize = state.baseFontSize;
 
+        const newSize = currentSize + delta;
+        if (newSize < 8 || newSize > 80) return;
+
+        // برای اینکه باگ ادامه‌دار نداشته باشیم، ابتدا انتخاب را در یک span بپیچانیم
         const span = document.createElement('span');
         span.style.fontSize = newSize + 'px';
         span.appendChild(range.extractContents());
         range.insertNode(span);
+        
     } else {
-        state.baseFontSize = Math.max(10, Math.min(state.baseFontSize + delta, 60));
-        $('editor').style.fontSize = state.baseFontSize + 'px';
+        // اگر متنی انتخاب نشده بود، فقط سایز پایه برای متن‌های بعدی تغییر می‌کند
+        state.baseFontSize = Math.max(8, Math.min(state.baseFontSize + delta, 80));
         $('fontSizeDisplay').textContent = state.baseFontSize;
+        
+        // برای اینکه متن‌های جدید سایز جدید بگیرند، یک فاصله با سایز جدید درج می‌کنیم
+        const sel = window.getSelection();
+        if(sel.rangeCount > 0){
+            const range = sel.getRangeAt(0);
+            const span = document.createElement('span');
+            span.style.fontSize = state.baseFontSize + 'px';
+            span.innerHTML = '&#8203;';
+            range.insertNode(span);
+            // بردن کرسر بعد از span
+            range.setStartAfter(span);
+            range.setEndAfter(span);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
         localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize);
     }
 }
@@ -386,11 +419,7 @@ function initEditor() {
         btn.addEventListener('mousedown', (e) => e.preventDefault());
         btn.addEventListener('click', () => { 
             editor.focus(); 
-            if(btn.dataset.command === 'hiliteColor') {
-                document.execCommand('hiliteColor', false, 'rgba(234, 179, 8, 0.5)'); 
-            } else {
-                document.execCommand(btn.dataset.command, false, null); 
-            }
+            document.execCommand(btn.dataset.command, false, null); 
             updateToolbarState(); 
         });
     });
@@ -507,13 +536,6 @@ function initEditor() {
         });
     }
 
-    if($('expandToolbarBtn')) $('expandToolbarBtn').onclick = () => {
-        const tb = $('topToolbar');
-        tb.classList.toggle('expanded');
-        const icon = $('expandToolbarBtn').querySelector('i');
-        icon.className = tb.classList.contains('expanded') ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
-    };
-
     initSelectionTooltip();
     initContextMenu();
 }
@@ -612,7 +634,10 @@ function initSelectionTooltip() {
         });
     }
 
+    // اصلاح هاور روی نکته: اگر متن انتخاب شده باشد، پاپ‌آپ باز نشود
     editor.addEventListener('mouseover', (e) => {
+        if (window.getSelection().toString().length > 0) return; // اگر متنی انتخاب شده، برو بیرون
+
         const el = e.target.closest('.hl-word');
         if (el && el.dataset.note) {
             $('noteViewContent').textContent = el.dataset.note;
@@ -903,7 +928,7 @@ function initFontDropdowns() {
     const colorBtn = $('textColorBtn'), colorPopup = $('colorPopup');
     if(colorBtn && colorPopup) {
         colorBtn.addEventListener('mousedown', (e) => {
-            e.preventDefault(); // جلوگیری از دست رفتن انتخاب
+            e.preventDefault();
             e.stopPropagation();
             const sel = window.getSelection();
             if (sel.rangeCount > 0) state.selectionRange = sel.getRangeAt(0).cloneRange();
@@ -914,7 +939,7 @@ function initFontDropdowns() {
         });
         colorPopup.querySelectorAll('.color-swatch').forEach(sw => {
             sw.onclick = (e) => { 
-                e.stopPropagation(); // جلوگیری از بسته شدن
+                e.stopPropagation(); 
                 $('editor').focus(); 
                 if (state.selectionRange) {
                     const sel = window.getSelection();
@@ -962,6 +987,26 @@ function initFontDropdowns() {
     if($('decreaseFontSize')) $('decreaseFontSize').onclick = () => { 
         changeFontSize(-2);
     };
+
+    // هایلایتر متن
+    if($('highlightBtn')) {
+        $('highlightBtn').onclick = (e) => {
+            e.stopPropagation();
+            if (!isHighlighterActive) {
+                isHighlighterActive = true;
+                $('highlightBtn').classList.add('active-tool');
+                document.execCommand('hiliteColor', false, 'rgba(234, 179, 8, 0.5)');
+            } else {
+                $('highlighterSettings').classList.toggle('show');
+            }
+        };
+        $('highlighterColor').oninput = (e) => {
+            document.execCommand('hiliteColor', false, e.target.value);
+        };
+        $('highlighterSize').oninput = (e) => {
+            $('editor').style.setProperty('--hl-size', e.target.value + 'px');
+        };
+    }
 
     if($('importBtn')) $('importBtn').onclick = () => { 
         if($('importStep1')) $('importStep1').classList.remove('hidden'); 
@@ -1108,7 +1153,7 @@ function initCanvas() {
 
     function setupBrush() {
         ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-        if (canvasState.tool === 'highlighter') { ctx.strokeStyle = canvasState.color; ctx.globalAlpha = 0.3; ctx.lineWidth = 15; ctx.globalCompositeOperation = 'source-over'; }
+        if (canvasState.tool === 'highlighter') { ctx.strokeStyle = canvasState.color; ctx.globalAlpha = 0.3; ctx.lineWidth = canvasState.size; ctx.globalCompositeOperation = 'source-over'; }
         else if (canvasState.tool === 'eraser') { ctx.strokeStyle = 'rgba(0,0,0,1)'; ctx.globalAlpha = 1; ctx.lineWidth = 20; ctx.globalCompositeOperation = 'destination-out'; }
         else { ctx.strokeStyle = canvasState.color; ctx.globalAlpha = 1; ctx.lineWidth = canvasState.size; ctx.globalCompositeOperation = 'source-over'; }
     }
@@ -1162,6 +1207,27 @@ function initCanvas() {
             else if(canvasState.tool === 'highlighter') canvas.classList.add('cursor-highlighter');
         };
     });
+
+    // هایلایتر بوم
+    if($('boardHighlighterBtn')) {
+        $('boardHighlighterBtn').onclick = (e) => {
+            e.stopPropagation();
+            if (!isBoardHighlighterActive) {
+                isBoardHighlighterActive = true;
+                $('boardHighlighterBtn').classList.add('active');
+                canvasState.tool = 'highlighter';
+                canvas.className = 'cursor-highlighter';
+            } else {
+                $('boardHighlighterSettings').classList.toggle('show');
+            }
+        };
+        $('boardHighlighterColor').oninput = (e) => {
+            canvasState.color = e.target.value;
+        };
+        $('boardHighlighterSize').oninput = (e) => {
+            canvasState.size = e.target.value;
+        };
+    }
     
     if($('clearBoardBtn')) $('clearBoardBtn').onclick = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); };
     if($('exportBoardToDocBtn')) $('exportBoardToDocBtn').onclick = () => {
@@ -1389,6 +1455,12 @@ function init() {
         $('rightPanel').classList.toggle('collapsed-right');
         $('toggleRightPanelBtn').querySelector('i').classList.toggle('fa-rotate-180');
     };
+
+    // بستن منوی هایلایتر با کلیک بیرون
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#highlighterWrapper')) $('highlighterSettings').classList.remove('show');
+        if (!e.target.closest('#boardHighlighterWrapper')) $('boardHighlighterSettings').classList.remove('show');
+    });
 
     $$('.btn-close-modal').forEach(btn => btn.onclick = () => btn.closest('.modal').classList.remove('show'));
     $$('.modal').forEach(modal => { modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('show'); }; });
