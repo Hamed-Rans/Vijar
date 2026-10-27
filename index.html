@@ -6,17 +6,13 @@
     <title>ویژار | دستیار هوشمند جزوه‌نویسی</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <!-- فونت‌ها (سینما و بقیه) -->
-    <link href="https://cdn.fontcdn.ir/Font/Persian/Cinema/Cinema.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Lalezar&family=Gulzar&family=Vazirmatn:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
-    <!-- سیستم نوتیفیکیشن -->
     <div id="toastContainer" class="toast-container"></div>
 
-    <!-- صفحه لودینگ -->
     <div id="loading-screen" class="hidden-loader">
         <div class="loader-geometric">
             <div class="shape shape1"></div>
@@ -26,7 +22,6 @@
         <div class="loader-text">ویژار</div>
     </div>
 
-    <!-- اورلی پردازش (برای PDF) -->
     <div id="processLoadingOverlay" class="hidden">
         <div class="loader-geometric" style="width: 60px; height: 60px;">
             <div class="shape shape1"></div>
@@ -36,7 +31,7 @@
         <p style="color: var(--text-main); font-weight: bold; margin-top: 20px;" data-lang="processing">در حال پردازش...</p>
     </div>
 
-    <!-- هدر شناور بالای صفحه -->
+    <!-- هدر شناور -->
     <div class="floating-top-nav">
         <div class="nav-block brand-block glass-element">
             <i class="fa-solid fa-feather-pointed logo-icon"></i>
@@ -44,7 +39,6 @@
             <span id="userRoleBadge" class="custom-badge hidden">دانشجو</span>
         </div>
         
-        <!-- دکمه‌های کناری پنل‌ها -->
         <div class="nav-block panel-toggles hidden">
             <button id="toggleLeftPanelBtn" class="nav-btn-text" title="پنل چپ">
                 <i class="fa-solid fa-arrow-right"></i> <span data-lang="panel-left">پنل چپ</span>
@@ -54,7 +48,6 @@
             </button>
         </div>
 
-        <!-- اکشن‌های اصلی -->
         <div class="nav-block actions-block">
             <button id="focusModeBtn" class="nav-btn action-nav hidden" title="حالت تمرکز"><i class="fa-solid fa-expand"></i></button>
             
@@ -66,7 +59,6 @@
                 <i class="fa-solid fa-file-arrow-down"></i> <span data-lang="btn-export">خروجی</span>
             </button>
             
-            <!-- دکمه خانه (بازگردانده شد) -->
             <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house"></i></button>
             
             <button id="settingsBtn" class="nav-btn" title="پیکربندی"><i class="fa-solid fa-gear"></i></button>
@@ -96,7 +88,6 @@
     <!-- صفحه داشبورد -->
     <section id="dashboard-view" class="view-section hidden">
         <div class="dashboard-layout">
-            <!-- ستون دسته‌بندی‌ها -->
             <aside class="dashboard-sidebar">
                 <div class="sidebar-title glass-panel">
                     <h3><i class="fa-solid fa-folder-tree"></i> <span data-lang="folders">دسته‌بندی‌ها</span></h3>
@@ -107,7 +98,6 @@
                 </div>
             </aside>
 
-            <!-- ستون جزوه‌ها -->
             <main class="documents-area">
                 <div class="docs-title glass-panel">
                     <h2 data-lang="my-notes">جزوه‌های من</h2>
@@ -129,10 +119,7 @@
     <section id="editor-view" class="view-section hidden">
         <div class="workspace-layout" id="workspaceLayout">
             
-            <!-- پنل سمت چپ (یادداشت و بوم) -->
             <aside class="side-panel left-panel transition-panel" id="leftPanel">
-                
-                <!-- هدر یادداشت (متن راست، آیکون چپ) -->
                 <div class="panel-title">
                     <span class="header-title" data-lang="notes-panel">یادداشت</span>
                     <i class="fa-solid fa-thumbtack"></i>
@@ -141,7 +128,6 @@
                     <div id="pinnedNotesArea" class="notes-container"></div>
                 </div>
 
-                <!-- هدر بوم (متن راست، دکمه و آیکون چپ) -->
                 <div class="panel-title" style="margin-top: 15px;">
                     <span class="header-title" data-lang="canvas-panel">بوم</span>
                     <div style="display:flex; gap:10px; align-items:center;">
@@ -159,7 +145,6 @@
                         <button class="board-tool" data-tool="rect" title="مربع"><i class="fa-regular fa-square"></i></button>
                         <button class="board-tool" data-tool="circle" title="دایره"><i class="fa-regular fa-circle"></i></button>
                         
-                        <!-- پالت رنگ بوم -->
                         <div class="color-menu-wrapper" id="boardColorWrapper">
                             <button class="board-tool" id="boardColorBtn" title="رنگ"><i class="fa-solid fa-palette"></i></button>
                             <div class="custom-color-popup glass-panel hidden" id="boardColorPopup">
@@ -182,12 +167,9 @@
                 </div>
             </aside>
 
-            <!-- ویرایشگر مرکزی -->
             <main class="editor-main">
-                
                 <!-- نوار ابزار بالا -->
                 <div class="editor-top-toolbar glass-panel" id="topToolbar">
-                    <!-- ردیف اول: ابزارهای اصلی -->
                     <div class="main-tools-row">
                         <div class="custom-dropdown" id="fontDropdown">
                             <div class="dropdown-selected" data-lang="font">فونت <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
@@ -211,12 +193,19 @@
                         
                         <div class="divider"></div>
                         
+                        <!-- دکمه های چینش متن -->
                         <button class="tool-btn align-tool" data-command="justifyRight" title="راست‌چین"><i class="fa-solid fa-align-right"></i></button>
                         <button class="tool-btn align-tool" data-command="justifyCenter" title="وسط‌چین"><i class="fa-solid fa-align-center"></i></button>
                         <button class="tool-btn align-tool" data-command="justifyLeft" title="چپ‌چین"><i class="fa-solid fa-align-left"></i></button>
                         
                         <div class="divider"></div>
                         
+                        <!-- دکمه های جهت متن (LTR/RTL) -->
+                        <button class="tool-btn" id="ltrBtn" title="چپ به راست"><i class="fa-solid fa-align-left" style="transform: scaleX(-1);"></i></button>
+                        <button class="tool-btn" id="rtlBtn" title="راست به چپ"><i class="fa-solid fa-align-right" style="transform: scaleX(-1);"></i></button>
+
+                        <div class="divider"></div>
+
                         <!-- پالت رنگ متن -->
                         <div class="color-menu-wrapper" id="textColorWrapper">
                             <button class="tool-btn" id="textColorBtn" title="رنگ متن"><i class="fa-solid fa-palette"></i></button>
@@ -233,10 +222,10 @@
                         </div>
                         
                         <!-- دکمه باز کردن ابزارهای بیشتر (در انتهای نوار) -->
-                        <button class="tool-btn" id="expandToolbarBtn" title="ابزارهای بیشتر" style="margin-right: auto;"><i class="fa-solid fa-chevron-down"></i></button>
+                        <button class="tool-btn" id="expandToolbarBtn" title="ابزارهای بیشتر"><i class="fa-solid fa-chevron-down"></i></button>
                     </div>
                     
-                    <!-- ردیف دوم: ابزارهای اضافی (با فلش باز می‌شوند) -->
+                    <!-- ابزارهای اضافی -->
                     <div class="extra-tools-row">
                         <div class="custom-dropdown" id="paperStyleDropdown">
                             <div class="dropdown-selected" data-lang="paper-style">بافت کاغذ <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
@@ -253,12 +242,10 @@
                     </div>
                 </div>
 
-                <!-- عنوان جزوه -->
                 <div class="editor-title-wrapper">
                     <input type="text" id="documentTitle" class="doc-title-input glass-panel" placeholder="عنوان جزوه...">
                 </div>
 
-                <!-- محتوای ادیتور -->
                 <div class="editor-content-wrapper glass-panel">
                     <div id="blurOverlay" class="blur-overlay"></div>
                     <div id="editor" contenteditable="true" class="editor-box paper-plain" placeholder="اینجا بنویسید..."></div>
@@ -269,7 +256,6 @@
                     <div id="wordCounter" class="word-counter glass-element">۰ کلمه</div>
                 </div>
 
-                <!-- نوار ابزار پایین -->
                 <div class="floating-doc-toolbar glass-element">
                     <button class="tool-btn toggle-tool" data-command="bold"><i class="fa-solid fa-bold"></i></button>
                     <button class="tool-btn toggle-tool" data-command="italic"><i class="fa-solid fa-italic"></i></button>
@@ -286,9 +272,7 @@
                 </div>
             </main>
 
-            <!-- پنل سمت راست (چرک‌نویس) -->
             <aside class="side-panel right-panel transition-panel" id="rightPanel">
-                <!-- هدر چرک‌نویس (متن راست، آیکون چپ) -->
                 <div class="panel-title">
                     <span class="header-title" data-lang="scratch-panel">چرک‌نویس</span>
                     <i class="fa-solid fa-pen-clip"></i>
@@ -300,19 +284,16 @@
         </div>
     </section>
 
-    <!-- تولتیپ انتخاب متن (با دکمه رنگ‌آمیزی) -->
     <div id="quickTooltip" class="quick-tooltip hidden">
         <button id="quickAddNoteBtn"><i class="fa-solid fa-comment-medical"></i> <span data-lang="add-note">ثبت نکته</span></button>
         <button id="quickHighlightBtn"><i class="fa-solid fa-highlighter"></i> <span>رنگ‌آمیزی</span></button>
     </div>
 
-    <!-- پاپ‌آپ نمایش نکته -->
     <div id="noteViewPopup" class="note-view-popup hidden">
         <p id="noteViewContent"></p>
         <div class="note-arrow"></div>
     </div>
 
-    <!-- منوی راست کلیک ادیتور -->
     <div id="customContextMenu" class="context-menu glass-panel hidden">
         <ul>
             <li id="menuCopy"><i class="fa-regular fa-copy"></i> <span data-lang="copy">رونوشت</span></li>
@@ -326,7 +307,6 @@
         </ul>
     </div>
 
-    <!-- منوی راست کلیک جزوه -->
     <div id="docContextMenu" class="context-menu glass-panel hidden">
         <ul>
             <li id="ctxEditTitle"><i class="fa-solid fa-pen"></i> <span data-lang="edit-title">ویرایش عنوان</span></li>
@@ -335,7 +315,6 @@
         </ul>
     </div>
 
-    <!-- منوی راست کلیک دسته‌بندی -->
     <div id="folderContextMenu" class="context-menu glass-panel hidden">
         <ul>
             <li id="ctxPinFolder"><i class="fa-solid fa-thumbtack"></i> <span data-lang="pin-folder">سنجاق به بالا</span></li>
@@ -344,7 +323,6 @@
         </ul>
     </div>
 
-    <!-- منوی راست کلیک چرک‌نویس -->
     <div id="scratchpadContextMenu" class="context-menu glass-panel hidden">
         <ul>
             <li class="scratch-cmd" data-cmd="bold"><i class="fa-solid fa-bold"></i> <span data-lang="bold">درشت‌نویسی</span></li>
@@ -354,7 +332,6 @@
         </ul>
     </div>
 
-    <!-- مودال ثبت نکته -->
     <div id="noteModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
             <h3><span data-lang="note-for">یادداشت برای:</span> <span id="selectedWordDisplay" class="highlight-preview"></span></h3>
@@ -379,7 +356,6 @@
         </div>
     </div>
 
-    <!-- مودال دسته‌بندی جدید -->
     <div id="addFolderModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
             <h3 data-lang="new-folder">دسته‌بندی جدید</h3>
@@ -391,7 +367,6 @@
         </div>
     </div>
 
-    <!-- مودال آپلود فایل -->
     <div id="importModal" class="modal">
         <div class="modal-content glass-panel border-top-accent">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
@@ -433,7 +408,6 @@
         </div>
     </div>
 
-    <!-- مودال تنظیمات -->
     <div id="settingsModal" class="modal">
         <div class="modal-content glass-panel border-top-accent" style="max-height: 85vh; overflow-y: auto;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
@@ -501,13 +475,11 @@
                 </label>
             </div>
 
-            <!-- درباره ما -->
             <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--border-glass); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
                 <h2 style="margin: 0; font-size: 1.8rem; font-weight: 800; background: linear-gradient(45deg, var(--accent-main), #7A9CFF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px;">Dahpat Studio</h2>
                 <p style="margin: 0; font-size: 0.95rem; color: var(--text-muted); font-weight: 500;">Designer & Ideator: Hamed Rans</p>
             </div>
 
-            <!-- دکمه‌های تایید و انصراف -->
             <div id="settingsActionBar" class="settings-actions">
                 <button id="confirmSettingsBtn" class="btn-primary" style="flex:1; justify-content:center;" data-lang="btn-confirm">تایید تغییرات</button>
                 <button id="cancelSettingsBtn" class="btn-ghost" style="flex:1; justify-content:center;" data-lang="btn-cancel">انصراف</button>
@@ -520,7 +492,6 @@
         </div>
     </div>
 
-    <!-- مودال تایید اختصاصی -->
     <div id="confirmModal" class="modal" style="z-index: 5000;">
         <div class="modal-content glass-panel border-top-accent" style="width: 380px; text-align: center;">
             <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: var(--danger); margin-bottom: 15px;"></i>
@@ -532,7 +503,6 @@
         </div>
     </div>
 
-    <!-- اسکریپت‌ها -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="app.js"></script>
