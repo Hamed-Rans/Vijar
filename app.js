@@ -305,7 +305,6 @@ function openDoc(id) {
     state.activeDoc = state.docs.find(d => d.id === id);
     if (!state.activeDoc) return;
     
-    // ثبت تاریخچه برای دکمه Back
     history.pushState({ view: 'editor', docId: id }, '', '#editor');
 
     if($('dashboard-view')) $('dashboard-view').style.opacity = '0';
@@ -368,6 +367,15 @@ function initEditor() {
         });
     });
 
+    if($('ltrBtn')) {
+        $('ltrBtn').addEventListener('mousedown', (e) => e.preventDefault());
+        $('ltrBtn').addEventListener('click', () => { editor.focus(); document.execCommand('justifyLeft'); document.execCommand('formatBlock', false, 'div'); document.execCommand('outdent'); });
+    }
+    if($('rtlBtn')) {
+        $('rtlBtn').addEventListener('mousedown', (e) => e.preventDefault());
+        $('rtlBtn').addEventListener('click', () => { editor.focus(); document.execCommand('justifyRight'); });
+    }
+
     editor.addEventListener('keyup', updateToolbarState);
     editor.addEventListener('mouseup', updateToolbarState);
     
@@ -423,6 +431,13 @@ function initEditor() {
             }
         });
     }
+
+    if($('expandToolbarBtn')) $('expandToolbarBtn').onclick = () => {
+        const tb = $('topToolbar');
+        tb.classList.toggle('expanded');
+        const icon = $('expandToolbarBtn').querySelector('i');
+        icon.className = tb.classList.contains('expanded') ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
+    };
 
     initSelectionTooltip();
     initContextMenu();
@@ -491,16 +506,11 @@ function initSelectionTooltip() {
         });
     }
 
-    // دکمه رنگ آمیزی (هایلایت بدون نکته با انتخاب رنگ)
     if($('quickHighlightBtn')) {
         $('quickHighlightBtn').addEventListener('click', () => {
             if (!state.selectionRange) return;
-            
-            // استفاده از یک پالت رنگ ساده
-            const color = prompt("لطفا یک رنگ انتخاب کنید (yellow, blue, green, red, neon):", "yellow");
+            const color = prompt("رنگ را انتخاب کنید (yellow, blue, green, red, neon):", "yellow");
             if (!color) return;
-
-            // بررسی معتبر بودن رنگ
             const validColors = ['yellow', 'blue', 'green', 'red', 'neon'];
             const finalColor = validColors.includes(color.toLowerCase()) ? color.toLowerCase() : 'yellow';
 
@@ -509,9 +519,8 @@ function initSelectionTooltip() {
             
             try { 
                 state.selectionRange.surroundContents(span); 
-                // رفع باگ ادامه دار شدن رنگ در تایپ با فاصله نامرئی و ریست کردن رنگ
                 const resetSpan = document.createElement('span');
-                resetSpan.innerHTML = '&#8203;'; // Zero-width space
+                resetSpan.innerHTML = '&#8203;';
                 resetSpan.style.cssText = 'background:transparent; border:none; color:inherit;';
                 span.after(resetSpan);
             }
@@ -535,7 +544,6 @@ function initSelectionTooltip() {
             const rect = el.getBoundingClientRect();
             
             popup.className = 'note-view-popup ' + el.classList[1] + ' hidden';
-            // قرار دادن دقیقا بالای کلمه
             popup.style.left = (rect.left + rect.width / 2) + 'px'; 
             popup.style.top = (rect.top - 5) + 'px'; 
             
@@ -552,7 +560,7 @@ function initSelectionTooltip() {
         if (e.target.closest('.hl-word')) {
             popup.classList.remove('show');
             blurOverlay.classList.remove('show');
-            setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 200); // سریعتر بسته میشه
+            setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 200);
         }
     });
 }
@@ -580,7 +588,6 @@ function initNoteModal() {
 
         try { 
             state.selectionRange.surroundContents(span); 
-            // رفع باگ فاصله و رنگ
             const resetSpan = document.createElement('span');
             resetSpan.innerHTML = '&#8203;';
             resetSpan.style.cssText = 'background:transparent; border:none; color:inherit;';
@@ -663,7 +670,6 @@ function initContextMenu() {
         });
     });
     
-    // منوی راست کلیک ادیتور
     if($('menuCopy')) $('menuCopy').onclick = () => { document.execCommand('copy'); menu.classList.add('hidden'); };
     if($('menuCut')) $('menuCut').onclick = () => { document.execCommand('cut'); menu.classList.add('hidden'); };
     if($('menuPaste')) $('menuPaste').onclick = async () => { try { const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); } catch(e) { showToast('دسترسی ندارید'); } menu.classList.add('hidden'); };
@@ -671,7 +677,6 @@ function initContextMenu() {
     if($('menuItalic')) $('menuItalic').onclick = () => { document.execCommand('italic'); menu.classList.add('hidden'); };
     if($('menuDelete')) $('menuDelete').onclick = () => { document.execCommand('delete'); menu.classList.add('hidden'); };
 
-    // منوی جزوه
     if($('ctxEditTitle')) $('ctxEditTitle').onclick = () => {
         const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
         if(doc) {
@@ -698,7 +703,6 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
 
-    // منوی دسته‌بندی
     if($('ctxPinFolder')) $('ctxPinFolder').onclick = () => {
         const idx = state.folders.findIndex(f => f.id === state.targetFolderIdToEdit);
         if(idx > 0) { const temp = state.folders[idx]; state.folders[idx] = state.folders[idx-1]; state.folders[idx-1] = temp; saveState(); renderFolders(); }
@@ -721,7 +725,6 @@ function initContextMenu() {
 }
 
 function initFontDropdowns() {
-    // فونت
     const fontDD = $('fontDropdown');
     if(fontDD) {
         fontDD.querySelector('.dropdown-selected').onmousedown = (e) => {
@@ -746,7 +749,6 @@ function initFontDropdowns() {
         });
     }
 
-    // سایز فونت
     const sizeDD = $('sizeDropdown');
     if(sizeDD) {
         sizeDD.querySelector('.dropdown-selected').onmousedown = (e) => {
@@ -757,11 +759,19 @@ function initFontDropdowns() {
         sizeDD.querySelector('.dropdown-selected').onclick = (e) => { e.stopPropagation(); sizeDD.classList.toggle('active'); };
     }
 
-    // رنگ متن
+    // ====== فیکس کردن پالت رنگ متن ======
     const colorBtn = $('textColorBtn'), colorPopup = $('colorPopup');
     if(colorBtn && colorPopup) {
-        colorBtn.onmousedown = (e) => e.preventDefault();
-        colorBtn.onclick = (e) => { e.stopPropagation(); colorPopup.classList.toggle('show'); };
+        colorBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) state.selectionRange = sel.getRangeAt(0).cloneRange();
+        });
+        colorBtn.addEventListener('click', (e) => { 
+            e.stopPropagation(); 
+            colorPopup.classList.toggle('show'); 
+        });
         colorPopup.querySelectorAll('.color-swatch').forEach(sw => {
             sw.onclick = () => { 
                 $('editor').focus(); 
@@ -776,17 +786,17 @@ function initFontDropdowns() {
         });
     }
 
-    // رنگ بوم
+    // ====== فیکس کردن پالت رنگ بوم ======
     const boardColorBtn = $('boardColorBtn'), boardColorPopup = $('boardColorPopup');
     if(boardColorBtn && boardColorPopup) {
-        boardColorBtn.onmousedown = (e) => {
+        boardColorBtn.addEventListener('mousedown', (e) => {
             e.preventDefault();
             e.stopPropagation();
-        };
-        boardColorBtn.onclick = (e) => { 
+        });
+        boardColorBtn.addEventListener('click', (e) => { 
             e.stopPropagation(); 
             boardColorPopup.classList.toggle('show'); 
-        };
+        });
         boardColorPopup.querySelectorAll('.color-swatch').forEach(sw => {
             sw.onclick = () => { canvasState.color = sw.dataset.color; boardColorPopup.classList.remove('show'); };
         });
@@ -798,7 +808,6 @@ function initFontDropdowns() {
         if (!e.target.closest('#boardColorWrapper') && boardColorPopup) boardColorPopup.classList.remove('show');
     });
 
-    // تغییر سایز فونت
     if($('increaseFontSize')) $('increaseFontSize').onmousedown = (e) => e.preventDefault();
     if($('increaseFontSize')) $('increaseFontSize').onclick = () => { 
         $('editor').focus();
@@ -839,14 +848,6 @@ function initFontDropdowns() {
         localStorage.setItem(STORAGE_KEYS.defaultFontSize, state.baseFontSize); 
     };
 
-    if($('expandToolbarBtn')) $('expandToolbarBtn').onclick = () => {
-        const tb = $('topToolbar');
-        tb.classList.toggle('expanded');
-        const icon = $('expandToolbarBtn').querySelector('i');
-        icon.className = tb.classList.contains('expanded') ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
-    };
-
-    // آپلود
     if($('importBtn')) $('importBtn').onclick = () => { 
         if($('importStep1')) $('importStep1').classList.remove('hidden'); 
         if($('importStep2')) $('importStep2').classList.add('hidden'); 
