@@ -6,15 +6,14 @@
     <title>ویژار | دستیار هوشمند جزوه‌نویسی</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Lalezar&family=Gulzar&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@700&family=Lalezar&family=Gulzar&family=Vazirmatn:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
-    <!-- سیستم نوتیفیکیشن -->
     <div id="toastContainer" class="toast-container"></div>
 
-    <div id="loading-screen">
+    <div id="loading-screen" class="hidden-loader">
         <div class="loader-geometric">
             <div class="shape shape1"></div>
             <div class="shape shape2"></div>
@@ -41,12 +40,12 @@
         </div>
         
         <div class="nav-block panel-toggles hidden">
-            <button id="toggleLeftPanelBtn" class="nav-btn-text" title="بوم و یادداشت"><i class="fa-solid fa-arrow-right"></i> <span data-lang="panel-left">بوم و یادداشت</span></button>
+            <button id="toggleLeftPanelBtn" class="nav-btn-text" title="پنل چپ"><i class="fa-solid fa-arrow-right"></i> <span data-lang="panel-left">پنل چپ</span></button>
             <button id="toggleRightPanelBtn" class="nav-btn-text" title="چرک‌نویس"><i class="fa-solid fa-arrow-left"></i> <span data-lang="panel-right">چرک‌نویس</span></button>
         </div>
 
         <div class="nav-block actions-block">
-            <button id="focusModeBtn" class="nav-btn action-nav hidden" title="حالت تمرکز مطلق"><i class="fa-solid fa-expand"></i></button>
+            <button id="focusModeBtn" class="nav-btn action-nav hidden" title="حالت تمرکز"><i class="fa-solid fa-expand"></i></button>
             <button id="importBtn" class="nav-btn-text action-nav hidden" title="افزودن"><i class="fa-solid fa-cloud-arrow-up"></i> <span data-lang="btn-import">رسانه</span></button>
             <button id="exportBtn" class="nav-btn-text action-nav hidden" title="دریافت"><i class="fa-solid fa-download"></i> <span data-lang="btn-export">دریافت</span></button>
             <button id="backToDashBtn" class="nav-btn hidden" title="داشبورد"><i class="fa-solid fa-house"></i></button>
@@ -130,7 +129,6 @@
                         <button class="board-tool" data-tool="rect" title="مربع"><i class="fa-regular fa-square"></i></button>
                         <button class="board-tool" data-tool="circle" title="دایره"><i class="fa-regular fa-circle"></i></button>
                         
-                        <!-- پالت رنگ بوم -->
                         <div class="color-menu-wrapper" id="boardColorWrapper">
                             <button class="board-tool" id="boardColorBtn" title="رنگ"><i class="fa-solid fa-palette"></i></button>
                             <div class="custom-color-popup glass-panel hidden" id="boardColorPopup">
@@ -156,15 +154,13 @@
             <main class="editor-main">
                 <!-- نوار ابزار بالا -->
                 <div class="editor-top-toolbar glass-panel" id="topToolbar">
-                    <!-- ردیف اول ابزارها -->
-                    <div class="toolbar-row main-row">
+                    <div class="toolbar-row">
                         <div class="custom-dropdown" id="fontDropdown">
                             <div class="dropdown-selected" data-lang="font">فونت <i class="fa-solid fa-chevron-down" style="font-size:.7rem;"></i></div>
                             <div class="dropdown-list">
-                                <div class="dropdown-item" data-value="YekanBakh">یکان‌بخ</div>
+                                <div class="dropdown-item" data-value="Vazirmatn">وزیرمتن</div>
                                 <div class="dropdown-item" data-value="Lalezar" style="font-family:'Lalezar'">لاله‌زار</div>
                                 <div class="dropdown-item" data-value="Gulzar" style="font-family:'Gulzar'">گلزار</div>
-                                <div class="dropdown-item" data-value="Vazirmatn">وزیرمتن</div>
                             </div>
                         </div>
                         <div class="custom-dropdown" id="sizeDropdown">
@@ -204,8 +200,6 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- دکمه باز کردن ابزارهای بیشتر (درون نوار) -->
-                        <button class="tool-btn" id="expandToolbarBtn" title="ابزارهای بیشتر" style="margin-right: auto;"><i class="fa-solid fa-chevron-down"></i></button>
                     </div>
                 </div>
 
@@ -456,6 +450,18 @@
             <div style="margin-top:15px; display:flex; flex-direction:column; gap:8px;">
                 <button id="resetRoleBtn" class="settings-btn"><i class="fa-solid fa-rotate-left"></i> <span data-lang="btn-reset-role">انتخاب مجدد نقش</span></button>
                 <button id="clearDataBtn" class="settings-btn danger"><i class="fa-solid fa-trash-can"></i> <span data-lang="btn-clear-data">حذف تمام داده‌ها</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- مودال تایید اختصاصی -->
+    <div id="confirmModal" class="modal" style="z-index: 5000;">
+        <div class="modal-content glass-panel border-top-accent" style="width: 380px; text-align: center;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 3rem; color: var(--danger); margin-bottom: 15px;"></i>
+            <h3 id="confirmMessage" style="margin-bottom: 25px;">آیا مطمئن هستید؟</h3>
+            <div style="display:flex; gap:10px;">
+                <button id="confirmYesBtn" class="btn-primary" style="flex:1; justify-content:center; background:var(--danger);">بله</button>
+                <button id="confirmNoBtn" class="btn-ghost" style="flex:1; justify-content:center;">خیر</button>
             </div>
         </div>
     </div>
