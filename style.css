@@ -35,16 +35,16 @@
 }
 
 /* ============================================================
-   پایه (اصلاح فونت کلی)
+   پایه (اصلاح کامل فونت کلی برنامه)
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; }
-body, html { 
-    margin: 0; padding: 0; height: 100vh; overflow: hidden; 
-    background-color: var(--bg-base); color: var(--text-main); 
-    transition: background 0.4s ease, color 0.4s ease; 
-    font-family: 'Vazirmatn', Tahoma, sans-serif; /* فونت پایه اصلاح شد */
+body, html, div, span, p, h1, h2, h3, h4, h5, h6, button, input, textarea, select {
+    font-family: 'Vazirmatn', Tahoma, sans-serif !important;
 }
-i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important; }
+i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands {
+    font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+}
+body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-color: var(--bg-base); color: var(--text-main); transition: background 0.4s ease, color 0.4s ease; }
 
 /* فونت سینما و رنگ آبی نیلی برای هدرها */
 .sidebar-title h3, 
@@ -53,7 +53,7 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
     font-family: 'Cinema', 'Lalezar', Tahoma, sans-serif !important;
     font-size: 1.1rem !important;
     font-weight: 500 !important;
-    color: var(--accent-main) !important; /* رنگ آبی نیلی */
+    color: var(--accent-main) !important;
 }
 
 /* Toast */
@@ -77,11 +77,12 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
 .loader-text { font-family: 'Aref Ruqaa', serif !important; font-size: 2.5rem; color: var(--accent-main); letter-spacing: 2px; animation: pulseText 2s infinite alternate; }
 @keyframes pulseText { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-button { display: none; }
+/* اسکرول بار نیلی و بدون دکمه */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: var(--accent-main); }
+::-webkit-scrollbar-thumb { background: var(--accent-main); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-hover); }
 
 .glass-panel, .glass-element { background: var(--surface-glass); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); border: 1px solid var(--border-glass); box-shadow: var(--shadow-emboss); border-radius: 20px; }
 .hidden { display: none !important; }
@@ -198,8 +199,7 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
 .editor-top-toolbar { 
     display: flex; flex-direction: column; gap: 10px; padding: 10px 15px; 
     border-radius: 20px; flex-shrink: 0; z-index: 100; width: 100%; 
-    overflow: visible !important; /* برای نمایش درست دراپ‌داون‌ها */
-    transition: max-height 0.4s ease; max-height: 60px;
+    overflow: visible !important; transition: max-height 0.4s ease; max-height: 60px;
 }
 .editor-top-toolbar.expanded { max-height: 200px; }
 .main-tools-row { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; width: 100%; }
@@ -245,21 +245,32 @@ canvas.cursor-eraser { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.
 
 .scratchpad-text { flex: 1; width: 100%; border: none; background: transparent; color: var(--text-main); padding: 20px; outline: none; line-height: 1.8; overflow-y: auto; min-height: 300px; cursor: text; position: relative; z-index: 10; }
 
-.notes-container { display: flex; flex-direction: column; gap: 8px; }
-.note-card { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 12px; font-size: 0.85rem; display: flex; flex-direction: column; gap: 8px; border-right: 4px solid var(--accent-main); position: relative; }
-.note-card strong { color: var(--accent-main); }
-.note-card .edit-note-btn { position: absolute; top: 8px; left: 8px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
+/* یادداشت‌ها (طراحی جدید کارت‌ها) */
+.notes-container { display: flex; flex-direction: column; gap: 10px; }
+.note-card { 
+    background: var(--surface-solid); 
+    border: 1px solid var(--border-glass); 
+    border-radius: 12px; 
+    padding: 15px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); 
+    position: relative;
+    transition: all 0.3s ease;
+}
+.note-card:hover { transform: translateY(-2px); border-color: var(--accent-main); box-shadow: 0 6px 15px rgba(0,0,0,0.3); }
+.note-card strong { color: var(--accent-main); font-size: 0.85rem; display: block; margin-bottom: 4px; }
+.note-card p { margin: 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; }
+.note-card .edit-note-btn { position: absolute; top: 10px; left: 10px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; }
 .note-card .edit-note-btn:hover { color: var(--accent-main); }
-.note-card.hl-yellow { border-right-color: #EAB308; background: rgba(234, 179, 8, 0.1); }
-.note-card.hl-yellow strong { color: #EAB308; }
-.note-card.hl-blue { border-right-color: #3B82F6; background: rgba(59, 130, 246, 0.1); }
-.note-card.hl-blue strong { color: #3B82F6; }
-.note-card.hl-green { border-right-color: #10B981; background: rgba(16, 185, 129, 0.1); }
-.note-card.hl-green strong { color: #10B981; }
-.note-card.hl-red { border-right-color: #EF4444; background: rgba(239, 68, 68, 0.1); }
-.note-card.hl-red strong { color: #EF4444; }
-.note-card.hl-neon { border-right-color: #39FF14; background: rgba(57, 255, 20, 0.1); box-shadow: 0 0 10px rgba(57,255,20,0.2); }
-.note-card.hl-neon strong { color: #39FF14; text-shadow: 0 0 5px #39FF14; }
+
+/* رنگ‌بندی کارت‌ها بر اساس نوع نکته */
+.note-card.hl-yellow { border-right: 4px solid #EAB308; }
+.note-card.hl-blue { border-right: 4px solid #3B82F6; }
+.note-card.hl-green { border-right: 4px solid #10B981; }
+.note-card.hl-red { border-right: 4px solid #EF4444; }
+.note-card.hl-neon { border-right: 4px solid #39FF14; }
 
 .note-view-popup { position: fixed; padding: 6px 10px; max-width: 180px; z-index: 500; border: 1px solid var(--border-glass); background: rgba(22, 27, 34, 0.85) !important; backdrop-filter: blur(16px); border-radius: 12px; box-shadow: var(--shadow-float); font-size: 0.8rem; font-weight: bold; line-height: 1.4; transform-origin: bottom center; transform: translate(-50%, -100%) scale(0.9); opacity: 0; visibility: hidden; transition: opacity 0.2s ease, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .note-view-popup.show { transform: translate(-50%, -100%) scale(1); opacity: 1; visibility: visible; }
@@ -284,6 +295,7 @@ canvas.cursor-eraser { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.
 .quick-tooltip button { background: transparent; border: none; color: var(--text-main); cursor: pointer; font-size: 0.8rem; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
 .quick-tooltip button:hover { background: var(--accent-soft); color: var(--accent-main); }
 
+/* منوها */
 .context-menu { position: fixed; border-radius: 14px; padding: 6px 0; min-width: 160px; z-index: 2000; background: var(--surface-glass); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-glass); box-shadow: var(--shadow-float); transform-origin: var(--origin-x) var(--origin-y); animation: menuOpen 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; overflow: hidden; will-change: transform, opacity; }
 @keyframes menuOpen { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .context-menu.closing { animation: menuClose 0.3s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards; }
@@ -302,6 +314,7 @@ canvas.cursor-eraser { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.
 .dropdown-item { padding: 10px 15px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; border-bottom: 1px solid var(--border-glass); text-align: right; }
 .dropdown-item:hover { background: var(--accent-soft); color: var(--accent-main); }
 
+/* پالت رنگ */
 .color-menu-wrapper { position: relative; }
 .custom-color-popup { 
     position: absolute !important; top: 120% !important; left: 50% !important; transform: translateX(-50%) translateY(0) !important; 
@@ -314,6 +327,7 @@ canvas.cursor-eraser { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.
 .color-swatch { width: 26px; height: 26px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 .color-swatch:hover { transform: scale(1.2); border-color: var(--text-main); }
 
+/* مودال‌ها */
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); z-index: 3000; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease; }
 .modal.show { opacity: 1; visibility: visible; }
 .modal-content { width: 460px; max-width: 90vw; padding: 25px; position: relative; border-top: 4px solid var(--accent-main); background: var(--surface-solid); border-radius: 24px; transform: translateY(30px) scale(0.96); opacity: 0; will-change: transform, opacity; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease; box-shadow: var(--shadow-float); }
