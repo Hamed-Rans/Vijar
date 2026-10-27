@@ -1,6 +1,6 @@
 @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css');
 @import url('https://fonts.googleapis.com/css2?family=Lalezar&family=Gulzar&display=swap');
-@import url('https://cdn.jsdelivr.net/gh/rastikerdar/cinema-font@v1.0.0/dist/font-face.css');
+@import url('https://cdn.fontcdn.ir/Font/Persian/Cinema/Cinema.css');
 
 :root {
     --bg-base: #0D1117; 
@@ -442,4 +442,117 @@ input:checked + .slider:before { transform: translateX(26px); }
     transform: rotate(-15deg) scale(1.1);
     color: #fff;
     background: var(--accent-main);
+}
+
+/* 1. فونت سینما و سایز کوچکتر برای هدرها */
+.panel-title .header-title {
+    font-family: 'Cinema', 'Lalezar', Tahoma, sans-serif !important;
+    font-size: 1rem !important;
+    color: var(--text-main);
+}
+
+/* 2. کم کردن گردی، نازک‌تر کردن و کم کردن ارتفاع هدرها */
+.panel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px !important; /* ارتفاع و حاشیه کم شد */
+    border-radius: 12px !important; /* گوشه‌ها کمتر گرد شد */
+    border: 1px solid var(--border-glass) !important; /* نازک‌تر شد */
+    background: var(--surface-solid) !important;
+    box-shadow: var(--shadow-emboss);
+    height: 50px !important; 
+}
+
+/* 3. ایکون هدر (بدون هاور چرخشی، سایز کوچکتر، رنگ ثابت) */
+.panel-title > i, .panel-title div > i {
+    color: var(--accent-main) !important;
+    font-size: 1rem !important;
+    background: var(--accent-soft) !important;
+    padding: 6px !important;
+    border-radius: 50% !important;
+    /* هاور و چرخش حذف شد */
+}
+
+/* 4. بازطراحی دکمه درج در متن بوم */
+#exportBoardToDocBtn {
+    background: var(--accent-main) !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 5px 12px !important;
+    border-radius: 8px !important;
+    font-size: 0.75rem !important;
+    font-family: inherit;
+    font-weight: bold;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    transition: 0.3s;
+}
+#exportBoardToDocBtn:hover {
+    background: var(--accent-hover) !important;
+    transform: translateY(-1px);
+}
+
+/* 5. اصلاح انیمیشن و مارجین پاپ‌آپ نکته (جمع و جورتر) */
+.note-view-popup {
+    position: fixed;
+    padding: 8px 12px;
+    max-width: 180px;
+    z-index: 500;
+    border: 1px solid var(--border-glass);
+    background: rgba(22, 27, 34, 0.85) !important;
+    backdrop-filter: blur(16px);
+    border-radius: 14px; /* گوشه گردتر */
+    box-shadow: var(--shadow-float);
+    font-size: 0.8rem;
+    font-weight: bold;
+    line-height: 1.5;
+    transform-origin: bottom center;
+    /* انیمیشن فنری از داخل کلمه */
+    transform: translateY(10px) scale(0.8); 
+    opacity: 0; 
+    visibility: hidden; 
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.note-view-popup.show {
+    transform: translateY(0) scale(1); 
+    opacity: 1; 
+    visibility: visible;
+}
+
+/* اصلاح تولتیپ انتخاب متن برای جا دادن دو دکمه */
+.quick-tooltip {
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    background: var(--surface-solid);
+    border: 1px solid var(--accent-main);
+    border-radius: 12px;
+    box-shadow: var(--shadow-float);
+    z-index: 500;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    transform: translate(-50%, 10px);
+}
+.quick-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+.quick-tooltip button {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: 0.2s;
+}
+.quick-tooltip button:hover {
+    background: var(--accent-soft);
+    color: var(--accent-main);
 }
