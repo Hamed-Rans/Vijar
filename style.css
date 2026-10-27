@@ -35,37 +35,37 @@
 }
 
 /* ============================================================
-   پایه (فونت‌ها)
+   پایه (اصلاح فونت کلی)
    ============================================================ */
 *, *::before, *::after { box-sizing: border-box; }
 body, html { 
     margin: 0; padding: 0; height: 100vh; overflow: hidden; 
     background-color: var(--bg-base); color: var(--text-main); 
     transition: background 0.4s ease, color 0.4s ease; 
-    font-family: 'Vazirmatn', Tahoma, sans-serif; /* فونت پایه */
+    font-family: 'Vazirmatn', Tahoma, sans-serif; /* فونت پایه اصلاح شد */
 }
 i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important; }
 
-/* فونت سینما مخصوص هدرها (با فورس کردن) */
+/* فونت سینما و رنگ آبی نیلی برای هدرها */
 .sidebar-title h3, 
 .docs-title h2,
-.panel-title .header-title,
-.modal-content h3 {
+.panel-title .header-title {
     font-family: 'Cinema', 'Lalezar', Tahoma, sans-serif !important;
+    font-size: 1.1rem !important;
     font-weight: 500 !important;
-    color: var(--text-main);
+    color: var(--accent-main) !important; /* رنگ آبی نیلی */
 }
 
-/* Toast Notification */
+/* Toast */
 .toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 99999; display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none; }
 .toast-message { background: var(--surface-glass); backdrop-filter: var(--glass-blur); border: 1px solid var(--border-glass); color: var(--text-main); padding: 12px 24px; border-radius: 30px; font-weight: bold; font-size: 0.95rem; box-shadow: var(--shadow-float); display: flex; align-items: center; gap: 10px; transform: translateY(20px); opacity: 0; animation: toastIn 0.4s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .toast-message.fade-out { animation: toastOut 0.3s forwards ease-in; }
 @keyframes toastIn { to { transform: translateY(0); opacity: 1; } }
 @keyframes toastOut { to { transform: translateY(20px); opacity: 0; } }
 
+/* سایر استایل‌های پایه */
 #processLoadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(13, 17, 23, 0.85); backdrop-filter: blur(8px); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 1; visibility: visible; transition: opacity 0.3s ease, visibility 0.3s ease; }
 #processLoadingOverlay.hidden { opacity: 0; visibility: hidden; display: none !important; }
-
 #loading-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-base); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease, visibility 0.5s ease; }
 #loading-screen.hidden-loader { opacity: 0; visibility: hidden; display: none !important; }
 .loader-geometric { position: relative; width: 80px; height: 80px; margin-bottom: 20px; }
@@ -103,7 +103,6 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
 #settingsBtn:hover i { animation: spinGear 0.8s ease; }
 @keyframes spinGear { 0% { transform: rotate(0); } 100% { transform: rotate(180deg); } }
 
-/* کلاپس پنل ها */
 .transition-panel { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
 .side-panel.collapsed-left { width: 0 !important; opacity: 0; padding: 0; overflow: hidden; margin: 0; border: none; }
 .side-panel.collapsed-right { width: 0 !important; opacity: 0; padding: 0; overflow: hidden; margin: 0; border: none; }
@@ -120,7 +119,6 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
 .role-card:hover .role-icon { transform: scale(1.15); }
 .role-card h3 { font-size: 1.2rem; margin: 0; font-weight: 700; }
 
-/* داشبورد */
 .dashboard-layout { display: flex; flex-direction: row; gap: 25px; max-width: 1400px; margin: 0 auto; padding: 0 40px; height: calc(100vh - 120px); width: 100%; }
 .dashboard-sidebar { width: 300px; display: flex; flex-direction: column; gap: 15px; height: 100%; flex-shrink: 0; }
 .documents-area { flex: 1; display: flex; flex-direction: column; gap: 15px; height: 100%; min-width: 0; }
@@ -129,7 +127,7 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
 .sidebar-content, .docs-content { padding: 20px; flex: 1; border-radius: 20px; overflow-y: auto; background: transparent; }
 
 .folder-list { list-style: none; padding: 0; margin: 0; }
-.folder-item { margin-bottom: 8px; }
+.folder-item { margin-bottom: 8px; position: relative; }
 .folder-header { display: flex; align-items: center; justify-content: space-between; border-radius: 16px; background: rgba(0,0,0,0.1); border: 1px solid transparent; transition: all 0.3s; }
 .folder-header:hover { background: rgba(255,255,255,0.05); border-color: var(--border-glass); }
 .folder-header.active { background: var(--accent-soft); border-color: var(--accent-main); }
@@ -141,6 +139,8 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
 .folder-header.open + .folder-docs { max-height: 500px; opacity: 1; margin-top: 5px; padding-bottom: 5px; }
 .folder-doc-item { padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
 .folder-doc-item:hover { background: rgba(255,255,255,0.05); color: var(--accent-main); }
+.pin-icon { position: absolute; top: 10px; left: 40px; font-size: 0.8rem; color: var(--accent-main); display: none; }
+.folder-item.pinned .pin-icon { display: block; }
 
 .btn-icon-small { background: var(--surface-solid) !important; border: 1px solid var(--border-glass) !important; color: var(--accent-main) !important; width: 34px; height: 34px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; box-shadow: var(--shadow-emboss); }
 .btn-icon-small:hover { background: var(--accent-main) !important; color: #fff !important; transform: translateY(-2px); }
@@ -166,7 +166,6 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
 .empty-icon { font-size: 4rem; color: var(--text-muted); margin-bottom: 20px; opacity: 0.5; }
 .empty-state p { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 20px; }
 
-/* ویرایشگر */
 .workspace-layout { display: flex; flex-direction: row; gap: 20px; max-width: 1800px; margin: 0 auto; padding: 0 30px; height: calc(100vh - 120px); align-items: stretch; justify-content: center; width: 100%; }
 .side-panel { width: 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; flex-shrink: 0; }
 .focus-mode .floating-top-nav { background: transparent !important; }
@@ -186,7 +185,6 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
     background: var(--accent-soft) !important; padding: 6px !important; border-radius: 50% !important;
 }
 
-/* دکمه درج در متن بوم */
 #exportBoardToDocBtn {
     background: var(--accent-main) !important; color: #fff !important;
     border: none !important; padding: 6px 14px !important;
@@ -196,11 +194,12 @@ i, .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands { font-family: "Fon
 }
 #exportBoardToDocBtn:hover { background: var(--accent-hover) !important; transform: translateY(-1px); }
 
-/* نوار ابزار بالا (فیکس شده و با انیمیشن) */
+/* نوار ابزار بالا */
 .editor-top-toolbar { 
     display: flex; flex-direction: column; gap: 10px; padding: 10px 15px; 
     border-radius: 20px; flex-shrink: 0; z-index: 100; width: 100%; 
-    overflow: hidden; transition: max-height 0.4s ease; max-height: 60px;
+    overflow: visible !important; /* برای نمایش درست دراپ‌داون‌ها */
+    transition: max-height 0.4s ease; max-height: 60px;
 }
 .editor-top-toolbar.expanded { max-height: 200px; }
 .main-tools-row { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; width: 100%; }
@@ -280,7 +279,7 @@ canvas.cursor-eraser { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.
 
 .hl-highlight { background-color: rgba(234, 179, 8, 0.4); border-radius: 3px; padding: 0 2px; }
 
-.quick-tooltip { display: flex; gap: 5px; padding: 5px; background: var(--surface-solid); border: 1px solid var(--accent-main); border-radius: 12px; box-shadow: var(--shadow-float); z-index: 500; opacity: 0; visibility: hidden; transition: all 0.3s ease; transform: translate(-50%, 10px); }
+.quick-tooltip { display: flex; gap: 5px; padding: 5px; background: var(--surface-solid); border: 1px solid var(--accent-main); border-radius: 12px; box-shadow: var(--shadow-float); z-index: 500; opacity: 0; visibility: hidden; transition: all 0.3s ease; transform: translate(-50%, 10px); position: fixed; }
 .quick-tooltip.show { opacity: 1; visibility: visible; transform: translate(-50%, 0); }
 .quick-tooltip button { background: transparent; border: none; color: var(--text-main); cursor: pointer; font-size: 0.8rem; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
 .quick-tooltip button:hover { background: var(--accent-soft); color: var(--accent-main); }
@@ -298,34 +297,17 @@ canvas.cursor-eraser { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.
 .custom-dropdown { position: relative; }
 .dropdown-selected { padding: 6px 12px; border-radius: 10px; cursor: pointer; font-size: 0.85rem; display: flex; gap: 6px; align-items: center; background: rgba(0,0,0,0.1); border: 1px solid var(--border-glass); transition: 0.2s; justify-content: space-between; min-width: 100px; }
 .dropdown-selected:hover { border-color: var(--accent-main); }
-.dropdown-list { position: absolute; top: 120%; right: 0; background: var(--surface-solid); border: 1px solid var(--border-glass); border-radius: 12px; width: 100%; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: 0.3s; z-index: 9999 !important; overflow: hidden; box-shadow: var(--shadow-float); }
+.dropdown-list { position: absolute; top: 120%; right: 0; background: var(--surface-solid); border: 1px solid var(--border-glass); border-radius: 12px; width: 100%; opacity: 0; visibility: hidden; transform: translateY(-10px); transition: 0.3s; z-index: 10000 !important; overflow: hidden; box-shadow: var(--shadow-float); }
 .custom-dropdown.active .dropdown-list { opacity: 1; visibility: visible; transform: translateY(0); }
 .dropdown-item { padding: 10px 15px; cursor: pointer; font-size: 0.85rem; transition: 0.2s; border-bottom: 1px solid var(--border-glass); text-align: right; }
 .dropdown-item:hover { background: var(--accent-soft); color: var(--accent-main); }
 
-/* ============================================================
-   پالت رنگ (کاملا فیکس شده با z-index بالا)
-   ============================================================ */
 .color-menu-wrapper { position: relative; }
 .custom-color-popup { 
-    position: absolute !important; 
-    top: 120% !important; 
-    left: 50% !important; 
-    transform: translateX(-50%) translateY(0) !important; 
-    padding: 15px; 
-    border-radius: 16px; 
-    width: 200px; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 15px; 
-    z-index: 999999 !important; /* فیکس مطلق مشکل باز نشدن */
-    opacity: 0; 
-    visibility: hidden; 
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-    border: 1px solid var(--accent-main); 
-    background: var(--surface-solid); 
-    box-shadow: var(--shadow-float); 
-    pointer-events: auto;
+    position: absolute !important; top: 120% !important; left: 50% !important; transform: translateX(-50%) translateY(0) !important; 
+    padding: 15px; border-radius: 16px; width: 200px; display: flex; flex-direction: column; gap: 15px; 
+    z-index: 999999 !important; opacity: 0; visibility: hidden; transition: opacity 0.2s ease, visibility 0.2s ease;
+    border: 1px solid var(--accent-main); background: var(--surface-solid); box-shadow: var(--shadow-float); pointer-events: auto;
 }
 .custom-color-popup.show { opacity: 1 !important; visibility: visible !important; }
 .preset-colors { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
