@@ -332,7 +332,6 @@ function openDoc(id) {
         
         if($('editor')) {
             $('editor').innerHTML = state.activeDoc.content || '';
-            // اعمال سایز فونت پیش‌فرض فقط روی ادیتور (متن‌های جدید)
             $('editor').style.fontSize = state.baseFontSize + 'px'; 
             $('editor').className = `editor-box paper-${state.activeDoc.paperStyle || 'plain'}`;
         }
@@ -366,32 +365,25 @@ function changeFontSize(delta) {
         if (parentEl) {
             if(parentEl.style.fontSize) {
                 currentSize = parseInt(parentEl.style.fontSize);
-            } else if (parentEl.tagName === 'FONT' && parentEl.getAttribute('size')) {
-                 // اگر از execCommand استفاده شده باشد
-                 currentSize = state.baseFontSize; // تقریب
             } else {
                 currentSize = parseInt(window.getComputedStyle(parentEl).fontSize);
             }
         }
         
-        // اگر سایز قبلی خوانده نشد، از سایز پایه استفاده کن
         if(isNaN(currentSize) || currentSize === 0) currentSize = state.baseFontSize;
 
         const newSize = currentSize + delta;
         if (newSize < 8 || newSize > 80) return;
 
-        // برای اینکه باگ ادامه‌دار نداشته باشیم، ابتدا انتخاب را در یک span بپیچانیم
         const span = document.createElement('span');
         span.style.fontSize = newSize + 'px';
         span.appendChild(range.extractContents());
         range.insertNode(span);
         
     } else {
-        // اگر متنی انتخاب نشده بود، فقط سایز پایه برای متن‌های بعدی تغییر می‌کند
         state.baseFontSize = Math.max(8, Math.min(state.baseFontSize + delta, 80));
         $('fontSizeDisplay').textContent = state.baseFontSize;
         
-        // برای اینکه متن‌های جدید سایز جدید بگیرند، یک فاصله با سایز جدید درج می‌کنیم
         const sel = window.getSelection();
         if(sel.rangeCount > 0){
             const range = sel.getRangeAt(0);
@@ -399,7 +391,6 @@ function changeFontSize(delta) {
             span.style.fontSize = state.baseFontSize + 'px';
             span.innerHTML = '&#8203;';
             range.insertNode(span);
-            // بردن کرسر بعد از span
             range.setStartAfter(span);
             range.setEndAfter(span);
             sel.removeAllRanges();
@@ -432,6 +423,32 @@ function initEditor() {
         });
     });
 
+    if($('checklistBtn')) {
+        $('checklistBtn').addEventListener('click', () => {
+            editor.focus();
+            document.execCommand('insertHTML', false, '<div style="display:flex; gap:8px; align-items:center; margin:5px 0;"><input type="checkbox" style="accent-color:var(--accent-main); width:18px; height:18px;"> <span style="flex:1; outline:none;" contenteditable="true">مورد جدید</span></div>');
+        });
+    }
+
+    if($('tableBtn')) {
+        $('tableBtn').addEventListener('click', () => {
+            editor.focus();
+            const rows = prompt('تعداد سطرها:', 3);
+            const cols = prompt('تعداد ستون‌ها:', 2);
+            if(!rows || !cols) return;
+            let tableHtml = '<table style="width:100%; border-collapse:collapse; margin:10px 0; border:1px solid var(--border-glass);">';
+            for(let i=0; i<rows; i++){
+                tableHtml += '<tr>';
+                for(let j=0; j<cols; j++){
+                    tableHtml += '<td style="border:1px solid var(--border-glass); padding:8px; min-width:50px;">&nbsp;</td>';
+                }
+                tableHtml += '</tr>';
+            }
+            tableHtml += '</table><p><br></p>';
+            document.execCommand('insertHTML', false, tableHtml);
+        });
+    }
+
     if($('ltrBtn')) {
         $('ltrBtn').addEventListener('mousedown', (e) => e.preventDefault());
         $('ltrBtn').addEventListener('click', () => { 
@@ -462,7 +479,6 @@ function initEditor() {
         }
     });
 
-    // هشدار حذف متن دارای یادداشت
     editor.addEventListener('keydown', (e) => {
         if (e.key === 'Backspace' || e.key === 'Delete') {
             const sel = window.getSelection();
@@ -556,6 +572,7 @@ function initSelectionTooltip() {
     const tooltip = $('quickTooltip');
     const popup = $('noteViewPopup');
     const blurOverlay = $('blurOverlay');
+    const pinnedNotesArea = $('pinnedNotesArea');
     if(!editor || !tooltip || !popup || !blurOverlay) return;
 
     document.addEventListener('mouseup', () => {
@@ -634,9 +651,8 @@ function initSelectionTooltip() {
         });
     }
 
-    // اصلاح هاور روی نکته: اگر متن انتخاب شده باشد، پاپ‌آپ باز نشود
     editor.addEventListener('mouseover', (e) => {
-        if (window.getSelection().toString().length > 0) return; // اگر متنی انتخاب شده، برو بیرون
+        if (window.getSelection().toString().length > 0) return; 
 
         const el = e.target.closest('.hl-word');
         if (el && el.dataset.note) {
@@ -647,7 +663,19 @@ function initSelectionTooltip() {
             popup.style.left = (rect.left + rect.width / 2) + 'px'; 
             popup.style.top = (rect.top - 5) + 'px'; 
             
-            if (state.blurEffect) blurOverlay.classList.add('show');
+            if (state.blurEffect) {
+                blurOverlay.classList.add('show');
+                // افکت بلر روی یادداشت‌ها
+                if(pinnedNotesArea) {
+                    pinnedNotesArea.classList.add('blur-active');
+                    // پیدا کردن کارت مربوطه
+                    const word = el.dataset.word;
+                    const cards = pinnedNotesArea.querySelectorAll('.note-card');
+                    cards.forEach(c => {
+                        if(c.querySelector('strong').textContent === word) c.classList.add('active-hover');
+                    });
+                }
+            }
 
             popup.classList.remove('hidden');
             requestAnimationFrame(() => {
@@ -660,7 +688,11 @@ function initSelectionTooltip() {
         if (e.target.closest('.hl-word')) {
             popup.classList.remove('show');
             blurOverlay.classList.remove('show');
-            setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 150); // سریعتر بسته شود
+            if(pinnedNotesArea) {
+                pinnedNotesArea.classList.remove('blur-active');
+                pinnedNotesArea.querySelectorAll('.note-card').forEach(c => c.classList.remove('active-hover'));
+            }
+            setTimeout(() => { if(!popup.classList.contains('show')) popup.classList.add('hidden'); }, 150); 
         }
     });
 }
@@ -1370,7 +1402,6 @@ function showConfirm(message, onYes) {
 function escapeHtml(str) { return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
 function init() {
-    // 1. اتصال رویداد کلیک برای کارت‌های انتخاب نقش (مستقل از بقیه کدها)
     document.addEventListener('click', (e) => {
         const card = e.target.closest('.role-card');
         if (card) {
@@ -1380,7 +1411,6 @@ function init() {
         }
     });
 
-    // 2. لود اولیه با مدیریت خطا (تا صفحه گیر نکند)
     try { loadState(); } catch(e) { console.error('loadState', e); }
     try { initTheme(); } catch(e) { console.error('initTheme', e); }
     try { initEditor(); } catch(e) { console.error('initEditor', e); }
@@ -1389,7 +1419,6 @@ function init() {
     try { initCanvas(); } catch(e) { console.error('initCanvas', e); }
     try { initSettings(); } catch(e) { console.error('initSettings', e); }
 
-    // رویداد برای دکمه Back مرورگر
     window.addEventListener('popstate', (e) => {
         if (state.activeDoc) {
             state.activeDoc.content = $('editor').innerHTML; 
@@ -1399,7 +1428,6 @@ function init() {
         }
     });
 
-    // حذف کامل صفحه لودینگ
     setTimeout(() => {
         const loader = $('loading-screen');
         if(loader) loader.style.display = 'none';
@@ -1410,7 +1438,9 @@ function init() {
         if (state.activeDoc) {
             state.activeDoc.content = $('editor').innerHTML; 
             state.activeDoc.title = $('documentTitle').value.trim();
-            saveState();
+            
+            // فیکس باگ: فقط اگر ذخیره خودکار فعال بود، ذخیره کن
+            if (state.autoSave) saveState(); 
             
             $('editor-view').style.opacity = '0';
             setTimeout(() => { 
@@ -1420,7 +1450,8 @@ function init() {
             
             html2canvas($('editor'), { scale: 0.5, backgroundColor: getComputedStyle(document.body).getPropertyValue('--surface-solid').trim() }).then(canvas => {
                 state.activeDoc.thumbnail = canvas.toDataURL('image/jpeg');
-                saveState(); renderDocs();
+                if (state.autoSave) saveState(); 
+                renderDocs();
             }).catch(() => {});
         } else { 
             showDashboard(); 
@@ -1456,10 +1487,9 @@ function init() {
         $('toggleRightPanelBtn').querySelector('i').classList.toggle('fa-rotate-180');
     };
 
-    // بستن منوی هایلایتر با کلیک بیرون
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('#highlighterWrapper')) $('highlighterSettings').classList.remove('show');
-        if (!e.target.closest('#boardHighlighterWrapper')) $('boardHighlighterSettings').classList.remove('show');
+        if (!e.target.closest('#highlighterWrapper')) $('highlighterSettings')?.classList.remove('show');
+        if (!e.target.closest('#boardHighlighterWrapper')) $('boardHighlighterSettings')?.classList.remove('show');
     });
 
     $$('.btn-close-modal').forEach(btn => btn.onclick = () => btn.closest('.modal').classList.remove('show'));
