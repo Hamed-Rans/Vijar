@@ -882,14 +882,34 @@ function initContextMenu() {
         $('docContextMenu').classList.add('hidden');
     };
     
-    if($('ctxMoveToFolder')) $('ctxMoveToFolder').onclick = (e) => {
+        if($('ctxMoveToFolder')) $('ctxMoveToFolder').onclick = (e) => {
         e.stopPropagation();
         const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
         if(!doc) return;
-        const options = state.folders.map(f => `${f.id}:${f.name}`).join('\n');
-        const folderId = prompt(`شناسه دسته‌بندی را وارد کنید:\n${options}\nیا برای خارج کردن "null" بنویسید:`);
-        if(folderId !== null) { doc.folderId = folderId === 'null' ? null : folderId; saveState(); renderDocs(); renderFolders(); }
+        
+        const select = $('moveFolderSelect');
+        select.innerHTML = '<option value="null">بدون دسته‌بندی (همه)</option>';
+        state.folders.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f.id;
+            opt.textContent = f.name;
+            if (doc.folderId === f.id) opt.selected = true;
+            select.appendChild(opt);
+        });
+        
         $('docContextMenu').classList.add('hidden');
+        $('moveDocModal').classList.add('show');
+    };
+    
+    // دکمه تایید انتقال
+    if($('confirmMoveDocBtn')) $('confirmMoveDocBtn').onclick = () => {
+        const doc = state.docs.find(d => d.id === state.targetDocIdToMove);
+        if(doc) {
+            const val = $('moveFolderSelect').value;
+            doc.folderId = val === 'null' ? null : val;
+            saveState(); renderDocs(); renderFolders();
+        }
+        $('moveDocModal').classList.remove('show');
     };
 
     if($('ctxPinFolder')) $('ctxPinFolder').onclick = (e) => {
