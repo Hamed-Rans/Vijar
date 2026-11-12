@@ -83,7 +83,13 @@ body, html { margin: 0; padding: 0; height: 100vh; overflow: hidden; background-
 [data-theme="light"] .floating-top-nav { background: linear-gradient(to bottom, rgba(226, 232, 240, 0.9) 0%, rgba(226, 232, 240, 0) 100%); }
 .nav-block { pointer-events: auto; display: flex; align-items: center; gap: 15px; }
 .brand-block { padding: 12px 35px; border-radius: 50px; display: flex; align-items: center; gap: 15px; }
-.brand-name { font-family: 'Aref Ruqaa', serif !important; font-size: 2.2rem; font-weight: 700; background: linear-gradient(45deg, var(--accent-main), #7A9CFF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; line-height: 1; }
+.brand-name { 
+    font-family: 'Aref Ruqaa', serif !important; 
+    font-size: 2.2rem; 
+    font-weight: 700; 
+    color: var(--accent-main) !important; /* رنگ ثابت به جای گرادیانت */
+    margin: 0; line-height: 1; 
+}
 .logo-icon { color: var(--accent-main); font-size: 1.8rem; }
 .custom-badge { background: linear-gradient(135deg, rgba(79, 117, 255, 0.2), rgba(30, 58, 138, 0.5)); color: #fff; padding: 4px 12px; border-radius: 20px; font-size: .8rem; border: 1px solid rgba(79, 117, 255, 0.5); font-weight: 600; box-shadow: 0 0 10px rgba(79, 117, 255, 0.3); }
 .actions-block { gap: 12px; }
